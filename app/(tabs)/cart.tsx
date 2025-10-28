@@ -1,5 +1,6 @@
 import { ThemedText } from '@/components/themed-text'
 import { ThemedView } from '@/components/themed-view'
+import BorderButton from '@/components/ui/borderbutton'
 import CartItem from '@/components/ui/cartItem'
 import FullButton from '@/components/ui/fullbutton'
 import GoBackButton from '@/components/ui/gobackbutton'
@@ -19,7 +20,9 @@ const CartScreen: FC = () => {
     const [total, setTotal] = useState(0);
     const [numberOfChecked, setNumberOfChecked] = useState(0);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [discount, setDiscount] = useState(0);
+    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+    const [selectedToRemove, setSelectedToRemove] = useState<string | null>(null);
+    const [discount] = useState(0);
     const [currentTotal, setCurrentTotal] = useState(0);
     const [cartItems, setCartItems] = useState([
         {
@@ -89,6 +92,23 @@ const CartScreen: FC = () => {
         recalcTotals(updatedItems);
     };
 
+    const onDeleteRequest = (id: string) => {
+        setSelectedToRemove(id);
+        setIsDeleteModalVisible(true);
+    };
+
+    const confirmDelete = () => {
+        if (!selectedToRemove) return;
+        handleRemove(selectedToRemove);
+        setSelectedToRemove(null);
+        setIsDeleteModalVisible(false);
+    };
+
+    const cancelDelete = () => {
+        setSelectedToRemove(null);
+        setIsDeleteModalVisible(false);
+    };
+
     return cartItems.length === 0 ? (
         <ThemedView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
             <Image source={require('@/assets/images/emptyCart.png')} style={{ width: '100%', height: 350 }} />
@@ -116,7 +136,7 @@ const CartScreen: FC = () => {
                             checked={item.checked}
                             onToggle={handleToggle}
                             onChangeQuantity={handleChangeQuantity}
-                            onRemove={handleRemove}
+                            onDeleteRequest={onDeleteRequest}
                         />
                     ))}
                 </ScrollView>
@@ -172,6 +192,27 @@ const CartScreen: FC = () => {
                             onPress={() => setIsModalVisible(false)}
                             text="Apply"
                         />
+                    </View>
+                </KeyboardAvoidingView>
+            </Modal>
+
+            <Modal animationType="slide"
+                transparent={true}
+                visible={isDeleteModalVisible}
+                onRequestClose={() => {
+                    cancelDelete();
+                    setIsDeleteModalVisible(false);
+                }}>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={styles.keyboardAvoid}
+                >
+                    <Pressable style={styles.modalOverlay} onPress={cancelDelete} />
+                    <View style={styles.modalContent}>
+                        <ThemedText style={styles.modalTitle}>Xóa mục</ThemedText>
+                        <ThemedText style={{ marginTop: 8 }}>Delete product from cart</ThemedText>
+                        <FullButton onPress={confirmDelete} text="Delete" />
+                        <BorderButton onPress={cancelDelete} text="Cancel" />
                     </View>
                 </KeyboardAvoidingView>
             </Modal>
@@ -232,6 +273,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 5,
+        gap: 12,
     },
     modalTitle: {
         fontSize: 18,
@@ -247,16 +289,5 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         marginBottom: 20,
         fontSize: 16,
-    },
-    applyButton: {
-        backgroundColor: '#1a1a1a',
-        padding: 16,
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    applyButtonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
     },
 })

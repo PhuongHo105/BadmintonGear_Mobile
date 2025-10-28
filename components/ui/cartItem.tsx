@@ -1,7 +1,7 @@
 import { Colors } from "@/constants/theme";
 import { Image } from "expo-image";
 import { FC, useEffect, useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, useColorScheme, View } from "react-native";
+import { Pressable, StyleSheet, Text, useColorScheme, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { ThemedText } from "../themed-text";
 import { ThemedView } from "../themed-view";
@@ -19,10 +19,10 @@ type CartItemProps = {
     numberOfItems?: number;
     onToggle?: (id: string) => void;
     onChangeQuantity?: (id: string, quantity: number) => void;
-    onRemove?: (id: string) => void;
+    onDeleteRequest?: (id: string) => void;
 };
 
-const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, onToggle, onChangeQuantity, onRemove }) => {
+const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, onToggle, onChangeQuantity, onDeleteRequest }) => {
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const tint: string = Colors[scheme].tint;
@@ -51,16 +51,9 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
     };
 
     const handleDec = () => {
-        // If quantity is 1, confirm removal
+        // If quantity is 1, request parent to confirm removal via modal
         if (quantity <= 1) {
-            Alert.alert(
-                'Remove item',
-                'Bạn muốn xóa cart này không?',
-                [
-                    { text: 'Hủy', style: 'cancel' },
-                    { text: 'Xóa', style: 'destructive', onPress: () => onRemove?.(product.id) }
-                ]
-            );
+            onDeleteRequest?.(product.id);
             return;
         }
 
@@ -112,14 +105,7 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
                     </ThemedView>
                     <Pressable style={styles.iconBtn}
                         onPress={() => {
-                            Alert.alert(
-                                'Remove item',
-                                'Bạn muốn xóa cart này không?',
-                                [
-                                    { text: 'Hủy', style: 'cancel' },
-                                    { text: 'Xóa', style: 'destructive', onPress: () => onRemove?.(product.id) }
-                                ]
-                            );
+                            onDeleteRequest?.(product.id);
                         }}
                     >
                         <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
