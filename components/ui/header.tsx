@@ -1,6 +1,6 @@
 import { Colors } from '@/constants/theme'
 import { Image } from 'expo-image'
-import React from 'react'
+import React, { FC } from 'react'
 import { ColorSchemeName, ImageSourcePropType, Pressable, StyleSheet, useColorScheme } from 'react-native'
 import { ThemedText } from '../themed-text'
 import { ThemedView } from '../themed-view'
@@ -11,11 +11,10 @@ type HeaderProps = {
     mode?: 'search'
 }
 
-export default function Header({ mode }: HeaderProps): React.ReactElement {
-    const schemeRaw: ColorSchemeName | undefined = useColorScheme()
+const Header: FC<HeaderProps> = ({ mode }) => {
+    const schemeRaw = useColorScheme() as ColorSchemeName | null | undefined;
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors
     const iconColor: string = Colors[scheme].text
-
     const logoSource: ImageSourcePropType = scheme === 'dark'
         ? require('../../assets/images/logo/dark-logo.png')
         : require('../../assets/images/logo/light-logo.png')
@@ -30,7 +29,7 @@ export default function Header({ mode }: HeaderProps): React.ReactElement {
             {mode !== 'search' && (
                 <ThemedView style={styles.rightContainer} >
                     <IconSymbol size={28} name="search.fill" color={iconColor} />
-                    <Pressable onPress={() => { }} style={{ marginLeft: 12 }}>
+                    <Pressable onPress={() => undefined} style={{ marginLeft: 12 }}>
                         <Image source={require('../../assets/images/logo/light-logo.png')} style={styles.avatar} />
                     </Pressable>
                 </ThemedView>
@@ -44,6 +43,8 @@ export default function Header({ mode }: HeaderProps): React.ReactElement {
         </ThemedView>
     )
 }
+
+export default Header;
 
 const styles = StyleSheet.create({
     headerContainer: {
