@@ -94,7 +94,7 @@ const ProfileScreen: React.FC = () => {
                     <ProfileMenuItem
                         icon="help-circle"
                         name="FAQs"
-                        onPress={() => Alert.alert('Mở FAQs')}
+                        onPress={() => router.push('/faqs' as any)}
                     />
                     <ProfileMenuItem
                         icon="message-circle"
