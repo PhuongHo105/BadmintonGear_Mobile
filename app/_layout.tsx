@@ -71,6 +71,7 @@ export default function RootLayout() {
               <Stack.Screen name="changepassword/01" options={{ headerShown: false }} />
               <Stack.Screen name="changepassword/02" options={{ headerShown: false }} />
               <Stack.Screen name="faqs" options={{ headerShown: false }} />
+              <Stack.Screen name="chat" options={{ headerShown: false }} />
               {/* <Stack.Screen name="product/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="search" options={{ headerShown: false }} /> */}
 

@@ -99,7 +99,7 @@ const ProfileScreen: React.FC = () => {
                     <ProfileMenuItem
                         icon="message-circle"
                         name="Chatbot"
-                        onPress={() => Alert.alert('Mở Chatbot')}
+                        onPress={() => router.push('/chat' as any)}
                     />
                 </ThemedView>
 
