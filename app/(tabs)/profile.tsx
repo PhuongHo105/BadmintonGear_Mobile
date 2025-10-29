@@ -84,7 +84,7 @@ const ProfileScreen: React.FC = () => {
                     <ProfileMenuItem
                         icon="shield"
                         name="Privacy Policy"
-                        onPress={() => Alert.alert('Mở Privacy Policy')}
+                        onPress={() => router.push('/privacy' as any)}
                     />
                     <ProfileMenuItem
                         icon="file-text"

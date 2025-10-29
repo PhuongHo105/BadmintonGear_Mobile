@@ -73,6 +73,7 @@ export default function RootLayout() {
               <Stack.Screen name="faqs" options={{ headerShown: false }} />
               <Stack.Screen name="chat" options={{ headerShown: false }} />
               <Stack.Screen name="termcondition" options={{ headerShown: false }} />
+              <Stack.Screen name="privacy" options={{ headerShown: false }} />
               {/* <Stack.Screen name="product/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="search" options={{ headerShown: false }} /> */}
 
