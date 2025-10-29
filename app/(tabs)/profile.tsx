@@ -89,7 +89,7 @@ const ProfileScreen: React.FC = () => {
                     <ProfileMenuItem
                         icon="file-text"
                         name="Terms & Conditions"
-                        onPress={() => Alert.alert('Mở Terms & Conditions')}
+                        onPress={() => router.push('/termcondition' as any)}
                     />
                     <ProfileMenuItem
                         icon="help-circle"
