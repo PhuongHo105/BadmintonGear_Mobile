@@ -7,7 +7,7 @@ import React, { FC } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 
 
-const ChangePassword01Screen: FC = () => {
+const FAQsScreen: FC = () => {
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const textColor: string = Colors[scheme].text;
@@ -43,7 +43,7 @@ const ChangePassword01Screen: FC = () => {
     )
 }
 
-export default ChangePassword01Screen;
+export default FAQsScreen;
 
 const styles = StyleSheet.create({
     container: {
