@@ -6,6 +6,7 @@ import ProfileMenuItem from '@/components/ui/profileMenuItem';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import {
     Alert,
@@ -19,6 +20,7 @@ import {
 } from 'react-native';
 
 const ProfileScreen: React.FC = () => {
+    const router = useRouter();
     const schemeRaw = useColorScheme() as ColorSchemeName | null | undefined;
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors
     const tint: string = Colors[scheme].tint;
@@ -106,7 +108,7 @@ const ProfileScreen: React.FC = () => {
                     <ProfileMenuItem
                         icon="lock"
                         name="Change Password"
-                        onPress={() => Alert.alert('Mở Change Password')}
+                        onPress={() => router.push('/changepassword/01' as any)}
                     />
                     <CustomSwitch
                         icon="moon"

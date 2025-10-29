@@ -68,7 +68,8 @@ export default function RootLayout() {
               <Stack.Screen name="welcome" options={{ headerShown: false, gestureEnabled: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-              <Stack.Screen name="product" options={{ headerShown: false }} />
+              <Stack.Screen name="changepassword/01" options={{ headerShown: false }} />
+              <Stack.Screen name="changepassword/02" options={{ headerShown: false }} />
               {/* <Stack.Screen name="product/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="search" options={{ headerShown: false }} /> */}
 
