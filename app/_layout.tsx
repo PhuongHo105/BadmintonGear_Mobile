@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import 'react-native-reanimated';
 
+import { ThemePreferenceProvider } from '@/app/providers/ThemePreferenceProvider';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import WelcomeScreen from './welcome';
 
@@ -57,23 +58,25 @@ export default function RootLayout() {
 
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <View style={{ flex: 1, backgroundColor: Colors[colorScheme ?? 'light'].background }}>
-        {!stackReady ? (
-          <WelcomeScreen />
-        ) : (
-          <Stack>
-            <Stack.Screen name="welcome" options={{ headerShown: false, gestureEnabled: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-            <Stack.Screen name="product" options={{ headerShown: false }} />
-            {/* <Stack.Screen name="product/[id]" options={{ headerShown: false }} />
+    <ThemePreferenceProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <View style={{ flex: 1, backgroundColor: Colors[colorScheme ?? 'light'].background }}>
+          {!stackReady ? (
+            <WelcomeScreen />
+          ) : (
+            <Stack>
+              <Stack.Screen name="welcome" options={{ headerShown: false, gestureEnabled: false }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+              <Stack.Screen name="product" options={{ headerShown: false }} />
+              {/* <Stack.Screen name="product/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="search" options={{ headerShown: false }} /> */}
 
-          </Stack>
-        )}
-        <StatusBar style="auto" />
-      </View>
-    </ThemeProvider>
+            </Stack>
+          )}
+          <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+        </View>
+      </ThemeProvider>
+    </ThemePreferenceProvider>
   );
 }

@@ -1,7 +1,8 @@
 import { Colors } from "@/constants/theme";
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Image } from "expo-image";
 import { FC } from "react";
-import { Pressable, StyleSheet, Text, useColorScheme } from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { ThemedText } from "../themed-text";
 import { ThemedView } from "../themed-view";
@@ -21,9 +22,10 @@ type WishlistItemProps = Product & {
 const WishlistItem: FC<WishlistItemProps> = ({ id, name, price, image, discount, onDeleteRequest }) => {
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
+    const textColor: string = Colors[scheme].text;
     const tint: string = Colors[scheme].tint;
-    const iconColor: string = Colors[scheme].icon;
-    const discountColor: string = Colors[scheme].icon;
+    const secondaryText: string = Colors[scheme].secondaryText;
+    const borderColor: string = Colors[scheme].border;
     const currentPrice: number = (price ?? 0) * (1 - (discount ?? 0) / 100);
     const handleAddToCart = (productId: string) => {
         console.log(`Add to cart: ${productId}`);
@@ -35,10 +37,10 @@ const WishlistItem: FC<WishlistItemProps> = ({ id, name, price, image, discount,
             <ThemedView style={styles.contentContainer}>
                 <ThemedView style={styles.info}>
                     <ThemedView style={styles.content}>
-                        <Text style={{ fontSize: 16, fontWeight: '600' }}>{name}</Text>
-                        <Text style={{ marginTop: 4, color: tint }}>{currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Text>
+                        <ThemedText style={{ fontSize: 16, fontWeight: '600', color: textColor }}>{name}</ThemedText>
+                        <ThemedText style={{ marginTop: 4, color: tint }}>{currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         {typeof discount === 'number' && discount > 0 ? (
-                            <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: discountColor, textDecorationLine: 'line-through' }}>{price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
+                            <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: secondaryText, textDecorationLine: 'line-through' }}>{price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         ) : null}
                     </ThemedView>
 
@@ -46,12 +48,12 @@ const WishlistItem: FC<WishlistItemProps> = ({ id, name, price, image, discount,
                 <ThemedView style={styles.action}>
                     <ThemedView>
                         <Pressable onPress={() => handleAddToCart(id)}>
-                            <ThemedView style={{ flexDirection: 'row', alignItems: 'center', borderColor: iconColor, borderWidth: 1, padding: 6, borderRadius: 8 }}>
+                            <ThemedView style={{ flexDirection: 'row', alignItems: 'center', borderColor: borderColor, borderWidth: 1, padding: 6, borderRadius: 8 }}>
                                 <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                    <Path d="M18 12C18 12.41 17.66 12.75 17.25 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H17.25C17.66 11.25 18 11.59 18 12Z" fill={iconColor} />
-                                    <Path d="M12 18C11.59 18 11.25 17.66 11.25 17.25V6C11.25 5.59 11.59 5.25 12 5.25C12.41 5.25 12.75 5.59 12.75 6V17.25C12.75 17.66 12.41 18 12 18Z" fill={iconColor} />
+                                    <Path d="M18 12C18 12.41 17.66 12.75 17.25 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H17.25C17.66 11.25 18 11.59 18 12Z" fill={secondaryText} />
+                                    <Path d="M12 18C11.59 18 11.25 17.66 11.25 17.25V6C11.25 5.59 11.59 5.25 12 5.25C12.41 5.25 12.75 5.59 12.75 6V17.25C12.75 17.66 12.41 18 12 18Z" fill={secondaryText} />
                                 </Svg>
-                                <Text style={{ fontSize: 16, paddingHorizontal: 2, color: iconColor }}>Add to cart</Text>
+                                <Text style={{ fontSize: 16, paddingHorizontal: 2, color: secondaryText }}>Add to cart</Text>
                             </ThemedView>
                         </Pressable>
                     </ThemedView>
@@ -80,15 +82,17 @@ export default WishlistItem;
 const styles = StyleSheet.create({
     item: {
         width: '100%',
-        height: 120,
+        height: 150,
         flexDirection: 'row',
         alignItems: 'center',
         padding: 12,
         marginBottom: 20,
     },
     image: {
-        width: 100,
-        height: 100,
+        width: 120,
+        height: 140,
+        marginRight: 12,
+        borderRadius: 19,
     },
     info: {
         flexDirection: 'row',

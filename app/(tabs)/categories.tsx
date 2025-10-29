@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
+import { ColorSchemeName, FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -10,8 +10,13 @@ import RacketIcon from '@/components/ui/categoryIcon/racket-icon';
 import ShoesIcon from '@/components/ui/categoryIcon/shoes-icon';
 import ShuttlecockIcon from '@/components/ui/categoryIcon/shuttlecock-icon';
 import GoBackButton from '@/components/ui/gobackbutton';
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function TabTwoScreen() {
+  const schemeRaw = useColorScheme() as ColorSchemeName | null | undefined;
+  const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors
+  const borderColor: string = Colors[scheme].border;
   const categories = [
     { id: '1', name: 'Racket', image: <RacketIcon width={60} height={60} /> },
     { id: '2', name: 'Shuttlecock', image: <ShuttlecockIcon width={60} height={60} /> },
@@ -32,7 +37,7 @@ export default function TabTwoScreen() {
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
         renderItem={({ item }) => (
-          <Pressable style={styles.categoryItem} onPress={() => { }}>
+          <Pressable style={[styles.categoryItem, { borderColor: borderColor }]} onPress={() => { }}>
             {React.isValidElement(item.image) ? (
               <View style={styles.categoryIcon}>{item.image}</View>
             ) : (
@@ -72,7 +77,6 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     paddingRight: 20,
     borderRadius: 12,
-    borderColor: '#F4F5FD',
     borderWidth: 1,
   },
   categoryIcon: {

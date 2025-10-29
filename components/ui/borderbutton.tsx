@@ -1,6 +1,7 @@
 import { Colors } from "@/constants/theme";
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { FC } from "react";
-import { Pressable, useColorScheme } from "react-native";
+import { Pressable } from "react-native";
 import { ThemedText } from "../themed-text";
 
 

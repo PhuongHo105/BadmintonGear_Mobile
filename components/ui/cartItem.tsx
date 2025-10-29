@@ -1,7 +1,8 @@
 import { Colors } from "@/constants/theme";
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Image } from "expo-image";
 import { FC, useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, useColorScheme, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { ThemedText } from "../themed-text";
 import { ThemedView } from "../themed-view";
@@ -26,7 +27,9 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const tint: string = Colors[scheme].tint;
-    const discountColor: string = Colors[scheme].icon;
+    const textColor: string = Colors[scheme].text;
+    const secondaryText: string = Colors[scheme].secondaryText;
+    const borderColor: string = Colors[scheme].border;
     const [localChecked, setLocalChecked] = useState<boolean>(checked);
     useEffect(() => {
         setLocalChecked(checked);
@@ -70,10 +73,10 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
             <ThemedView style={styles.contentContainer}>
                 <ThemedView style={styles.info}>
                     <ThemedView style={styles.content}>
-                        <Text style={{ fontSize: 16, fontWeight: '600' }}>{product.name}</Text>
-                        <Text style={{ marginTop: 4, color: tint }}>{currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Text>
+                        <ThemedText style={{ fontSize: 16, fontWeight: '600', color: textColor }}>{product.name}</ThemedText>
+                        <ThemedText style={{ marginTop: 4, color: tint }}>{currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         {typeof product.discount === 'number' && product.discount > 0 ? (
-                            <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: discountColor, textDecorationLine: 'line-through' }}>{product.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
+                            <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: secondaryText, textDecorationLine: 'line-through' }}>{product.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         ) : null}
                     </ThemedView>
                     <ThemedView style={styles.iconBtn}>
@@ -89,17 +92,17 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
                     </ThemedView>
                 </ThemedView>
                 <ThemedView style={styles.action}>
-                    <ThemedView style={styles.numberOfItems}>
+                    <ThemedView style={[styles.numberOfItems, { borderColor: borderColor }]}>
                         <Pressable style={styles.iconBtn} onPress={handleDec}>
                             <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <Path d="M18 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H18C18.41 11.25 18.75 11.59 18.75 12C18.75 12.41 18.41 12.75 18 12.75Z" fill={scheme === "light" ? "#000" : "#fff"} />
+                                <Path d="M18 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H18C18.41 11.25 18.75 11.59 18.75 12C18.75 12.41 18.41 12.75 18 12.75Z" fill={secondaryText} />
                             </Svg>
                         </Pressable>
                         <ThemedText style={{ textAlign: 'center', marginVertical: 4 }}>{quantity}</ThemedText>
                         <Pressable style={styles.iconBtn} onPress={handleInc}>
                             <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <Path d="M18 12C18 12.41 17.66 12.75 17.25 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H17.25C17.66 11.25 18 11.59 18 12Z" fill={scheme === "light" ? "#000" : "#fff"} />
-                                <Path d="M12 18C11.59 18 11.25 17.66 11.25 17.25V6C11.25 5.59 11.59 5.25 12 5.25C12.41 5.25 12.75 5.59 12.75 6V17.25C12.75 17.66 12.41 18 12 18Z" fill={scheme === "light" ? "#000" : "#fff"} />
+                                <Path d="M18 12C18 12.41 17.66 12.75 17.25 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H17.25C17.66 11.25 18 11.59 18 12Z" fill={secondaryText} />
+                                <Path d="M12 18C11.59 18 11.25 17.66 11.25 17.25V6C11.25 5.59 11.59 5.25 12 5.25C12.41 5.25 12.75 5.59 12.75 6V17.25C12.75 17.66 12.41 18 12 18Z" fill={secondaryText} />
                             </Svg>
                         </Pressable>
                     </ThemedView>
@@ -128,19 +131,20 @@ export default CartItem;
 const styles = StyleSheet.create({
     item: {
         width: '100%',
-        height: 120,
+        height: 150,
         flexDirection: 'row',
         alignItems: 'center',
         padding: 12,
         marginBottom: 20,
     },
     image: {
-        width: 100,
-        height: 100,
+        width: 120,
+        height: 140,
+        marginRight: 12,
+        borderRadius: 19,
     },
     numberOfItems: {
         borderRadius: 8,
-        borderColor: '#F4F5FD',
         borderWidth: 1,
         textAlign: 'center',
         alignItems: 'center',

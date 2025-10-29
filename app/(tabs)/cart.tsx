@@ -16,7 +16,7 @@ const CartScreen: FC = () => {
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const tint: string = Colors[scheme].tint;
-    const lightText: string = Colors[scheme].icon;
+    const secondaryText: string = Colors[scheme].secondaryText;
     const [total, setTotal] = useState(0);
     const [numberOfChecked, setNumberOfChecked] = useState(0);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -127,7 +127,7 @@ const CartScreen: FC = () => {
                         <ThemedText style={{ color: tint }}>Voucher Code</ThemedText>
                     </Pressable>
                 </ThemedView>
-                <ScrollView>
+                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
                     {cartItems.map((item) => (
                         <CartItem
                             key={item.product.id}
@@ -144,17 +144,17 @@ const CartScreen: FC = () => {
                     <ThemedView style={{ gap: 5 }}>
                         <ThemedText type="title" style={{ fontSize: 18 }}>Order Info</ThemedText>
                         <ThemedView style={styles.info}>
-                            <ThemedText type="default" style={{ fontSize: 16, color: lightText }}>Total: </ThemedText>
-                            <ThemedText type="default" style={{ fontSize: 16, color: lightText }}>{total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
+                            <ThemedText type="default" style={{ fontSize: 16, color: secondaryText }}>Total: </ThemedText>
+                            <ThemedText type="default" style={{ fontSize: 16, color: secondaryText }}>{total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.info}>
-                            <ThemedText type="default" style={{ fontSize: 16, color: lightText }}>Shipping cost: </ThemedText>
-                            <ThemedText type="default" style={{ fontSize: 16, color: lightText }}>{(0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
+                            <ThemedText type="default" style={{ fontSize: 16, color: secondaryText }}>Shipping cost: </ThemedText>
+                            <ThemedText type="default" style={{ fontSize: 16, color: secondaryText }}>{(0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         </ThemedView>
                         {discount > 0 && (
                             <ThemedView style={styles.info}>
-                                <ThemedText type="default" style={{ fontSize: 16, color: lightText }}>Discount: </ThemedText>
-                                <ThemedText type="default" style={{ fontSize: 16, color: lightText }}>- {discount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
+                                <ThemedText type="default" style={{ fontSize: 16, color: secondaryText }}>Discount: </ThemedText>
+                                <ThemedText type="default" style={{ fontSize: 16, color: secondaryText }}>- {discount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                             </ThemedView>
                         )}
                         <ThemedView style={styles.info}>

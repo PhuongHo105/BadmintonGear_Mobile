@@ -21,6 +21,7 @@ export default function HomeScreen() {
   const schemeRaw = useColorScheme();
   const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
   const tint: string = Colors[scheme].tint;
+  const borderColor: string = Colors[scheme].border;
   const onPressCategorySeeAll = () => {
     router.push('/categories' as any);
   }
@@ -60,7 +61,7 @@ export default function HomeScreen() {
             </ThemedView>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
               {categories.map((cat) => (
-                <Pressable key={cat.id} style={styles.categoryItem} onPress={() => { }}>
+                <Pressable key={cat.id} style={[styles.categoryItem, { borderColor: borderColor }]} onPress={() => { }}>
                   {React.isValidElement(cat.image) ? (
                     <View style={styles.categoryIcon}>{cat.image}</View>
                   ) : (
@@ -117,13 +118,13 @@ const styles = StyleSheet.create({
   },
   categoryItem: {
     alignItems: 'center',
+    width: 130,
     marginRight: 16,
     paddingTop: 12,
     paddingBottom: 12,
     paddingLeft: 20,
     paddingRight: 20,
     borderRadius: 12,
-    borderColor: '#F4F5FD',
     borderWidth: 1,
   },
   categoryIcon: {
