@@ -4,6 +4,8 @@ import BorderButton from "@/components/ui/borderbutton";
 import FullButton from "@/components/ui/fullbutton";
 import GoBackButton from "@/components/ui/gobackbutton";
 import WishlistItem from "@/components/ui/wishlistItem";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { FC, useState } from "react";
@@ -11,6 +13,8 @@ import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleShee
 
 const WishlistScreen: FC = () => {
     const router = useRouter();
+    const scheme = useColorScheme() ?? 'light';
+    const palette = Colors[scheme];
     const [wishlistItems, setWishlistItems] = useState([
         { id: '1', name: 'Racket A', price: 120000, image: require('@/assets/images/product1.png'), discount: 10 },
         { id: '2', name: 'Shoe B', price: 80000, image: require('@/assets/images/product1.png'), discount: 5 },
@@ -40,7 +44,7 @@ const WishlistScreen: FC = () => {
         <ThemedView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
             <Image source={require('@/assets/images/emptyWishlist.png')} style={{ width: '100%', height: 350 }} />
             <ThemedText type="title" style={{ textAlign: 'center', marginTop: 30, fontSize: 20 }}>Your wishlist is empty</ThemedText>
-            <ThemedText type="default" style={{ textAlign: 'center', marginTop: 10, color: '#666666' }}>Tap heart button to start saving your favorite items.</ThemedText>
+            <ThemedText type="default" style={{ textAlign: 'center', marginTop: 10, color: palette.secondaryText }}>Tap heart button to start saving your favorite items.</ThemedText>
             <FullButton onPress={() => { router.push('/productList') }} text="Explore Products" />
         </ThemedView>
     ) : (
@@ -65,8 +69,8 @@ const WishlistScreen: FC = () => {
                         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                         style={styles.keyboardAvoid}
                     >
-                        <Pressable style={styles.modalOverlay} onPress={cancelRemove} />
-                        <View style={styles.modalContent}>
+                        <Pressable style={[styles.modalOverlay, { backgroundColor: palette.modalOverlay }]} onPress={cancelRemove} />
+                        <View style={[styles.modalContent, { backgroundColor: palette.modalBackground }]}>
                             <ThemedText style={styles.modalTitle}>Delete product from wishlist</ThemedText>
                             <FullButton onPress={confirmRemove} text="Delete" />
                             <BorderButton onPress={cancelRemove} text="Cancel" />
@@ -101,10 +105,8 @@ const styles = StyleSheet.create({
     },
     modalOverlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
-        backgroundColor: 'white',
         padding: 22,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,

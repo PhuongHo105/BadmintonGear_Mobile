@@ -5,18 +5,17 @@ import CartItem from '@/components/ui/cartItem'
 import FullButton from '@/components/ui/fullbutton'
 import GoBackButton from '@/components/ui/gobackbutton'
 import { Colors } from '@/constants/theme'
+import { useColorScheme } from '@/hooks/use-color-scheme'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import React, { FC, useState } from 'react'
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, useColorScheme, View } from 'react-native'
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native'
 
 
 const CartScreen: FC = () => {
     const router = useRouter();
-    const schemeRaw = useColorScheme();
-    const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
-    const tint: string = Colors[scheme].tint;
-    const secondaryText: string = Colors[scheme].secondaryText;
+    const scheme = useColorScheme() ?? 'light';
+    const palette = Colors[scheme];
     const [total, setTotal] = useState(0);
     const [numberOfChecked, setNumberOfChecked] = useState(0);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -60,7 +59,7 @@ const CartScreen: FC = () => {
             }
         });
         setTotal(newTotal);
-        setCurrentTotal(newTotal * (1 - discount) / 100);
+        setCurrentTotal(newTotal * (1 - discount / 100));
         setNumberOfChecked(newNumberOfChecked);
     };
 
@@ -124,7 +123,7 @@ const CartScreen: FC = () => {
                         <ThemedText type="title" style={{ fontSize: 20 }}>My Cart</ThemedText>
                     </ThemedView>
                     <Pressable onPress={() => setIsModalVisible(true)}>
-                        <ThemedText style={{ color: tint }}>Voucher Code</ThemedText>
+                        <ThemedText style={{ color: palette.tint }}>Voucher Code</ThemedText>
                     </Pressable>
                 </ThemedView>
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
@@ -144,17 +143,17 @@ const CartScreen: FC = () => {
                     <ThemedView style={{ gap: 5 }}>
                         <ThemedText type="title" style={{ fontSize: 18 }}>Order Info</ThemedText>
                         <ThemedView style={styles.info}>
-                            <ThemedText type="default" style={{ fontSize: 16, color: secondaryText }}>Total: </ThemedText>
-                            <ThemedText type="default" style={{ fontSize: 16, color: secondaryText }}>{total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
+                            <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>Total: </ThemedText>
+                            <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>{total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.info}>
-                            <ThemedText type="default" style={{ fontSize: 16, color: secondaryText }}>Shipping cost: </ThemedText>
-                            <ThemedText type="default" style={{ fontSize: 16, color: secondaryText }}>{(0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
+                            <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>Shipping cost: </ThemedText>
+                            <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>{(0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         </ThemedView>
                         {discount > 0 && (
                             <ThemedView style={styles.info}>
-                                <ThemedText type="default" style={{ fontSize: 16, color: secondaryText }}>Discount: </ThemedText>
-                                <ThemedText type="default" style={{ fontSize: 16, color: secondaryText }}>- {discount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
+                                <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>Discount: </ThemedText>
+                                <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>- {discount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                             </ThemedView>
                         )}
                         <ThemedView style={styles.info}>
@@ -178,10 +177,10 @@ const CartScreen: FC = () => {
                     style={styles.keyboardAvoid}
                 >
                     <Pressable
-                        style={styles.modalOverlay}
+                        style={[styles.modalOverlay, { backgroundColor: palette.modalOverlay }]}
                         onPress={() => setIsModalVisible(false)}
                     />
-                    <View style={styles.modalContent}>
+                    <ThemedView style={[styles.modalContent, { backgroundColor: palette.modalBackground }]}>
                         <ThemedText style={styles.modalTitle}>Voucher Code</ThemedText>
                         <TextInput
                             style={styles.input}
@@ -192,7 +191,7 @@ const CartScreen: FC = () => {
                             onPress={() => setIsModalVisible(false)}
                             text="Apply"
                         />
-                    </View>
+                    </ThemedView>
                 </KeyboardAvoidingView>
             </Modal>
 
@@ -207,13 +206,16 @@ const CartScreen: FC = () => {
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                     style={styles.keyboardAvoid}
                 >
-                    <Pressable style={styles.modalOverlay} onPress={cancelDelete} />
-                    <View style={styles.modalContent}>
-                        <ThemedText style={styles.modalTitle}>Xóa mục</ThemedText>
+                    <Pressable
+                        style={[styles.modalOverlay, { backgroundColor: palette.modalOverlay }]}
+                        onPress={() => setIsModalVisible(false)}
+                    />
+                    <ThemedView style={[styles.modalContent, { backgroundColor: palette.modalBackground }]}>
+                        <ThemedText style={styles.modalTitle}>Delete</ThemedText>
                         <ThemedText style={{ marginTop: 8 }}>Delete product from cart</ThemedText>
                         <FullButton onPress={confirmDelete} text="Delete" />
                         <BorderButton onPress={cancelDelete} text="Cancel" />
-                    </View>
+                    </ThemedView>
                 </KeyboardAvoidingView>
             </Modal>
         </View>
@@ -261,10 +263,8 @@ const styles = StyleSheet.create({
     },
     modalOverlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
-        backgroundColor: 'white',
         padding: 22,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
