@@ -25,6 +25,8 @@ const MAPPING: IconMapping = {
   'account-box': 'account-box',
   'search.fill': 'search',
   'close': 'close',
+  'filter': 'filter-list',
+
   // custom icons are registered through ICON_REGISTRY, not in this mapping.
 } as IconMapping;
 
@@ -48,7 +50,7 @@ export function IconSymbol({
   const scheme = useColorScheme() ?? 'light';
   const tint = Colors[scheme].tint;
   const resolvedColor = (color as string) ?? tint;
-  
+
 
   return (
     <MaterialIcons

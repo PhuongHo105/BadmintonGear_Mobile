@@ -113,7 +113,7 @@ const CartScreen: FC = () => {
         <ThemedView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
             <Image source={require('@/assets/images/emptyCart.png')} style={{ width: '100%', height: 350 }} />
             <ThemedText type="title" style={{ textAlign: 'center', marginTop: 30, fontSize: 20 }}>Your cart is empty</ThemedText>
-            <FullButton onPress={() => { router.push('/products') }} text="Explore Products" />
+            <FullButton onPress={() => { router.push('/productList') }} text="Explore Products" />
         </ThemedView>
     ) : (
         <View>

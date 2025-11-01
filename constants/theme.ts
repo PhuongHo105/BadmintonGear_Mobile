@@ -18,6 +18,8 @@ export const Colors = {
     tabIconDefault: "#6F7384",
     tabIconSelected: tintColorLight,
     border: "#F4F5FD",
+    modalBackground: "#fff",
+    modalOverlay: "rgba(0, 0, 0, 0.5)",
   },
   dark: {
     text: "#fff",
@@ -28,6 +30,8 @@ export const Colors = {
     tabIconDefault: "#9BA1A6",
     tabIconSelected: tintColorDark,
     border: "#1C1B1B",
+    modalBackground: "#000",
+    modalOverlay: "rgba(41, 41, 41, 0.5)",
   },
 };
 

@@ -12,8 +12,10 @@ import ShuttlecockIcon from '@/components/ui/categoryIcon/shuttlecock-icon';
 import GoBackButton from '@/components/ui/gobackbutton';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useRouter } from 'expo-router';
 
 export default function TabTwoScreen() {
+  const router = useRouter();
   const schemeRaw = useColorScheme() as ColorSchemeName | null | undefined;
   const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors
   const borderColor: string = Colors[scheme].border;
@@ -37,7 +39,7 @@ export default function TabTwoScreen() {
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
         renderItem={({ item }) => (
-          <Pressable style={[styles.categoryItem, { borderColor: borderColor }]} onPress={() => { }}>
+          <Pressable style={[styles.categoryItem, { borderColor: borderColor }]} onPress={() => { router.push({ pathname: '/productList', params: { category: item.id } }) }}>
             {React.isValidElement(item.image) ? (
               <View style={styles.categoryIcon}>{item.image}</View>
             ) : (

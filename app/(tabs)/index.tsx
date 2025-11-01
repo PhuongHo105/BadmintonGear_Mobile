@@ -22,18 +22,33 @@ export default function HomeScreen() {
   const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
   const tint: string = Colors[scheme].tint;
   const borderColor: string = Colors[scheme].border;
-  const onPressCategorySeeAll = () => {
-    router.push('/categories' as any);
-  }
-  const onPressSeeAll = () => {
-    router.push('/product' as any);
-  }
+
+  const handleSeeAllCategoriesPress = () => {
+    router.push('/categories');
+  };
+
+  const pushProductList = (params?: { category?: number }) => {
+    const routeParams: Record<string, string> = {};
+    if (params?.category !== undefined) {
+      routeParams.category = String(params.category);
+    }
+    router.push({ pathname: '/productList', params: routeParams });
+  };
+
+  const handleSeeAllProductsPress = () => {
+    pushProductList();
+  };
+
+  const handleCategoryItemPress = (category?: number) => {
+    pushProductList(category ? { category } : undefined);
+  };
+
   const categories = [
-    { id: '1', name: 'Racket', image: <RacketIcon width={48} height={48} /> },
-    { id: '2', name: 'Shuttlecock', image: <ShuttlecockIcon width={48} height={48} /> },
-    { id: '3', name: 'Shoes', image: <ShoesIcon width={48} height={48} /> },
-    { id: '4', name: 'Clothes', image: <ClothesIcon width={48} height={48} /> },
-    { id: '5', name: 'Bags', image: <BagsIcon width={48} height={48} /> },
+    { id: '1', name: 'Racket', image: <RacketIcon width={48} height={48} />, filter: 1 },
+    { id: '2', name: 'Shuttlecock', image: <ShuttlecockIcon width={48} height={48} />, filter: 2 },
+    { id: '3', name: 'Shoes', image: <ShoesIcon width={48} height={48} />, filter: 3 },
+    { id: '4', name: 'Clothes', image: <ClothesIcon width={48} height={48} />, filter: 4 },
+    { id: '5', name: 'Bags', image: <BagsIcon width={48} height={48} />, filter: 5 },
     { id: '6', name: 'Others', image: <OtherIcon width={48} height={48} /> },
   ];
   const products = [
@@ -55,13 +70,17 @@ export default function HomeScreen() {
           <ThemedView>
             <ThemedView style={styles.headerSection}>
               <ThemedText type="defaultSemiBold" style={{ fontSize: 20 }}>Category</ThemedText>
-              <Pressable onPress={() => { onPressCategorySeeAll() }}>
+              <Pressable onPress={handleSeeAllCategoriesPress}>
                 <ThemedText type="link" style={{ color: tint }}>See All</ThemedText>
               </Pressable>
             </ThemedView>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
               {categories.map((cat) => (
-                <Pressable key={cat.id} style={[styles.categoryItem, { borderColor: borderColor }]} onPress={() => { }}>
+                <Pressable
+                  key={cat.id}
+                  style={[styles.categoryItem, { borderColor: borderColor }]}
+                  onPress={() => handleCategoryItemPress(cat.filter)}
+                >
                   {React.isValidElement(cat.image) ? (
                     <View style={styles.categoryIcon}>{cat.image}</View>
                   ) : (
@@ -75,7 +94,7 @@ export default function HomeScreen() {
           <ThemedView>
             <ThemedView style={styles.headerSection}>
               <ThemedText type="defaultSemiBold" style={{ fontSize: 20 }}>Lastest Product</ThemedText>
-              <Pressable onPress={() => { onPressSeeAll() }}>
+              <Pressable onPress={handleSeeAllProductsPress}>
                 <ThemedText type="link" style={{ color: tint }}>See All</ThemedText>
               </Pressable>
             </ThemedView>
