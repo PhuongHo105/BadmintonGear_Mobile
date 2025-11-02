@@ -92,6 +92,7 @@ export default function RootLayout() {
               <Stack.Screen name="checkout/items" options={{ headerShown: false }} />
               <Stack.Screen name="checkout/result" options={{ headerShown: false }} />
               <Stack.Screen name="shippingAddress" options={{ headerShown: false }} />
+              <Stack.Screen name="orderList" options={{ headerShown: false }} />
             </Stack>
           )}
           <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />

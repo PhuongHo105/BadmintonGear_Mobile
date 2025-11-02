@@ -20,6 +20,9 @@ export const Colors = {
     border: "#F4F5FD",
     modalBackground: "#fff",
     modalOverlay: "rgba(0, 0, 0, 0.5)",
+    tabBackground: "#F4F5FD",
+    tabButtonBG: "#000",
+    activeTabText: "#fff",
   },
   dark: {
     text: "#fff",
@@ -32,6 +35,9 @@ export const Colors = {
     border: "#1C1B1B",
     modalBackground: "#000",
     modalOverlay: "rgba(41, 41, 41, 0.5)",
+    tabBackground: "#1C1B1B",
+    tabButtonBG: tintColorDark,
+    activeTabText: "#fff",
   },
 };
 

@@ -180,6 +180,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         flexDirection: 'row',
         gap: 2,
+        width: 'auto',
+        paddingHorizontal: 4,
+        paddingVertical: 2,
+        alignSelf: 'flex-start',
     },
     info: {
         flexDirection: 'row',
@@ -224,8 +228,8 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     iconBtn: {
-        width: 34,
-        height: 34,
+        width: 28,
+        height: 28,
         alignItems: 'center',
         justifyContent: 'center',
     }
