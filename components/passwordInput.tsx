@@ -3,10 +3,10 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Feather } from '@expo/vector-icons';
 import { FC, useState } from "react";
-import { Pressable, StyleSheet, TextInput } from "react-native";
+import { Pressable, StyleProp, StyleSheet, TextInput, ViewStyle } from "react-native";
 import { ThemedView } from "./themed-view";
 
-const PasswordInput: FC<{
+type PasswordInputProps = {
     placeholder?: string;
     placeholderTextColor?: string;
     borderColor?: string;
@@ -14,7 +14,17 @@ const PasswordInput: FC<{
     value?: string;
     onChangeText?: (text: string) => void;
     onChange?: (e: any) => void;
-}> = ({ placeholder, placeholderTextColor, value, onChangeText, onChange }) => {
+    style?: StyleProp<ViewStyle>;
+};
+
+const PasswordInput: FC<PasswordInputProps> = ({
+    placeholder,
+    placeholderTextColor,
+    value,
+    onChangeText,
+    onChange,
+    style,
+}) => {
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const textColor: string = Colors[scheme].text;
@@ -22,7 +32,7 @@ const PasswordInput: FC<{
     const iconColor: string = Colors[scheme].icon;
     const [show, setShow] = useState(false);
     return (
-        <ThemedView style={[styles.container, { borderColor: borderColor }]}>
+        <ThemedView style={[styles.container, { borderColor: borderColor }, style]}>
             <TextInput
                 secureTextEntry={!show}
                 placeholder={placeholder}
@@ -46,11 +56,13 @@ export default PasswordInput;
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
         borderRadius: 8,
-        padding: 12
+        paddingHorizontal: 12,
+        paddingVertical: 15,
+        minHeight: 52,
+        width: '100%',
     }
 });
