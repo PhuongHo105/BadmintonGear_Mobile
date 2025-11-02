@@ -20,6 +20,8 @@ const LoginScreen: React.FC = () => {
             : require('@/assets/images/logo/light-logo.png');
     const [email, setEmail] = React.useState<string>('');
     const [password, setPassword] = React.useState<string>('');
+    const [isEmailFocused, setIsEmailFocused] = React.useState(false);
+    const [isPasswordFocused, setIsPasswordFocused] = React.useState(false);
     const handleLogin = (email: string, password: string) => {
         router.push('/');
     }
@@ -52,13 +54,21 @@ const LoginScreen: React.FC = () => {
                     <ThemedView style={styles.fieldGroup}>
                         <ThemedText>Email *</ThemedText>
                         <TextInput
-                            style={[styles.input, { color: Colors[scheme].text, borderColor: Colors[scheme].border }]}
+                            style={[
+                                styles.input,
+                                {
+                                    color: Colors[scheme].text,
+                                    borderColor: isEmailFocused ? Colors[scheme].tint : Colors[scheme].border,
+                                },
+                            ]}
                             value={email}
                             onChangeText={setEmail}
                             placeholder="Enter your email"
                             placeholderTextColor={Colors[scheme].secondaryText}
                             keyboardType="email-address"
                             autoCapitalize="none"
+                            onFocus={() => setIsEmailFocused(true)}
+                            onBlur={() => setIsEmailFocused(false)}
                         />
                     </ThemedView>
 
@@ -69,6 +79,14 @@ const LoginScreen: React.FC = () => {
                             placeholderTextColor={Colors[scheme].secondaryText}
                             value={password}
                             onChangeText={setPassword}
+                            onFocus={() => setIsPasswordFocused(true)}
+                            onBlur={() => setIsPasswordFocused(false)}
+                            style={[
+                                styles.input,
+                                {
+                                    borderColor: isPasswordFocused ? Colors[scheme].tint : Colors[scheme].border,
+                                },
+                            ]}
                         />
                     </ThemedView>
 
