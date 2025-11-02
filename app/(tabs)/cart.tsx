@@ -9,7 +9,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import React, { FC, useState } from 'react'
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native'
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native'
 
 
 const CartScreen: FC = () => {
@@ -108,6 +108,10 @@ const CartScreen: FC = () => {
         setIsDeleteModalVisible(false);
     };
 
+    const handleCheckout = () => {
+        router.push('/checkout' as any);
+    }
+
     return cartItems.length === 0 ? (
         <ThemedView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
             <Image source={require('@/assets/images/emptyCart.png')} style={{ width: '100%', height: 350 }} />
@@ -115,7 +119,7 @@ const CartScreen: FC = () => {
             <FullButton onPress={() => { router.push('/productList') }} text="Explore Products" />
         </ThemedView>
     ) : (
-        <View>
+        <ThemedView>
             <ThemedView style={styles.container}>
                 <ThemedView style={styles.headerContainer}>
                     <ThemedView style={styles.leftHeader}>
@@ -161,7 +165,7 @@ const CartScreen: FC = () => {
                             <ThemedText type="title" style={{ fontSize: 18 }}>{currentTotal.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         </ThemedView>
                     </ThemedView>
-                    <FullButton onPress={() => { }} text={`Checkout (${numberOfChecked})`} />
+                    <FullButton onPress={() => { handleCheckout() }} text={`Checkout (${numberOfChecked})`} />
                 </ThemedView>
             </ThemedView>
             <Modal
@@ -208,7 +212,7 @@ const CartScreen: FC = () => {
                 >
                     <Pressable
                         style={[styles.modalOverlay, { backgroundColor: palette.modalOverlay }]}
-                        onPress={() => setIsModalVisible(false)}
+                        onPress={() => setIsDeleteModalVisible(false)}
                     />
                     <ThemedView style={[styles.modalContent, { backgroundColor: palette.modalBackground }]}>
                         <ThemedText style={styles.modalTitle}>Delete</ThemedText>
@@ -218,7 +222,7 @@ const CartScreen: FC = () => {
                     </ThemedView>
                 </KeyboardAvoidingView>
             </Modal>
-        </View>
+        </ThemedView>
 
     );
 }
