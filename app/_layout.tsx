@@ -83,6 +83,9 @@ export default function RootLayout() {
               <Stack.Screen name="forgotPassword/emailVerification" options={{ headerShown: false }} />
               <Stack.Screen name="forgotPassword/setNewPassword" options={{ headerShown: false }} />
               <Stack.Screen name="forgotPassword/success" options={{ headerShown: false }} />
+              <Stack.Screen name="onboarding/index" options={{ headerShown: false }} />
+              <Stack.Screen name="onboarding/02" options={{ headerShown: false }} />
+              <Stack.Screen name="onboarding/03" options={{ headerShown: false }} />
             </Stack>
           )}
           <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
