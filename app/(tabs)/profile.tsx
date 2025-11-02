@@ -65,17 +65,12 @@ const ProfileScreen: React.FC = () => {
                     <ProfileMenuItem
                         icon="box"
                         name="Shipping Address"
-                        onPress={() => Alert.alert('Chuyển đến Shipping Address')}
-                    />
-                    <ProfileMenuItem
-                        icon="credit-card"
-                        name="Payment Method"
-                        onPress={() => Alert.alert('Chuyển đến Payment Method')}
+                        onPress={() => router.push('/shippingAddress' as any)}
                     />
                     <ProfileMenuItem
                         icon="clipboard"
                         name="Order History"
-                        onPress={() => Alert.alert('Chuyển đến Order History')}
+                        onPress={() => router.push('/orderList' as any)}
                     />
                 </ThemedView>
 
