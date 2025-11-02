@@ -49,7 +49,7 @@ const ChangePassword02Screen: FC = () => {
                     <ThemedText type="title" style={{ fontSize: 20 }}>Change password</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.rightHeader}>
-                    <ThemedText type="default" style={{ fontSize: 16, color: textColor }}>01 / </ThemedText>
+                    <ThemedText type="default" style={{ fontSize: 16, color: textColor }}>02 / </ThemedText>
                     <ThemedText type="default" style={{ fontSize: 16, color: iconColor }}>02</ThemedText>
                 </ThemedView>
             </ThemedView>
@@ -58,14 +58,14 @@ const ChangePassword02Screen: FC = () => {
                 <ThemedText type="default" style={{ fontSize: 14, marginBottom: 24, color: secondaryText }}>Enter your new password and remember it.</ThemedText>
                 <ThemedView>
                     <ThemedText type="defaultSemiBold" style={{ fontSize: 16, marginBottom: 8, color: textColor }}>New Password *</ThemedText>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <ThemedView style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <PasswordInput
                             placeholder="Enter your new password"
                             placeholderTextColor={secondaryText}
                             value={newPassword}
                             onChangeText={setNewPassword}
                         />
-                    </View>
+                    </ThemedView>
                 </ThemedView>
 
                 <ThemedView style={{ marginTop: 20 }}>
@@ -83,7 +83,7 @@ const ChangePassword02Screen: FC = () => {
                     <ThemedText type="default" style={{ color: 'red', marginTop: 8 }}>{error}</ThemedText>
                 ) : null}
                 <ThemedView style={{ marginTop: 30 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <ThemedView style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <FullButton onPress={() => {
                             if (!newPassword || !confirmPassword) {
                                 setError('Please fill both fields');
@@ -95,8 +95,8 @@ const ChangePassword02Screen: FC = () => {
                             }
                             // proceed
                             router.push('/changepassword/03' as any);
-                        }} text='Continue' />
-                    </View>
+                        }} text='Save' style={{ flex: 1 }} />
+                    </ThemedView>
                 </ThemedView>
             </ThemedView>
         </ThemedView>
