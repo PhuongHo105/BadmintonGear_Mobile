@@ -93,6 +93,7 @@ export default function RootLayout() {
               <Stack.Screen name="checkout/result" options={{ headerShown: false }} />
               <Stack.Screen name="shippingAddress" options={{ headerShown: false }} />
               <Stack.Screen name="orderList" options={{ headerShown: false }} />
+              <Stack.Screen name="order/[id]" options={{ headerShown: false }} />
               <Stack.Screen name="feedback" options={{ headerShown: false }} />
             </Stack>
           )}
