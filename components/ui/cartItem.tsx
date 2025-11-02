@@ -14,6 +14,7 @@ type Product = {
     image?: any;
     discount?: number;
 }
+
 type CartItemProps = {
     product: Product;
     checked?: boolean;
@@ -21,25 +22,31 @@ type CartItemProps = {
     onToggle?: (id: string) => void;
     onChangeQuantity?: (id: string, quantity: number) => void;
     onDeleteRequest?: (id: string) => void;
+    type?: 'editable' | 'review';
 };
 
-const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, onToggle, onChangeQuantity, onDeleteRequest }) => {
+const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, onToggle, onChangeQuantity, onDeleteRequest, type }) => {
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const tint: string = Colors[scheme].tint;
     const textColor: string = Colors[scheme].text;
     const secondaryText: string = Colors[scheme].secondaryText;
     const borderColor: string = Colors[scheme].border;
+
+    // Local checkbox state synced with prop
     const [localChecked, setLocalChecked] = useState<boolean>(checked);
-    useEffect(() => {
-        setLocalChecked(checked);
-    }, [checked]);
+    useEffect(() => setLocalChecked(checked), [checked]);
+
+    // Local mode that can switch to 'editable' when user taps in review
+    const [mode, setMode] = useState<'editable' | 'review'>(type ?? 'editable');
+    useEffect(() => setMode(type ?? 'editable'), [type]);
+
     const currentPrice: number = (product.price ?? 0) * (1 - (product.discount ?? 0) / 100);
-    // Local quantity state (optimistic). Sync when prop changes.
+
+    // Local quantity synced with prop
     const [quantity, setQuantity] = useState<number>(numberOfItems ?? 1);
-    useEffect(() => {
-        setQuantity(numberOfItems ?? 1);
-    }, [numberOfItems]);
+    useEffect(() => setQuantity(numberOfItems ?? 1), [numberOfItems]);
+
     const handleToggle = () => {
         setLocalChecked((v) => !v);
         onToggle?.(product.id);
@@ -54,12 +61,10 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
     };
 
     const handleDec = () => {
-        // If quantity is 1, request parent to confirm removal via modal
         if (quantity <= 1) {
             onDeleteRequest?.(product.id);
             return;
         }
-
         setQuantity((q) => {
             const nq = Math.max(1, q - 1);
             onChangeQuantity?.(product.id, nq);
@@ -74,51 +79,75 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
                 <ThemedView style={styles.info}>
                     <ThemedView style={styles.content}>
                         <ThemedText style={{ fontSize: 16, fontWeight: '600', color: textColor }}>{product.name}</ThemedText>
-                        <ThemedText style={{ marginTop: 4, color: tint }}>{currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
+                        <ThemedText style={{ marginTop: 4, color: tint }}>
+                            {currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                        </ThemedText>
                         {typeof product.discount === 'number' && product.discount > 0 ? (
-                            <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: secondaryText, textDecorationLine: 'line-through' }}>{product.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
+                            <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: secondaryText, textDecorationLine: 'line-through' }}>
+                                {product.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                            </ThemedText>
                         ) : null}
                     </ThemedView>
-                    <ThemedView style={styles.iconBtn}>
-                        <Pressable onPress={handleToggle} style={styles.checkbox} accessibilityRole="checkbox" accessibilityState={{ checked: !!localChecked }}>
-                            {localChecked ? (
-                                <View style={[styles.checkInner, { backgroundColor: tint }]}>
-                                    <Text style={styles.checkMark}>✓</Text>
-                                </View>
-                            ) : (
-                                <View style={styles.checkInner} />
-                            )}
-                        </Pressable>
-                    </ThemedView>
+                    {mode !== 'review' && (
+                        <ThemedView style={styles.iconBtn}>
+                            <Pressable onPress={handleToggle} style={styles.checkbox} accessibilityRole="checkbox" accessibilityState={{ checked: !!localChecked }}>
+                                {localChecked ? (
+                                    <View style={[styles.checkInner, { backgroundColor: tint }]}>
+                                        <Text style={styles.checkMark}>✓</Text>
+                                    </View>
+                                ) : (
+                                    <View style={styles.checkInner} />
+                                )}
+                            </Pressable>
+                        </ThemedView>
+                    )}
                 </ThemedView>
+
                 <ThemedView style={styles.action}>
                     <ThemedView style={[styles.numberOfItems, { borderColor: borderColor }]}>
-                        <Pressable style={styles.iconBtn} onPress={handleDec}>
+                        <Pressable style={styles.iconBtn} onPress={mode === 'review' ? undefined : handleDec}>
                             <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                 <Path d="M18 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H18C18.41 11.25 18.75 11.59 18.75 12C18.75 12.41 18.41 12.75 18 12.75Z" fill={secondaryText} />
                             </Svg>
                         </Pressable>
                         <ThemedText style={{ textAlign: 'center', marginVertical: 4 }}>{quantity}</ThemedText>
-                        <Pressable style={styles.iconBtn} onPress={handleInc}>
+                        <Pressable style={styles.iconBtn} onPress={mode === 'review' ? undefined : handleInc}>
                             <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                 <Path d="M18 12C18 12.41 17.66 12.75 17.25 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H17.25C17.66 11.25 18 11.59 18 12Z" fill={secondaryText} />
                                 <Path d="M12 18C11.59 18 11.25 17.66 11.25 17.25V6C11.25 5.59 11.59 5.25 12 5.25C12.41 5.25 12.75 5.59 12.75 6V17.25C12.75 17.66 12.41 18 12 18Z" fill={secondaryText} />
                             </Svg>
                         </Pressable>
                     </ThemedView>
-                    <Pressable style={styles.iconBtn}
-                        onPress={() => {
-                            onDeleteRequest?.(product.id);
-                        }}
-                    >
-                        <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                            <Path d="M20.9997 6.72998C20.9797 6.72998 20.9497 6.72998 20.9197 6.72998C15.6297 6.19998 10.3497 5.99998 5.11967 6.52998L3.07967 6.72998C2.65967 6.76998 2.28967 6.46998 2.24967 6.04998C2.20967 5.62998 2.50967 5.26998 2.91967 5.22998L4.95967 5.02998C10.2797 4.48998 15.6697 4.69998 21.0697 5.22998C21.4797 5.26998 21.7797 5.63998 21.7397 6.04998C21.7097 6.43998 21.3797 6.72998 20.9997 6.72998Z" fill={tint} />
-                            <Path d="M8.49977 5.72C8.45977 5.72 8.41977 5.72 8.36977 5.71C7.96977 5.64 7.68977 5.25 7.75977 4.85L7.97977 3.54C8.13977 2.58 8.35977 1.25 10.6898 1.25H13.3098C15.6498 1.25 15.8698 2.63 16.0198 3.55L16.2398 4.85C16.3098 5.26 16.0298 5.65 15.6298 5.71C15.2198 5.78 14.8298 5.5 14.7698 5.1L14.5498 3.8C14.4098 2.93 14.3798 2.76 13.3198 2.76H10.6998C9.63977 2.76 9.61977 2.9 9.46977 3.79L9.23977 5.09C9.17977 5.46 8.85977 5.72 8.49977 5.72Z" fill={tint} />
-                            <Path d="M15.2104 22.7501H8.79039C5.30039 22.7501 5.16039 20.8201 5.05039 19.2601L4.40039 9.19007C4.37039 8.78007 4.69039 8.42008 5.10039 8.39008C5.52039 8.37008 5.87039 8.68008 5.90039 9.09008L6.55039 19.1601C6.66039 20.6801 6.70039 21.2501 8.79039 21.2501H15.2104C17.3104 21.2501 17.3504 20.6801 17.4504 19.1601L18.1004 9.09008C18.1304 8.68008 18.4904 8.37008 18.9004 8.39008C19.3104 8.42008 19.6304 8.77007 19.6004 9.19007L18.9504 19.2601C18.8404 20.8201 18.7004 22.7501 15.2104 22.7501Z" fill={tint} />
-                            <Path d="M13.6601 17.25H10.3301C9.92008 17.25 9.58008 16.91 9.58008 16.5C9.58008 16.09 9.92008 15.75 10.3301 15.75H13.6601C14.0701 15.75 14.4101 16.09 14.4101 16.5C14.4101 16.91 14.0701 17.25 13.6601 17.25Z" fill={tint} />
-                            <Path d="M14.5 13.25H9.5C9.09 13.25 8.75 12.91 8.75 12.5C8.75 12.09 9.09 11.75 9.5 11.75H14.5C14.91 11.75 15.25 12.09 15.25 12.5C15.25 12.91 14.91 13.25 14.5 13.25Z" fill={tint} />
-                        </Svg>
-                    </Pressable>
+
+                    {mode !== 'review' && (
+                        <Pressable style={styles.iconBtn}
+                            onPress={() => {
+                                onDeleteRequest?.(product.id);
+                            }}
+                        >
+                            <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                                <Path d="M20.9997 6.72998C20.9797 6.72998 20.9497 6.72998 20.9197 6.72998C15.6297 6.19998 10.3497 5.99998 5.11967 6.52998L3.07967 6.72998C2.65967 6.76998 2.28967 6.46998 2.24967 6.04998C2.20967 5.62998 2.50967 5.26998 2.91967 5.22998L4.95967 5.02998C10.2797 4.48998 15.6697 4.69998 21.0697 5.22998C21.4797 5.26998 21.7797 5.63998 21.7397 6.04998C21.7097 6.43998 21.3797 6.72998 20.9997 6.72998Z" fill={tint} />
+                                <Path d="M8.49977 5.72C8.45977 5.72 8.41977 5.72 8.36977 5.71C7.96977 5.64 7.68977 5.25 7.75977 4.85L7.97977 3.54C8.13977 2.58 8.35977 1.25 10.6898 1.25H13.3098C15.6498 1.25 15.8698 2.63 16.0198 3.55L16.2398 4.85C16.3098 5.26 16.0298 5.65 15.6298 5.71C15.2198 5.78 14.8298 5.5 14.7698 5.1L14.5498 3.8C14.4098 2.93 14.3798 2.76 13.3198 2.76H10.6998C9.63977 2.76 9.61977 2.9 9.46977 3.79L9.23977 5.09C9.17977 5.46 8.85977 5.72 8.49977 5.72Z" fill={tint} />
+                                <Path d="M15.2104 22.7501H8.79039C5.30039 22.7501 5.16039 20.8201 5.05039 19.2601L4.40039 9.19007C4.37039 8.78007 4.69039 8.42008 5.10039 8.39008C5.52039 8.37008 5.87039 8.68008 5.90039 9.09008L6.55039 19.1601C6.66039 20.6801 6.70039 21.2501 8.79039 21.2501H15.2104C17.3104 21.2501 17.3504 20.6801 17.4504 19.1601L18.1004 9.09008C18.1304 8.68008 18.4904 8.37008 18.9004 8.39008C19.3104 8.42008 19.6304 8.77007 19.6004 9.19007L18.9504 19.2601C18.8404 20.8201 18.7004 22.7501 15.2104 22.7501Z" fill={tint} />
+                                <Path d="M13.6601 17.25H10.3301C9.92008 17.25 9.58008 16.91 9.58008 16.5C9.58008 16.09 9.92008 15.75 10.3301 15.75H13.6601C14.0701 15.75 14.4101 16.09 14.4101 16.5C14.4101 16.91 14.0701 17.25 13.6601 17.25Z" fill={tint} />
+                                <Path d="M14.5 13.25H9.5C9.09 13.25 8.75 12.91 8.75 12.5C8.75 12.09 9.09 11.75 9.5 11.75H14.5C14.91 11.75 15.25 12.09 15.25 12.5C15.25 12.91 14.91 13.25 14.5 13.25Z" fill={tint} />
+                            </Svg>
+                        </Pressable>
+                    )}
+
+                    {mode === 'review' && (
+                        <Pressable style={styles.iconBtn}
+                            onPress={() => {
+                                setMode('editable');
+                            }}
+                        >
+                            <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" >
+                                <Path d="M5.53999 19.5201C4.92999 19.5201 4.35999 19.31 3.94999 18.92C3.42999 18.43 3.17999 17.69 3.26999 16.89L3.63999 13.65C3.70999 13.04 4.07999 12.23 4.50999 11.79L12.72 3.10005C14.77 0.930049 16.91 0.870049 19.08 2.92005C21.25 4.97005 21.31 7.11005 19.26 9.28005L11.05 17.97C10.63 18.42 9.84999 18.84 9.23999 18.9401L6.01999 19.49C5.84999 19.5 5.69999 19.5201 5.53999 19.5201ZM15.93 2.91005C15.16 2.91005 14.49 3.39005 13.81 4.11005L5.59999 12.8101C5.39999 13.0201 5.16999 13.5201 5.12999 13.8101L4.75999 17.05C4.71999 17.38 4.79999 17.65 4.97999 17.82C5.15999 17.99 5.42999 18.05 5.75999 18L8.97999 17.4501C9.26999 17.4001 9.74999 17.14 9.94999 16.93L18.16 8.24005C19.4 6.92005 19.85 5.70005 18.04 4.00005C17.24 3.23005 16.55 2.91005 15.93 2.91005Z" fill={Colors[scheme].icon} />
+                                <Path d="M17.3404 10.9498C17.3204 10.9498 17.2904 10.9498 17.2704 10.9498C14.1504 10.6398 11.6404 8.26985 11.1604 5.16985C11.1004 4.75985 11.3804 4.37985 11.7904 4.30985C12.2004 4.24985 12.5804 4.52985 12.6504 4.93985C13.0304 7.35985 14.9904 9.21985 17.4304 9.45985C17.8404 9.49985 18.1404 9.86985 18.1004 10.2798C18.0504 10.6598 17.7204 10.9498 17.3404 10.9498Z" fill={Colors[scheme].icon} />
+                                <Path d="M21 22.75H3C2.59 22.75 2.25 22.41 2.25 22C2.25 21.59 2.59 21.25 3 21.25H21C21.41 21.25 21.75 21.59 21.75 22C21.75 22.41 21.41 22.75 21 22.75Z" fill={Colors[scheme].icon} />
+                            </Svg>
+                        </Pressable>
+                    )}
                 </ThemedView>
             </ThemedView>
         </ThemedView >

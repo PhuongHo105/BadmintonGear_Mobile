@@ -29,6 +29,7 @@ const MAPPING: IconMapping = {
   'star': 'star',
   'star-half': 'star-half',
   'star-border': 'star-border',
+  'chevron-right': 'chevron-right',
 
   // custom icons are registered through ICON_REGISTRY, not in this mapping.
 } as IconMapping;

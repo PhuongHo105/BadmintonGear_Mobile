@@ -86,6 +86,11 @@ export default function RootLayout() {
               <Stack.Screen name="onboarding/index" options={{ headerShown: false }} />
               <Stack.Screen name="onboarding/02" options={{ headerShown: false }} />
               <Stack.Screen name="onboarding/03" options={{ headerShown: false }} />
+              <Stack.Screen name="checkout/index" options={{ headerShown: false }} />
+              <Stack.Screen name="checkout/payment" options={{ headerShown: false }} />
+              <Stack.Screen name="checkout/review" options={{ headerShown: false }} />
+              <Stack.Screen name="checkout/items" options={{ headerShown: false }} />
+              <Stack.Screen name="checkout/result" options={{ headerShown: false }} />
             </Stack>
           )}
           <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />

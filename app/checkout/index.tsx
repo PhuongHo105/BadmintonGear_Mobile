@@ -1,0 +1,432 @@
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import FullButton from '@/components/ui/fullbutton';
+import GoBackButton from '@/components/ui/gobackbutton';
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { router } from 'expo-router';
+import React, { FC } from 'react';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
+
+type ID = string;
+
+type DistrictOption = {
+    code: ID;
+    name: string;
+};
+
+type ProvinceOption = {
+    code: ID;
+    name: string;
+    districts: DistrictOption[];
+};
+
+type OpenApiProvince = {
+    code: number;
+    name: string;
+    districts: { code: number; name: string }[];
+};
+
+type GithubProvince = {
+    Code: string;
+    Name: string;
+    Districts: { Code: string; Name: string }[];
+};
+
+const OPEN_API_URL = 'https://provinces.open-api.vn/api/?depth=2';
+const GITHUB_FALLBACK_URL =
+    'https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json';
+
+const CheckoutScreen: FC = () => {
+    const schemeRaw = useColorScheme();
+    const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
+
+    const [fullName, setFullName] = React.useState('');
+    const [isFullNameFocused, setIsFullNameFocused] = React.useState(false);
+    const [phone, setPhone] = React.useState('');
+    const [isPhoneFocused, setIsPhoneFocused] = React.useState(false);
+    const [selectedCountry, setSelectedCountry] = React.useState('Vietnam');
+    const [selectedProvince, setSelectedProvince] = React.useState('');
+    const [selectedDistrict, setSelectedDistrict] = React.useState('');
+    const [detailedAddress, setDetailedAddress] = React.useState('');
+    const [isDetailedFocused, setIsDetailedFocused] = React.useState(false);
+
+    const [isCountryMenuOpen, setIsCountryMenuOpen] = React.useState(false);
+    const [isProvinceMenuOpen, setIsProvinceMenuOpen] = React.useState(false);
+    const [isDistrictMenuOpen, setIsDistrictMenuOpen] = React.useState(false);
+
+    const [addressData, setAddressData] = React.useState<ProvinceOption[]>([]);
+    const [isLoadingAddresses, setIsLoadingAddresses] = React.useState(false);
+    const [addressError, setAddressError] = React.useState<string | null>(null);
+
+    const countries = React.useMemo(() => ['Vietnam'], []);
+    const provinceOptions = React.useMemo(() => {
+        if (selectedCountry !== 'Vietnam') return [];
+        return addressData.map((p) => p.name);
+    }, [addressData, selectedCountry]);
+
+    const districtOptions = React.useMemo(() => {
+        if (selectedCountry !== 'Vietnam') return [];
+        const province = addressData.find((it) => it.name === selectedProvince);
+        return province?.districts.map((d) => d.name) ?? [];
+    }, [addressData, selectedCountry, selectedProvince]);
+
+    const normalizeFromOpenApi = (rows: OpenApiProvince[]): ProvinceOption[] =>
+        rows.map((p) => ({
+            code: String(p.code),
+            name: p.name,
+            districts: (p.districts || []).map((d) => ({ code: String(d.code), name: d.name })),
+        }));
+
+    const normalizeFromGithub = (rows: GithubProvince[]): ProvinceOption[] =>
+        rows.map((p) => ({
+            code: p.Code,
+            name: p.Name,
+            districts: (p.Districts || []).map((d) => ({ code: d.Code, name: d.Name })),
+        }));
+
+    const loadAddresses = React.useCallback(async () => {
+        if (selectedCountry !== 'Vietnam') return;
+
+        setIsLoadingAddresses(true);
+        setAddressError(null);
+
+        try {
+            const res = await fetch(OPEN_API_URL);
+            if (!res.ok) throw new Error('open-api not ok');
+            const data = (await res.json()) as OpenApiProvince[];
+            setAddressData(normalizeFromOpenApi(data));
+        } catch (err) {
+            console.warn('Primary address source failed, falling back...', err);
+            try {
+                const res2 = await fetch(GITHUB_FALLBACK_URL);
+                if (!res2.ok) throw new Error('fallback not ok');
+                const data2 = (await res2.json()) as GithubProvince[];
+                setAddressData(normalizeFromGithub(data2));
+            } catch (err2) {
+                console.error('Failed to load provinces', err2);
+                setAddressError('Không thể tải địa chỉ. Kiểm tra kết nối và thử lại.');
+            }
+        } finally {
+            setIsLoadingAddresses(false);
+        }
+    }, [selectedCountry]);
+
+    React.useEffect(() => {
+        if (selectedCountry !== 'Vietnam') {
+            setAddressData([]);
+            setSelectedProvince('');
+            setSelectedDistrict('');
+            return;
+        }
+        if (!addressData.length && !isLoadingAddresses && !addressError) {
+            // initial load
+            loadAddresses();
+        }
+    }, [selectedCountry, addressData.length, isLoadingAddresses, addressError, loadAddresses]);
+
+    React.useEffect(() => {
+        if (selectedCountry !== 'Vietnam') return;
+        if (!addressData.length) return;
+
+        const current = addressData.find((p) => p.name === selectedProvince) ?? addressData[0];
+        if (current && current.name !== selectedProvince) {
+            setSelectedProvince(current.name);
+            return;
+        }
+
+        const dists = current?.districts ?? [];
+        const currentDist = dists.find((d) => d.name === selectedDistrict) ?? dists[0];
+        if (currentDist && currentDist.name !== selectedDistrict) {
+            setSelectedDistrict(currentDist.name);
+        }
+    }, [addressData, selectedCountry, selectedProvince, selectedDistrict]);
+
+    const renderDropdown = (
+        label: string,
+        value: string,
+        onToggle: () => void,
+        isOpen: boolean,
+        options: string[],
+        onSelect: (option: string) => void,
+        placeholder?: string,
+        disabled: boolean = false,
+        emptyMessage?: string,
+    ) => {
+        const displayValue = value || placeholder || 'Select an option';
+        const isSelectionAvailable = options.length > 0;
+
+        return (
+            <View style={styles.dropdownGroup}>
+                <ThemedText>{label}</ThemedText>
+                <Pressable
+                    style={[
+                        styles.dropdownContainer,
+                        {
+                            borderColor: isOpen ? Colors[scheme].tint : Colors[scheme].border,
+                            backgroundColor: Colors[scheme].background,
+                            opacity: disabled ? 0.6 : 1,
+                        },
+                    ]}
+                    onPress={() => {
+                        if (!disabled) onToggle();
+                    }}
+                >
+                    <ThemedText
+                        style={{ color: value ? Colors[scheme].text : Colors[scheme].secondaryText, fontSize: 16 }}
+                    >
+                        {displayValue}
+                    </ThemedText>
+                    <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <Path d="M7 10L12 15L17 10" stroke={Colors[scheme].icon} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                </Pressable>
+                {isOpen && !disabled && (
+                    <View
+                        style={[
+                            styles.dropdownList,
+                            { backgroundColor: Colors[scheme].background, borderColor: Colors[scheme].border },
+                        ]}
+                    >
+                        {isSelectionAvailable ? (
+                            options.map((option) => (
+                                <Pressable
+                                    key={option}
+                                    style={styles.dropdownItem}
+                                    onPress={() => {
+                                        onSelect(option);
+                                        onToggle();
+                                    }}
+                                >
+                                    <ThemedText
+                                        style={{ color: option === value ? Colors[scheme].tint : Colors[scheme].text, fontSize: 16 }}
+                                    >
+                                        {option}
+                                    </ThemedText>
+                                </Pressable>
+                            ))
+                        ) : (
+                            <View style={styles.dropdownItem}>
+                                <ThemedText style={{ color: Colors[scheme].secondaryText, fontSize: 16 }}>
+                                    {emptyMessage || 'No options available'}
+                                </ThemedText>
+                            </View>
+                        )}
+                    </View>
+                )}
+            </View>
+        );
+    };
+
+    // Menu toggle handlers are inlined in render to avoid unused variables.
+
+    const provincePlaceholder =
+        selectedCountry !== 'Vietnam'
+            ? 'Select a country first'
+            : isLoadingAddresses
+                ? 'Loading provinces...'
+                : 'Select province / city';
+
+    const districtPlaceholder =
+        selectedCountry !== 'Vietnam'
+            ? 'Select a country first'
+            : !selectedProvince
+                ? 'Select province first'
+                : isLoadingAddresses
+                    ? 'Loading districts...'
+                    : 'Select district';
+
+    const isProvinceDisabled = selectedCountry !== 'Vietnam' || isLoadingAddresses;
+    const isDistrictDisabled = selectedCountry !== 'Vietnam' || !selectedProvince || isLoadingAddresses;
+
+    return (
+        <ThemedView style={styles.container}>
+            <ThemedView style={styles.headerContainer}>
+                <ThemedView style={styles.leftHeader}>
+                    <GoBackButton />
+                    <ThemedText type="title" style={{ fontSize: 20 }}>
+                        Checkout
+                    </ThemedText>
+                </ThemedView>
+            </ThemedView>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.keyboardAvoid}
+            >
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    <ThemedView style={styles.statusBar}>
+                        <Svg width="280" height="39" viewBox="0 0 280 39" fill="none">
+                            <Path d="M26.4994 13.2999C26.3694 13.2999 26.2394 13.2699 26.1194 13.1999L17.2894 8.0899C16.9294 7.8799 16.8093 7.41987 17.0193 7.05987C17.2293 6.69987 17.6793 6.57985 18.0493 6.78985L26.4994 11.6799L34.8993 6.81988C35.2593 6.60988 35.7193 6.7399 35.9293 7.0899C36.1393 7.4499 36.0094 7.90987 35.6594 8.11987L26.8894 13.1999C26.7594 13.2599 26.6294 13.2999 26.4994 13.2999Z" fill={Colors[scheme].text} />
+                            <Path d="M26.5 22.36C26.09 22.36 25.75 22.02 25.75 21.61V12.54C25.75 12.13 26.09 11.79 26.5 11.79C26.91 11.79 27.25 12.13 27.25 12.54V21.61C27.25 22.02 26.91 22.36 26.5 22.36Z" fill={Colors[scheme].text} />
+                            <Path d="M26.5006 22.75C25.6206 22.75 24.7506 22.56 24.0606 22.18L18.7206 19.21C17.2706 18.41 16.1406 16.48 16.1406 14.82V9.16998C16.1406 7.50998 17.2706 5.59002 18.7206 4.78002L24.0606 1.82C25.4306 1.06 27.5706 1.06 28.9406 1.82L34.2806 4.78997C35.7306 5.58997 36.8606 7.51999 36.8606 9.17999V14.83C36.8606 16.49 35.7306 18.41 34.2806 19.22L28.9406 22.18C28.2506 22.56 27.3806 22.75 26.5006 22.75ZM26.5006 2.74999C25.8706 2.74999 25.2506 2.88 24.7906 3.13L19.4506 6.09997C18.4906 6.63997 17.6406 8.06999 17.6406 9.17999V14.83C17.6406 15.93 18.4906 17.37 19.4506 17.91L24.7906 20.88C25.7006 21.39 27.3006 21.39 28.2106 20.88L33.5506 17.91C34.5106 17.37 35.3606 15.94 35.3606 14.83V9.17999C35.3606 8.07999 34.5106 6.63997 33.5506 6.09997L28.2106 3.13C27.7506 2.88 27.1306 2.74999 26.5006 2.74999Z" fill={Colors[scheme].text} />
+                            <Path d="M31.5002 13.99C31.0902 13.99 30.7502 13.65 30.7502 13.24V10.0201L21.6302 4.76007C21.2702 4.55007 21.1502 4.09005 21.3602 3.74005C21.5702 3.38005 22.0202 3.26003 22.3802 3.47003L31.8702 8.95007C32.1002 9.08007 32.2502 9.33003 32.2502 9.60003V13.2601C32.2502 13.6501 31.9102 13.99 31.5002 13.99Z" fill={Colors[scheme].text} />
+                            <Path d="M4.056 36.144C3.496 36.144 2.976 36.04 2.496 35.832C2.016 35.616 1.608 35.324 1.272 34.956C0.936 34.588 0.688 34.164 0.528 33.684L1.728 33.18C1.944 33.732 2.26 34.156 2.676 34.452C3.092 34.748 3.572 34.896 4.116 34.896C4.436 34.896 4.716 34.848 4.956 34.752C5.196 34.648 5.38 34.504 5.508 34.32C5.644 34.136 5.712 33.924 5.712 33.684C5.712 33.356 5.62 33.096 5.436 32.904C5.252 32.712 4.98 32.56 4.62 32.448L2.94 31.92C2.268 31.712 1.756 31.396 1.404 30.972C1.052 30.54 0.876 30.036 0.876 29.46C0.876 28.956 1 28.516 1.248 28.14C1.496 27.756 1.836 27.456 2.268 27.24C2.708 27.024 3.208 26.916 3.768 26.916C4.304 26.916 4.792 27.012 5.232 27.204C5.672 27.388 6.048 27.644 6.36 27.972C6.68 28.3 6.912 28.68 7.056 29.112L5.88 29.628C5.704 29.156 5.428 28.792 5.052 28.536C4.684 28.28 4.256 28.152 3.768 28.152C3.472 28.152 3.212 28.204 2.988 28.308C2.764 28.404 2.588 28.548 2.46 28.74C2.34 28.924 2.28 29.14 2.28 29.388C2.28 29.676 2.372 29.932 2.556 30.156C2.74 30.38 3.02 30.548 3.396 30.66L4.956 31.152C5.668 31.368 6.204 31.68 6.564 32.088C6.924 32.488 7.104 32.988 7.104 33.588C7.104 34.084 6.972 34.524 6.708 34.908C6.452 35.292 6.096 35.596 5.64 35.82C5.184 36.036 4.656 36.144 4.056 36.144ZM8.62153 36V26.916H9.97753V30.78L9.76153 30.612C9.92153 30.204 10.1775 29.896 10.5295 29.688C10.8815 29.472 11.2895 29.364 11.7535 29.364C12.2335 29.364 12.6575 29.468 13.0255 29.676C13.3935 29.884 13.6815 30.172 13.8895 30.54C14.0975 30.908 14.2015 31.328 14.2015 31.8V36H12.8575V32.172C12.8575 31.844 12.7935 31.568 12.6655 31.344C12.5455 31.112 12.3775 30.936 12.1615 30.816C11.9455 30.688 11.6975 30.624 11.4175 30.624C11.1455 30.624 10.8975 30.688 10.6735 30.816C10.4575 30.936 10.2855 31.112 10.1575 31.344C10.0375 31.576 9.97753 31.852 9.97753 32.172V36H8.62153ZM15.7128 36V29.508H17.0688V36H15.7128ZM15.7128 28.62V27.06H17.0688V28.62H15.7128ZM18.7142 38.4V29.508H20.0102V30.852L19.8542 30.54C20.0942 30.172 20.4142 29.884 20.8142 29.676C21.2142 29.468 21.6702 29.364 22.1822 29.364C22.7982 29.364 23.3502 29.512 23.8382 29.808C24.3342 30.104 24.7222 30.508 25.0022 31.02C25.2902 31.532 25.4342 32.108 25.4342 32.748C25.4342 33.388 25.2902 33.964 25.0022 34.476C24.7222 34.988 24.3382 35.396 23.8502 35.7C23.3622 35.996 22.8062 36.144 22.1822 36.144C21.6782 36.144 21.2182 36.04 20.8022 35.832C20.3942 35.624 20.0782 35.324 19.8542 34.932L20.0702 34.68V38.4H18.7142ZM22.0502 34.884C22.4342 34.884 22.7742 34.792 23.0702 34.608C23.3662 34.424 23.5982 34.172 23.7662 33.852C23.9422 33.524 24.0302 33.156 24.0302 32.748C24.0302 32.34 23.9422 31.976 23.7662 31.656C23.5982 31.336 23.3662 31.084 23.0702 30.9C22.7742 30.716 22.4342 30.624 22.0502 30.624C21.6742 30.624 21.3342 30.716 21.0302 30.9C20.7342 31.084 20.4982 31.336 20.3222 31.656C20.1542 31.976 20.0702 32.34 20.0702 32.748C20.0702 33.156 20.1542 33.524 20.3222 33.852C20.4982 34.172 20.7342 34.424 21.0302 34.608C21.3342 34.792 21.6742 34.884 22.0502 34.884ZM26.8132 38.4V29.508H28.1092V30.852L27.9532 30.54C28.1932 30.172 28.5132 29.884 28.9132 29.676C29.3132 29.468 29.7692 29.364 30.2812 29.364C30.8972 29.364 31.4492 29.512 31.9373 29.808C32.4332 30.104 32.8212 30.508 33.1013 31.02C33.3893 31.532 33.5333 32.108 33.5333 32.748C33.5333 33.388 33.3893 33.964 33.1013 34.476C32.8212 34.988 32.4372 35.396 31.9492 35.7C31.4613 35.996 30.9053 36.144 30.2812 36.144C29.7773 36.144 29.3173 36.04 28.9012 35.832C28.4932 35.624 28.1772 35.324 27.9532 34.932L28.1692 34.68V38.4H26.8132ZM30.1492 34.884C30.5332 34.884 30.8733 34.792 31.1693 34.608C31.4653 34.424 31.6973 34.172 31.8652 33.852C32.0412 33.524 32.1292 33.156 32.1292 32.748C32.1292 32.34 32.0412 31.976 31.8652 31.656C31.6973 31.336 31.4653 31.084 31.1693 30.9C30.8733 30.716 30.5332 30.624 30.1492 30.624C29.7732 30.624 29.4332 30.716 29.1292 30.9C28.8332 31.084 28.5972 31.336 28.4212 31.656C28.2532 31.976 28.1692 32.34 28.1692 32.748C28.1692 33.156 28.2532 33.524 28.4212 33.852C28.5972 34.172 28.8332 34.424 29.1292 34.608C29.4332 34.792 29.7732 34.884 30.1492 34.884ZM34.9123 36V29.508H36.2683V36H34.9123ZM34.9123 28.62V27.06H36.2683V28.62H34.9123ZM37.9137 36V29.508H39.2097V30.78L39.0537 30.612C39.2137 30.204 39.4697 29.896 39.8217 29.688C40.1737 29.472 40.5817 29.364 41.0457 29.364C41.5257 29.364 41.9497 29.468 42.3177 29.676C42.6857 29.884 42.9737 30.172 43.1817 30.54C43.3897 30.908 43.4937 31.332 43.4937 31.812V36H42.1497V32.172C42.1497 31.844 42.0897 31.568 41.9697 31.344C41.8497 31.112 41.6777 30.936 41.4537 30.816C41.2377 30.688 40.9897 30.624 40.7097 30.624C40.4297 30.624 40.1777 30.688 39.9537 30.816C39.7377 30.936 39.5697 31.112 39.4497 31.344C39.3297 31.576 39.2697 31.852 39.2697 32.172V36H37.9137ZM48.137 38.64C47.665 38.64 47.229 38.564 46.829 38.412C46.429 38.26 46.085 38.048 45.797 37.776C45.509 37.512 45.293 37.2 45.149 36.84L46.397 36.324C46.509 36.628 46.713 36.88 47.009 37.08C47.313 37.28 47.685 37.38 48.125 37.38C48.469 37.38 48.777 37.312 49.049 37.176C49.321 37.048 49.537 36.856 49.697 36.6C49.857 36.352 49.937 36.052 49.937 35.7V34.236L50.177 34.512C49.953 34.928 49.641 35.244 49.241 35.46C48.849 35.676 48.405 35.784 47.909 35.784C47.309 35.784 46.769 35.644 46.289 35.364C45.809 35.084 45.429 34.7 45.149 34.212C44.877 33.724 44.741 33.176 44.741 32.568C44.741 31.952 44.877 31.404 45.149 30.924C45.429 30.444 45.805 30.064 46.277 29.784C46.749 29.504 47.289 29.364 47.897 29.364C48.393 29.364 48.833 29.472 49.217 29.688C49.609 29.896 49.929 30.2 50.177 30.6L49.997 30.936V29.508H51.281V35.7C51.281 36.26 51.145 36.76 50.873 37.2C50.609 37.648 50.241 38 49.769 38.256C49.297 38.512 48.753 38.64 48.137 38.64ZM48.065 34.524C48.425 34.524 48.745 34.44 49.025 34.272C49.305 34.096 49.525 33.864 49.685 33.576C49.853 33.28 49.937 32.948 49.937 32.58C49.937 32.212 49.853 31.88 49.685 31.584C49.517 31.288 49.293 31.056 49.013 30.888C48.733 30.712 48.417 30.624 48.065 30.624C47.697 30.624 47.369 30.712 47.081 30.888C46.793 31.056 46.565 31.288 46.397 31.584C46.237 31.872 46.157 32.204 46.157 32.58C46.157 32.94 46.237 33.268 46.397 33.564C46.565 33.86 46.793 34.096 47.081 34.272C47.369 34.44 47.697 34.524 48.065 34.524Z" fill={Colors[scheme].text} />
+                            <Path d="M62 19.5H110" stroke={Colors[scheme].icon} />
+                            <Path d="M155 10.75H135C134.59 10.75 134.25 10.41 134.25 10C134.25 9.59 134.59 9.25 135 9.25H155C155.41 9.25 155.75 9.59 155.75 10C155.75 10.41 155.41 10.75 155 10.75Z" fill={Colors[scheme].icon} />
+                            <Path d="M144.55 21.2498H139.44C135.46 21.2498 134.24 20.0498 134.24 16.1098V7.88977C134.24 4.73977 134.91 2.98977 138.48 2.77977C138.78 2.76977 139.1 2.75977 139.44 2.75977H150.55C154.53 2.75977 155.75 3.95976 155.75 7.89977V12.3098C155.75 12.7198 155.41 13.0598 155 13.0598C154.59 13.0598 154.25 12.7198 154.25 12.3098V7.89977C154.25 4.80977 153.7 4.25977 150.55 4.25977H139.44C139.12 4.25977 138.83 4.26977 138.55 4.27977C136.38 4.40977 135.74 4.89977 135.74 7.89977V16.1198C135.74 19.2098 136.29 19.7598 139.44 19.7598H144.55C144.96 19.7598 145.3 20.0998 145.3 20.5098C145.3 20.9198 144.97 21.2498 144.55 21.2498Z" fill={Colors[scheme].icon} />
+                            <Path d="M143 16.75H139C138.59 16.75 138.25 16.41 138.25 16C138.25 15.59 138.59 15.25 139 15.25H143C143.41 15.25 143.75 15.59 143.75 16C143.75 16.41 143.41 16.75 143 16.75Z" fill={Colors[scheme].icon} />
+                            <Path d="M151 22.75C149.34 22.75 147.78 21.87 146.94 20.44C146.49 19.72 146.25 18.87 146.25 18C146.25 15.38 148.38 13.25 151 13.25C153.62 13.25 155.75 15.38 155.75 18C155.75 18.87 155.51 19.72 155.06 20.45C154.22 21.87 152.66 22.75 151 22.75ZM151 14.75C149.21 14.75 147.75 16.21 147.75 18C147.75 18.59 147.91 19.17 148.22 19.67C148.8 20.65 149.87 21.25 151 21.25C152.13 21.25 153.2 20.65 153.78 19.68C154.09 19.17 154.25 18.6 154.25 18C154.25 16.21 152.79 14.75 151 14.75Z" fill={Colors[scheme].icon} />
+                            <Path d="M150.43 19.7401C150.24 19.7401 150.05 19.6701 149.9 19.5201L148.91 18.5301C148.62 18.2401 148.62 17.7601 148.91 17.4701C149.2 17.1801 149.68 17.1801 149.97 17.4701L150.45 17.9501L152.05 16.4701C152.35 16.1901 152.83 16.2101 153.11 16.5101C153.39 16.8101 153.37 17.2901 153.07 17.5701L150.94 19.54C150.79 19.67 150.61 19.7401 150.43 19.7401Z" fill={Colors[scheme].icon} />
+                            <Path d="M119.924 36V27.06H123.176C123.776 27.06 124.304 27.172 124.76 27.396C125.224 27.612 125.584 27.932 125.84 28.356C126.096 28.772 126.224 29.272 126.224 29.856C126.224 30.432 126.092 30.928 125.828 31.344C125.572 31.76 125.216 32.08 124.76 32.304C124.304 32.528 123.776 32.64 123.176 32.64H121.34V36H119.924ZM121.34 31.38H123.212C123.532 31.38 123.812 31.316 124.052 31.188C124.292 31.06 124.48 30.884 124.616 30.66C124.752 30.428 124.82 30.156 124.82 29.844C124.82 29.532 124.752 29.264 124.616 29.04C124.48 28.808 124.292 28.632 124.052 28.512C123.812 28.384 123.532 28.32 123.212 28.32H121.34V31.38ZM129.132 36.144C128.692 36.144 128.304 36.068 127.968 35.916C127.64 35.756 127.384 35.54 127.2 35.268C127.016 34.988 126.924 34.66 126.924 34.284C126.924 33.932 127 33.616 127.152 33.336C127.312 33.056 127.556 32.82 127.884 32.628C128.212 32.436 128.624 32.3 129.12 32.22L131.376 31.848V32.916L129.384 33.264C129.024 33.328 128.76 33.444 128.592 33.612C128.424 33.772 128.34 33.98 128.34 34.236C128.34 34.484 128.432 34.688 128.616 34.848C128.808 35 129.052 35.076 129.348 35.076C129.716 35.076 130.036 34.996 130.308 34.836C130.588 34.676 130.804 34.464 130.956 34.2C131.108 33.928 131.184 33.628 131.184 33.3V31.632C131.184 31.312 131.064 31.052 130.824 30.852C130.592 30.644 130.28 30.54 129.888 30.54C129.528 30.54 129.212 30.636 128.94 30.828C128.676 31.012 128.48 31.252 128.352 31.548L127.224 30.984C127.344 30.664 127.54 30.384 127.812 30.144C128.084 29.896 128.4 29.704 128.76 29.568C129.128 29.432 129.516 29.364 129.924 29.364C130.436 29.364 130.888 29.46 131.28 29.652C131.68 29.844 131.988 30.112 132.204 30.456C132.428 30.792 132.54 31.184 132.54 31.632V36H131.244V34.824L131.52 34.86C131.368 35.124 131.172 35.352 130.932 35.544C130.7 35.736 130.432 35.884 130.128 35.988C129.832 36.092 129.5 36.144 129.132 36.144ZM134.761 38.64C134.601 38.64 134.441 38.624 134.281 38.592C134.129 38.568 133.989 38.528 133.861 38.472V37.308C133.957 37.332 134.073 37.352 134.209 37.368C134.345 37.392 134.477 37.404 134.605 37.404C134.981 37.404 135.257 37.32 135.433 37.152C135.617 36.992 135.781 36.744 135.925 36.408L136.357 35.424L136.333 36.564L133.525 29.508H134.977L137.053 34.92H136.561L138.625 29.508H140.089L137.221 36.708C137.069 37.092 136.877 37.428 136.645 37.716C136.421 38.012 136.153 38.24 135.841 38.4C135.537 38.56 135.177 38.64 134.761 38.64ZM141.077 36V29.508H142.373V30.912L142.205 30.696C142.341 30.256 142.589 29.924 142.949 29.7C143.309 29.476 143.721 29.364 144.185 29.364C144.705 29.364 145.165 29.504 145.565 29.784C145.973 30.056 146.245 30.42 146.381 30.876L145.997 30.912C146.189 30.392 146.481 30.004 146.873 29.748C147.273 29.492 147.729 29.364 148.241 29.364C148.689 29.364 149.093 29.468 149.453 29.676C149.821 29.884 150.113 30.172 150.329 30.54C150.545 30.908 150.653 31.328 150.653 31.8V36H149.297V32.172C149.297 31.844 149.237 31.568 149.117 31.344C149.005 31.112 148.845 30.936 148.637 30.816C148.437 30.688 148.201 30.624 147.929 30.624C147.657 30.624 147.417 30.688 147.209 30.816C147.001 30.936 146.837 31.112 146.717 31.344C146.597 31.576 146.537 31.852 146.537 32.172V36H145.193V32.172C145.193 31.844 145.133 31.568 145.013 31.344C144.901 31.112 144.741 30.936 144.533 30.816C144.333 30.688 144.093 30.624 143.813 30.624C143.541 30.624 143.301 30.688 143.093 30.816C142.885 30.936 142.721 31.112 142.601 31.344C142.489 31.576 142.433 31.852 142.433 32.172V36H141.077ZM155.213 36.144C154.565 36.144 153.989 35.996 153.485 35.7C152.989 35.396 152.601 34.988 152.321 34.476C152.041 33.956 151.901 33.376 151.901 32.736C151.901 32.08 152.041 31.5 152.321 30.996C152.609 30.492 152.993 30.096 153.473 29.808C153.953 29.512 154.497 29.364 155.105 29.364C155.593 29.364 156.029 29.448 156.413 29.616C156.797 29.784 157.121 30.016 157.385 30.312C157.649 30.6 157.849 30.932 157.985 31.308C158.129 31.684 158.201 32.084 158.201 32.508C158.201 32.612 158.197 32.72 158.189 32.832C158.181 32.944 158.165 33.048 158.141 33.144H152.969V32.064H157.373L156.725 32.556C156.805 32.164 156.777 31.816 156.641 31.512C156.513 31.2 156.313 30.956 156.041 30.78C155.777 30.596 155.465 30.504 155.105 30.504C154.745 30.504 154.425 30.596 154.145 30.78C153.865 30.956 153.649 31.212 153.497 31.548C153.345 31.876 153.285 32.276 153.317 32.748C153.277 33.188 153.337 33.572 153.497 33.9C153.665 34.228 153.897 34.484 154.193 34.668C154.497 34.852 154.841 34.944 155.225 34.944C155.617 34.944 155.949 34.856 156.221 34.68C156.501 34.504 156.721 34.276 156.881 33.996L157.985 34.536C157.857 34.84 157.657 35.116 157.385 35.364C157.121 35.604 156.801 35.796 156.425 35.94C156.057 36.076 155.653 36.144 155.213 36.144ZM159.584 36V29.508H160.88V30.78L160.724 30.612C160.884 30.204 161.14 29.896 161.492 29.688C161.844 29.472 162.252 29.364 162.716 29.364C163.196 29.364 163.62 29.468 163.988 29.676C164.356 29.884 164.644 30.172 164.852 30.54C165.06 30.908 165.164 31.332 165.164 31.812V36H163.82V32.172C163.82 31.844 163.76 31.568 163.64 31.344C163.52 31.112 163.348 30.936 163.124 30.816C162.908 30.688 162.66 30.624 162.38 30.624C162.1 30.624 161.848 30.688 161.624 30.816C161.408 30.936 161.24 31.112 161.12 31.344C161 31.576 160.94 31.852 160.94 32.172V36H159.584ZM169.483 36.072C168.803 36.072 168.275 35.88 167.899 35.496C167.523 35.112 167.335 34.572 167.335 33.876V30.732H166.195V29.508H166.375C166.679 29.508 166.915 29.42 167.083 29.244C167.251 29.068 167.335 28.828 167.335 28.524V28.02H168.691V29.508H170.167V30.732H168.691V33.816C168.691 34.04 168.727 34.232 168.799 34.392C168.871 34.544 168.987 34.664 169.147 34.752C169.307 34.832 169.515 34.872 169.771 34.872C169.835 34.872 169.907 34.868 169.987 34.86C170.067 34.852 170.143 34.844 170.215 34.836V36C170.103 36.016 169.979 36.032 169.843 36.048C169.707 36.064 169.587 36.072 169.483 36.072Z" fill={Colors[scheme].icon} />
+                            <Path d="M180 19.5H228" stroke={Colors[scheme].icon} />
+                            <Path d="M257.31 16.9501C257.12 16.9501 256.93 16.8801 256.78 16.7301L255.28 15.2301C254.99 14.9401 254.99 14.4601 255.28 14.1701C255.57 13.8801 256.05 13.8801 256.34 14.1701L257.31 15.1401L260.78 11.6701C261.07 11.3801 261.55 11.3801 261.84 11.6701C262.13 11.9601 262.13 12.4401 261.84 12.7301L257.84 16.7301C257.7 16.8801 257.5 16.9501 257.31 16.9501Z" fill={Colors[scheme].icon} />
+                            <Path d="M260.5 6.75H256.5C255.54 6.75 253.75 6.75 253.75 4C253.75 1.25 255.54 1.25 256.5 1.25H260.5C261.46 1.25 263.25 1.25 263.25 4C263.25 4.96 263.25 6.75 260.5 6.75ZM256.5 2.75C255.51 2.75 255.25 2.75 255.25 4C255.25 5.25 255.51 5.25 256.5 5.25H260.5C261.75 5.25 261.75 4.99 261.75 4C261.75 2.75 261.49 2.75 260.5 2.75H256.5Z" fill={Colors[scheme].icon} />
+                            <Path d="M261.5 22.7499H255.5C249.88 22.7499 248.75 20.1699 248.75 15.9999V9.99993C248.75 5.43993 250.4 3.48993 254.46 3.27993C254.87 3.25993 255.23 3.56993 255.25 3.98993C255.27 4.40993 254.95 4.74993 254.54 4.76993C251.7 4.92993 250.25 5.77993 250.25 9.99993V15.9999C250.25 19.6999 250.98 21.2499 255.5 21.2499H261.5C266.02 21.2499 266.75 19.6999 266.75 15.9999V9.99993C266.75 5.77993 265.3 4.92993 262.46 4.76993C262.05 4.74993 261.73 4.38993 261.75 3.97993C261.77 3.56993 262.12 3.24993 262.54 3.26993C266.6 3.48993 268.25 5.43993 268.25 9.98993V15.9899C268.25 20.1699 267.12 22.7499 261.5 22.7499Z" fill={Colors[scheme].icon} />
+                            <Path d="M237.924 36V27.06H241.176C241.776 27.06 242.304 27.172 242.76 27.396C243.216 27.612 243.572 27.932 243.828 28.356C244.092 28.772 244.224 29.272 244.224 29.856C244.224 30.472 244.068 31 243.756 31.44C243.452 31.88 243.04 32.2 242.52 32.4L244.584 36H242.976L240.78 32.1L241.704 32.64H239.34V36H237.924ZM239.34 31.38H241.2C241.528 31.38 241.812 31.316 242.052 31.188C242.292 31.06 242.476 30.884 242.604 30.66C242.74 30.428 242.808 30.156 242.808 29.844C242.808 29.532 242.74 29.264 242.604 29.04C242.476 28.808 242.292 28.632 242.052 28.512C241.812 28.384 241.528 28.32 241.2 28.32H239.34V31.38ZM248.388 36.144C247.74 36.144 247.164 35.996 246.66 35.7C246.164 35.396 245.776 34.988 245.496 34.476C245.216 33.956 245.076 33.376 245.076 32.736C245.076 32.08 245.216 31.5 245.496 30.996C245.784 30.492 246.168 30.096 246.648 29.808C247.128 29.512 247.672 29.364 248.28 29.364C248.768 29.364 249.204 29.448 249.588 29.616C249.972 29.784 250.296 30.016 250.56 30.312C250.824 30.6 251.024 30.932 251.16 31.308C251.304 31.684 251.376 32.084 251.376 32.508C251.376 32.612 251.372 32.72 251.364 32.832C251.356 32.944 251.34 33.048 251.316 33.144H246.144V32.064H250.548L249.9 32.556C249.98 32.164 249.952 31.816 249.816 31.512C249.688 31.2 249.488 30.956 249.216 30.78C248.952 30.596 248.64 30.504 248.28 30.504C247.92 30.504 247.6 30.596 247.32 30.78C247.04 30.956 246.824 31.212 246.672 31.548C246.52 31.876 246.46 32.276 246.492 32.748C246.452 33.188 246.512 33.572 246.672 33.9C246.84 34.228 247.072 34.484 247.368 34.668C247.672 34.852 248.016 34.944 248.4 34.944C248.792 34.944 249.124 34.856 249.396 34.68C249.676 34.504 249.896 34.276 250.056 33.996L251.16 34.536C251.032 34.84 250.832 35.116 250.56 35.364C250.296 35.604 249.976 35.796 249.6 35.94C249.232 36.076 248.828 36.144 248.388 36.144ZM254.526 36L251.982 29.508H253.458L255.414 34.8H254.874L256.83 29.508H258.318L255.762 36H254.526ZM259.3 36V29.508H260.656V36H259.3ZM259.3 28.62V27.06H260.656V28.62H259.3ZM265.35 36.144C264.702 36.144 264.126 35.996 263.622 35.7C263.126 35.396 262.738 34.988 262.458 34.476C262.178 33.956 262.038 33.376 262.038 32.736C262.038 32.08 262.178 31.5 262.458 30.996C262.746 30.492 263.13 30.096 263.61 29.808C264.09 29.512 264.634 29.364 265.242 29.364C265.73 29.364 266.166 29.448 266.55 29.616C266.934 29.784 267.258 30.016 267.522 30.312C267.786 30.6 267.986 30.932 268.122 31.308C268.266 31.684 268.338 32.084 268.338 32.508C268.338 32.612 268.334 32.72 268.326 32.832C268.318 32.944 268.302 33.048 268.278 33.144H263.106V32.064H267.51L266.862 32.556C266.942 32.164 266.914 31.816 266.778 31.512C266.65 31.2 266.45 30.956 266.178 30.78C265.914 30.596 265.602 30.504 265.242 30.504C264.882 30.504 264.562 30.596 264.282 30.78C264.002 30.956 263.786 31.212 263.634 31.548C263.482 31.876 263.422 32.276 263.454 32.748C263.414 33.188 263.474 33.572 263.634 33.9C263.802 34.228 264.034 34.484 264.33 34.668C264.634 34.852 264.978 34.944 265.362 34.944C265.754 34.944 266.086 34.856 266.358 34.68C266.638 34.504 266.858 34.276 267.018 33.996L268.122 34.536C267.994 34.84 267.794 35.116 267.522 35.364C267.258 35.604 266.938 35.796 266.562 35.94C266.194 36.076 265.79 36.144 265.35 36.144ZM271.293 36L269.061 29.508H270.501L272.205 34.68H271.701L273.441 29.508H274.677L276.405 34.68H275.901L277.617 29.508H279.057L276.813 36H275.589L273.837 30.708H274.281L272.529 36H271.293Z" fill={Colors[scheme].icon} />
+                        </Svg>
+
+                    </ThemedView>
+                    <ThemedView style={styles.content}>
+                        <ThemedView style={styles.fieldGroup}>
+                            <ThemedText>Full Name *</ThemedText>
+                            <TextInput
+                                style={[
+                                    styles.input,
+                                    { color: Colors[scheme].text, borderColor: isFullNameFocused ? Colors[scheme].tint : Colors[scheme].border },
+                                ]}
+                                value={fullName}
+                                onChangeText={setFullName}
+                                placeholder="Enter your full name"
+                                placeholderTextColor={Colors[scheme].icon}
+                                keyboardType="default"
+                                autoCapitalize="words"
+                                onFocus={() => setIsFullNameFocused(true)}
+                                onBlur={() => setIsFullNameFocused(false)}
+                            />
+                        </ThemedView>
+
+                        <ThemedView style={styles.fieldGroup}>
+                            <ThemedText>Phone Number *</ThemedText>
+                            <TextInput
+                                style={[
+                                    styles.input,
+                                    { color: Colors[scheme].text, borderColor: isPhoneFocused ? Colors[scheme].tint : Colors[scheme].border },
+                                ]}
+                                value={phone}
+                                onChangeText={setPhone}
+                                placeholder="Enter your phone number"
+                                placeholderTextColor={Colors[scheme].icon}
+                                keyboardType="default"
+                                autoCapitalize="words"
+                                onFocus={() => setIsPhoneFocused(true)}
+                                onBlur={() => setIsPhoneFocused(false)}
+                            />
+                        </ThemedView>
+
+                        <ThemedView style={styles.fieldGroup}>
+                            {renderDropdown(
+                                'Country *',
+                                selectedCountry,
+                                () => setIsCountryMenuOpen((v) => !v),
+                                isCountryMenuOpen,
+                                countries,
+                                (option) => {
+                                    setSelectedCountry(option);
+                                    setIsProvinceMenuOpen(false);
+                                    setIsDistrictMenuOpen(false);
+                                    if (option !== 'Vietnam') {
+                                        setAddressData([]);
+                                        setAddressError(null);
+                                        setSelectedProvince('');
+                                        setSelectedDistrict('');
+                                    } else if (!addressData.length) {
+                                        loadAddresses();
+                                    }
+                                },
+                                'Select country',
+                                false,
+                                'No countries available',
+                            )}
+                        </ThemedView>
+
+                        <ThemedView style={styles.fieldGroup}>
+                            {renderDropdown(
+                                'Province / City *',
+                                selectedProvince,
+                                () => setIsProvinceMenuOpen((v) => !v),
+                                isProvinceMenuOpen,
+                                provinceOptions,
+                                (option) => {
+                                    setSelectedProvince(option);
+                                    setSelectedDistrict('');
+                                    setIsDistrictMenuOpen(false);
+                                },
+                                provincePlaceholder,
+                                isProvinceDisabled,
+                                addressError ?? 'No provinces available',
+                            )}
+                            {isLoadingAddresses && (
+                                <View style={{ marginTop: 8 }}>
+                                    <ActivityIndicator color={Colors[scheme].tint} />
+                                </View>
+                            )}
+                            {addressError && (
+                                <ThemedView style={{ marginTop: 8, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                                    <ThemedText style={[styles.errorText, { color: Colors[scheme].tint }]}>
+                                        {addressError}
+                                    </ThemedText>
+                                    <Pressable onPress={loadAddresses} style={{ paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: Colors[scheme].tint, borderRadius: 6 }}>
+                                        <ThemedText style={{ color: Colors[scheme].tint }}>Retry</ThemedText>
+                                    </Pressable>
+                                </ThemedView>
+                            )}
+                        </ThemedView>
+
+                        <ThemedView style={styles.fieldGroup}>
+                            {renderDropdown(
+                                'District *',
+                                selectedDistrict,
+                                () => setIsDistrictMenuOpen((v) => !v),
+                                isDistrictMenuOpen,
+                                districtOptions,
+                                (option) => setSelectedDistrict(option),
+                                districtPlaceholder,
+                                isDistrictDisabled,
+                                selectedProvince ? 'No districts available' : 'Select province first',
+                            )}
+                        </ThemedView>
+
+                        <ThemedView style={styles.fieldGroup}>
+                            <ThemedText>Detailed Address *</ThemedText>
+                            <TextInput
+                                style={[
+                                    styles.input,
+                                    { color: Colors[scheme].text, borderColor: isDetailedFocused ? Colors[scheme].tint : Colors[scheme].border },
+                                ]}
+                                value={detailedAddress}
+                                onChangeText={setDetailedAddress}
+                                placeholder="Street, building, house number"
+                                placeholderTextColor={Colors[scheme].icon}
+                                keyboardType="default"
+                                autoCapitalize="sentences"
+                                onFocus={() => setIsDetailedFocused(true)}
+                                onBlur={() => setIsDetailedFocused(false)}
+                            />
+                        </ThemedView>
+                    </ThemedView>
+                    <FullButton text='Continue' onPress={() => { router.push('/checkout/payment') }} style={{ marginTop: 20, flex: 1 }} />
+                </ScrollView>
+            </KeyboardAvoidingView>
+
+        </ThemedView >
+    );
+};
+
+export default CheckoutScreen;
+
+const styles = StyleSheet.create({
+    container: { height: '100%', width: '100%', padding: 15, paddingTop: 50, position: 'relative' },
+    headerContainer: { width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+    leftHeader: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
+    statusBar: { width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
+    content: { flex: 1 },
+    fieldGroup: { marginTop: 16 },
+    errorText: { marginTop: 8, fontSize: 13 },
+    input: { fontSize: 16, borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 15, marginTop: 8 },
+    dropdownGroup: { marginTop: 8 },
+    dropdownContainer: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 15, marginTop: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    dropdownList: { marginTop: 8, borderWidth: 1, borderRadius: 12, overflow: 'hidden' },
+    dropdownItem: { paddingHorizontal: 12, paddingVertical: 12 },
+    keyboardAvoid: { flex: 1, justifyContent: 'flex-end', },
+});
