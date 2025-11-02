@@ -26,6 +26,9 @@ const MAPPING: IconMapping = {
   'search.fill': 'search',
   'close': 'close',
   'filter': 'filter-list',
+  'star': 'star',
+  'star-half': 'star-half',
+  'star-border': 'star-border',
 
   // custom icons are registered through ICON_REGISTRY, not in this mapping.
 } as IconMapping;

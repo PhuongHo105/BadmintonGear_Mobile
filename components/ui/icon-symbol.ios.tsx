@@ -17,6 +17,9 @@ const MAPPING: IconMapping = {
   'search.fill': 'search',
   'close': 'close',
   'filter': 'filter-list',
+  'star': 'star',
+  'star-half': 'star-half',
+  'star-border': 'star-border',
 };
 
 export function IconSymbol({
