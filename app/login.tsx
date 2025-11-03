@@ -5,6 +5,8 @@ import BorderButton from '@/components/ui/borderbutton';
 import FullButton from '@/components/ui/fullbutton';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { login } from '@/services/authenticationService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { ColorSchemeName, Image, ImageSourcePropType, Pressable, StyleSheet, TextInput } from 'react-native';
@@ -22,8 +24,31 @@ const LoginScreen: React.FC = () => {
     const [password, setPassword] = React.useState<string>('');
     const [isEmailFocused, setIsEmailFocused] = React.useState(false);
     const [isPasswordFocused, setIsPasswordFocused] = React.useState(false);
-    const handleLogin = (email: string, password: string) => {
-        router.push('/');
+    const [error, setError] = React.useState<string | null>(null);
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
+    const handleLogin = async (email: string, password: string) => {
+        setError(null);
+        if (!email.trim() || !password.trim()) {
+            setError('Email and password are required.');
+            return;
+        }
+        try {
+            setIsLoading(true);
+            const response = await login(email, password);
+            const token = (response as any)?.token;
+            const ok = token || (response as any)?.message === 'Login successfully';
+            if (ok && token) {
+                await AsyncStorage.setItem('loginToken', token);
+                await AsyncStorage.setItem('password', password);
+                router.push('/');
+            } else {
+                setError('Username or password is incorrect. Please try again.');
+            }
+        } catch {
+            setError('Login failed. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return (
@@ -52,7 +77,7 @@ const LoginScreen: React.FC = () => {
 
                 <ThemedView>
                     <ThemedView style={styles.fieldGroup}>
-                        <ThemedText>Email *</ThemedText>
+                        <ThemedText>Email or Username *</ThemedText>
                         <TextInput
                             style={[
                                 styles.input,
@@ -63,7 +88,7 @@ const LoginScreen: React.FC = () => {
                             ]}
                             value={email}
                             onChangeText={setEmail}
-                            placeholder="Enter your email"
+                            placeholder="Enter your email or username"
                             placeholderTextColor={Colors[scheme].secondaryText}
                             keyboardType="email-address"
                             autoCapitalize="none"
@@ -89,6 +114,11 @@ const LoginScreen: React.FC = () => {
                             ]}
                         />
                     </ThemedView>
+                    {error && (
+                        <ThemedText type="default" style={{ color: 'red', marginTop: 8 }}>
+                            {error}
+                        </ThemedText>
+                    )}
 
                     <ThemedView style={styles.forgotPasswordRow}>
                         <Pressable onPress={() => router.push('/forgotPassword')}>
@@ -98,7 +128,7 @@ const LoginScreen: React.FC = () => {
                         </Pressable>
                     </ThemedView>
                     <ThemedView style={{ marginTop: 32 }}>
-                        <FullButton text='Login' onPress={() => { handleLogin(email, password) }} />
+                        <FullButton text={isLoading ? 'Logging in…' : 'Login'} onPress={() => { if (!isLoading) handleLogin(email, password) }} />
                         <BorderButton
                             text='Login with Google'
                             onPress={() => { }}
@@ -192,3 +222,5 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     }
 });
+
+// Removed jwtDecode stub (not used in React Native login flow)
