@@ -10,7 +10,7 @@ import { ThemedView } from '../themed-view'
 type Product = {
     id: string | number
     name: string
-    image: any
+    Imagesproducts: { url: string }[]
     price: number
     discount?: number
 }
@@ -31,12 +31,15 @@ export default function ProductCard({ product }: Props) {
     const horizontalPadding = 15 * 2; // container padding left + right from screen layout
     const gap = 16; // desired gap between columns
     const cardWidth = Math.floor((windowWidth - horizontalPadding - gap) / 2);
+    const imageUrl = product?.Imagesproducts?.[0]?.url
+        ? product.Imagesproducts[0].url
+        : "@/assets/images/unimage.png";
 
     return (
         <Pressable key={product.id} onPress={() => router.push(`/product/${product.id}` as any)} style={[styles.card, { width: cardWidth, borderColor: borderColor }]}>
             <ThemedView style={styles.inner}>
                 <ThemedView style={styles.imageWrapper}>
-                    <Image source={product.image} style={styles.image} />
+                    <Image source={imageUrl ? { uri: imageUrl } : undefined} style={styles.image} />
                     {typeof product.discount === 'number' && product.discount > 0 ? (
                         <ThemedView style={[styles.badge, { backgroundColor: tint }]}>
                             <ThemedText style={{ color: '#fff', fontSize: 12 }}>{`-${product.discount}%`}</ThemedText>

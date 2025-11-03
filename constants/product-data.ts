@@ -6,12 +6,12 @@ export type Product = {
   price: number;
   discount?: number;
   image: ImageSourcePropType;
-  category?: number;
+  categoriesid?: number;
   brand?: string;
 };
 
 export type ProductFilters = {
-  category?: number;
+  categoriesid?: number;
   searchQuery?: string;
   brand?: string;
   minPrice?: number;
@@ -25,7 +25,7 @@ export const PRODUCT_DATA: Product[] = [
     price: 3200000,
     discount: 20,
     image: require("../assets/images/product1.png"),
-    category: 1,
+    categoriesid: 1,
     brand: "Yonex",
   },
   {
@@ -34,7 +34,7 @@ export const PRODUCT_DATA: Product[] = [
     price: 2900000,
     discount: 10,
     image: require("../assets/images/product1.png"),
-    category: 1,
+    categoriesid: 1,
     brand: "Lining",
   },
   {
@@ -42,7 +42,7 @@ export const PRODUCT_DATA: Product[] = [
     name: "Giày Victor P9200",
     price: 2100000,
     image: require("../assets/images/product1.png"),
-    category: 3,
+    categoriesid: 3,
     brand: "Victor",
   },
   {
@@ -51,7 +51,7 @@ export const PRODUCT_DATA: Product[] = [
     price: 850000,
     discount: 15,
     image: require("../assets/images/product1.png"),
-    category: 4,
+    categoriesid: 4,
     brand: "Yonex",
   },
   {
@@ -59,7 +59,7 @@ export const PRODUCT_DATA: Product[] = [
     name: "Balo Adidas Barricade",
     price: 950000,
     image: require("../assets/images/product1.png"),
-    category: 5,
+    categoriesid: 5,
     brand: "Adidas",
   },
 ];
@@ -75,11 +75,12 @@ export const PRICE_RANGE = (() => {
 })();
 
 export const CATEGORY_LABEL_MAP: Record<number, string> = {
-  1: "Vợt",
-  2: "Cầu lông",
-  3: "Giày",
-  4: "Trang phục",
-  5: "Balo",
+  1: "Racket",
+  2: "Shoes",
+  3: "Clothes",
+  4: "Bags",
+  5: "Shuttlecocks",
+  6: "Others",
 };
 
 export const CATEGORY_OPTIONS: { label: string; value?: number }[] = [
@@ -92,7 +93,7 @@ export const CATEGORY_OPTIONS: { label: string; value?: number }[] = [
 ];
 
 export const BRAND_OPTIONS: { label: string; value?: string }[] = [
-  { label: "Tất cả", value: undefined },
+  { label: "All", value: undefined },
   { label: "Yonex", value: "Yonex" },
   { label: "Lining", value: "Lining" },
   { label: "Victor", value: "Victor" },

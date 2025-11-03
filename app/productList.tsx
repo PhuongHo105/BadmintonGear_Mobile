@@ -7,17 +7,15 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import ProductCard from '@/components/ui/productcard';
 import Slider from '@/components/ui/slider';
 import {
-    BRAND_OPTIONS,
     CATEGORY_LABEL_MAP,
     CATEGORY_OPTIONS,
-    PRICE_RANGE,
     PRICE_STEP,
-    PRODUCT_DATA,
     type ProductFilters,
-    formatPrice,
+    formatPrice
 } from '@/constants/product-data';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { http } from '@/services/http';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
@@ -34,22 +32,35 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
     const params = useLocalSearchParams<ProductListRouteParams>();
     const [searchMode, setSearchMode] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [productList, setProductList] = useState<any[]>([]);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const productsResponse = await http.get('/products');
+                setProductList(productsResponse);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     const normalizeParam = (value?: string | string[]) => (Array.isArray(value) ? value[0] : value);
 
     const routeFilters = useMemo<ProductFilters>(() => {
         const next: ProductFilters = {};
 
-        const category = normalizeParam(params.category);
+        const categoriesid = normalizeParam(params.categoriesid);
         const brand = normalizeParam(params.brand);
         const searchQuery = normalizeParam(params.searchQuery);
         const minPrice = normalizeParam(params.minPrice);
         const maxPrice = normalizeParam(params.maxPrice);
 
-        if (category !== undefined) {
-            const parsedCategory = Number(category);
+        if (categoriesid !== undefined) {
+            const parsedCategory = Number(categoriesid);
             if (!Number.isNaN(parsedCategory)) {
-                next.category = parsedCategory;
+                next.categoriesid = parsedCategory;
             }
         }
         if (brand) {
@@ -72,7 +83,7 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
         }
 
         return next;
-    }, [params.brand, params.category, params.maxPrice, params.minPrice, params.searchQuery]);
+    }, [params.brand, params.categoriesid, params.maxPrice, params.minPrice, params.searchQuery]);
 
     const mergedFilters = useMemo<ProductFilters>(() => {
         return { ...routeFilters, ...(filters ?? {}) };
@@ -80,33 +91,63 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
 
     const [draftFilters, setDraftFilters] = useState<ProductFilters>(() => mergedFilters);
     const [appliedFilters, setAppliedFilters] = useState<ProductFilters>(() => mergedFilters);
+
+    const computedRange = useMemo(() => {
+        const prices = productList
+            .map((p) => Number(p?.price))
+            .filter((n) => Number.isFinite(n));
+        if (prices.length === 0) return { min: 0, max: PRICE_STEP * 20 };
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        const roundedMin = Math.floor(minPrice / PRICE_STEP) * PRICE_STEP;
+        const roundedMax = Math.ceil(maxPrice / PRICE_STEP) * PRICE_STEP;
+        return { min: roundedMin, max: Math.max(roundedMax, roundedMin + PRICE_STEP) };
+    }, [productList]);
+
+    const brandOptions = useMemo(() => {
+        const set = new Set<string>();
+        for (const p of productList) {
+            const b = (p?.brand ?? '').toString().trim();
+            if (b) set.add(b);
+        }
+        const brands = Array.from(set).sort((a, b) => a.localeCompare(b));
+        return [{ label: 'All', value: undefined as string | undefined }, ...brands.map((b) => ({ label: b, value: b }))];
+    }, [productList]);
+
     const [priceInputs, setPriceInputs] = useState<{ min: number; max: number }>(() => ({
-        min: mergedFilters.minPrice ?? PRICE_RANGE.min,
-        max: mergedFilters.maxPrice ?? PRICE_RANGE.max,
+        min: mergedFilters.minPrice ?? computedRange.min,
+        max: mergedFilters.maxPrice ?? computedRange.max,
     }));
 
     useEffect(() => {
         setDraftFilters(mergedFilters);
         setAppliedFilters(mergedFilters);
         setPriceInputs({
-            min: mergedFilters.minPrice ?? PRICE_RANGE.min,
-            max: mergedFilters.maxPrice ?? PRICE_RANGE.max,
+            min: mergedFilters.minPrice ?? computedRange.min,
+            max: mergedFilters.maxPrice ?? computedRange.max,
         });
     }, [mergedFilters]);
+
+    useEffect(() => {
+        setPriceInputs((prev) => ({
+            min: appliedFilters.minPrice ?? computedRange.min,
+            max: appliedFilters.maxPrice ?? computedRange.max,
+        }));
+    }, [computedRange.min, computedRange.max, appliedFilters.minPrice, appliedFilters.maxPrice]);
 
     const products = useMemo(() => {
         const query = appliedFilters.searchQuery?.trim().toLowerCase();
 
-        return PRODUCT_DATA.filter((product) => {
-            const matchesCategory = appliedFilters.category ? product.category === appliedFilters.category : true;
+        return productList.filter((product) => {
+            const matchesCategoriesId = appliedFilters.categoriesid ? product.categoriesid === appliedFilters.categoriesid : true;
             const matchesBrand = appliedFilters.brand ? product.brand === appliedFilters.brand : true;
             const matchesMinPrice = typeof appliedFilters.minPrice === 'number' ? product.price >= appliedFilters.minPrice : true;
             const matchesMaxPrice = typeof appliedFilters.maxPrice === 'number' ? product.price <= appliedFilters.maxPrice : true;
             const matchesQuery = query ? product.name.toLowerCase().includes(query) : true;
 
-            return matchesCategory && matchesBrand && matchesMinPrice && matchesMaxPrice && matchesQuery;
+            return matchesCategoriesId && matchesBrand && matchesMinPrice && matchesMaxPrice && matchesQuery;
         });
-    }, [appliedFilters]);
+    }, [appliedFilters, productList]);
 
     const title = useMemo(() => {
         const trimmedQuery = appliedFilters.searchQuery?.trim();
@@ -114,15 +155,15 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
             return trimmedQuery;
         }
 
-        if (typeof appliedFilters.category === 'number') {
-            const categoryLabel = CATEGORY_LABEL_MAP[appliedFilters.category];
+        if (typeof appliedFilters.categoriesid === 'number') {
+            const categoryLabel = CATEGORY_LABEL_MAP[appliedFilters.categoriesid];
             if (categoryLabel) {
                 return categoryLabel;
             }
         }
 
         return 'All';
-    }, [appliedFilters.category, appliedFilters.searchQuery]);
+    }, [appliedFilters.categoriesid, appliedFilters.searchQuery]);
 
     const handleSearchChange = (value: string) => {
         if (value.length === 0 || value.trim().length > 0) {
@@ -150,13 +191,13 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
         Keyboard.dismiss();
     };
 
-    const handleCategoryPress = (value?: number) => {
+    const handleCategoriesIdPress = (value?: number) => {
         setDraftFilters((prev) => {
             const next: ProductFilters = { ...prev };
-            if (value === undefined || prev.category === value) {
-                delete next.category;
+            if (value === undefined || prev.categoriesid === value) {
+                delete next.categoriesid;
             } else {
-                next.category = value;
+                next.categoriesid = value;
             }
             return next;
         });
@@ -177,13 +218,13 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
     const updatePriceDraft = (minValue: number, maxValue: number) => {
         setDraftFilters((prev) => {
             const next: ProductFilters = { ...prev };
-            if (minValue <= PRICE_RANGE.min) {
+            if (minValue <= computedRange.min) {
                 delete next.minPrice;
             } else {
                 next.minPrice = minValue;
             }
 
-            if (maxValue >= PRICE_RANGE.max) {
+            if (maxValue >= computedRange.max) {
                 delete next.maxPrice;
             } else {
                 next.maxPrice = maxValue;
@@ -225,7 +266,7 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
     const handleClearFilters = () => {
         setDraftFilters({});
         setAppliedFilters({});
-        setPriceInputs({ min: PRICE_RANGE.min, max: PRICE_RANGE.max });
+        setPriceInputs({ min: computedRange.min, max: computedRange.max });
         setIsModalVisible(false);
         setSearchMode(false);
         Keyboard.dismiss();
@@ -323,12 +364,12 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
                         <ThemedText type="defaultSemiBold" style={styles.sectionLabel}>
                             Category
                         </ThemedText>
-                        <ThemedView style={styles.chipGroup}>{renderChip<number>(CATEGORY_OPTIONS, draftFilters.category, handleCategoryPress)}</ThemedView>
+                        <ThemedView style={styles.chipGroup}>{renderChip<number>(CATEGORY_OPTIONS, draftFilters.categoriesid, handleCategoriesIdPress)}</ThemedView>
 
                         <ThemedText type="defaultSemiBold" style={styles.sectionLabel}>
                             Brand
                         </ThemedText>
-                        <ThemedView style={styles.chipGroup}>{renderChip<string>(BRAND_OPTIONS, draftFilters.brand, handleBrandPress)}</ThemedView>
+                        <ThemedView style={styles.chipGroup}>{renderChip<string>(brandOptions, draftFilters.brand, handleBrandPress)}</ThemedView>
 
                         <ThemedText type="defaultSemiBold" style={styles.sectionLabel}>
                             Price Range (VND)
@@ -342,8 +383,8 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
                                 <ThemedText>Min Price</ThemedText>
                                 <Slider
                                     style={styles.slider}
-                                    minimumValue={PRICE_RANGE.min}
-                                    maximumValue={PRICE_RANGE.max}
+                                    minimumValue={computedRange.min}
+                                    maximumValue={computedRange.max}
                                     value={priceInputs.min}
                                     step={PRICE_STEP}
                                     minimumTrackTintColor={palette.tint}
@@ -356,8 +397,8 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
                                 <ThemedText>Max Price</ThemedText>
                                 <Slider
                                     style={styles.slider}
-                                    minimumValue={PRICE_RANGE.min}
-                                    maximumValue={PRICE_RANGE.max}
+                                    minimumValue={computedRange.min}
+                                    maximumValue={computedRange.max}
                                     value={priceInputs.max}
                                     step={PRICE_STEP}
                                     minimumTrackTintColor={palette.border}
