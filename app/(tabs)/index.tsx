@@ -31,16 +31,16 @@ export default function HomeScreen() {
   const pushProductList = (params?: { category?: number }) => {
     const routeParams: Record<string, string> = {};
     if (params?.category !== undefined) {
-      routeParams.category = String(params.category);
+      routeParams.categoriesid = String(params.category);
     }
     router.push({ pathname: '/productList', params: routeParams });
   };
-  const [categories, setCategories] = React.useState<any[]>([{ id: '1', name: 'Racket', image: <RacketIcon width={48} height={48} />, filter: 1 },
+  const categories = [{ id: '1', name: 'Racket', image: <RacketIcon width={48} height={48} />, filter: 1 },
   { id: '2', name: 'Shoes', image: <ShoesIcon width={48} height={48} />, filter: 3 },
   { id: '3', name: 'Clothes', image: <ClothesIcon width={48} height={48} />, filter: 4 },
   { id: '4', name: 'Bags', image: <BagsIcon width={48} height={48} />, filter: 5 },
   { id: '5', name: 'Shuttlecock', image: <ShuttlecockIcon width={48} height={48} />, filter: 2 },
-  { id: '6', name: 'Others', image: <OtherIcon width={48} height={48} /> },]);
+  { id: '6', name: 'Others', image: <OtherIcon width={48} height={48} /> }];
   const [products, setProducts] = React.useState<any[]>([]);
 
   const handleSeeAllProductsPress = () => {
@@ -57,7 +57,6 @@ export default function HomeScreen() {
       try {
         const productsResponse = await http.get('/products');
         setProducts(productsResponse);
-        console.log('Fetched products:', productsResponse);
       } catch (error) {
         console.error('Error fetching data:', error);
       }

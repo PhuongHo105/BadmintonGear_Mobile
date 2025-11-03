@@ -126,7 +126,7 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
             min: mergedFilters.minPrice ?? computedRange.min,
             max: mergedFilters.maxPrice ?? computedRange.max,
         });
-    }, [mergedFilters]);
+    }, [mergedFilters, computedRange.min, computedRange.max]);
 
     useEffect(() => {
         setPriceInputs((prev) => ({

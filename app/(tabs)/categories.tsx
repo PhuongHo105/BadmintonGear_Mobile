@@ -39,7 +39,7 @@ export default function TabTwoScreen() {
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
         renderItem={({ item }) => (
-          <Pressable style={[styles.categoryItem, { borderColor: borderColor }]} onPress={() => { router.push({ pathname: '/productList', params: { category: item.id } }) }}>
+          <Pressable style={[styles.categoryItem, { borderColor: borderColor }]} onPress={() => { router.push({ pathname: '/productList', params: { categoriesid: item.id } }) }}>
             {React.isValidElement(item.image) ? (
               <View style={styles.categoryIcon}>{item.image}</View>
             ) : (
