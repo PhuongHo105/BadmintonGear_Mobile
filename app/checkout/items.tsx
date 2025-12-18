@@ -7,11 +7,13 @@ import GoBackButton from '@/components/ui/gobackbutton';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import React, { FC } from 'react';
+import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
 
 
 
 const CheckoutScreen: FC = () => {
+    const { t } = useTranslation();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const [isDeleteModalVisible, setIsDeleteModalVisible] = React.useState(false);
@@ -86,7 +88,7 @@ const CheckoutScreen: FC = () => {
             <ThemedView style={styles.headerContainer}>
                 <ThemedView style={styles.leftHeader}>
                     <GoBackButton />
-                    <ThemedText type="title" style={{ fontSize: 20 }}>Item</ThemedText>
+                    <ThemedText type="title" style={{ fontSize: 20 }}>{t('cart.checkouttitle')}</ThemedText>
                 </ThemedView>
             </ThemedView>
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -117,10 +119,10 @@ const CheckoutScreen: FC = () => {
                         onPress={() => setIsDeleteModalVisible(false)}
                     />
                     <ThemedView style={[styles.modalContent, { backgroundColor: Colors[scheme].modalBackground }]}>
-                        <ThemedText style={styles.modalTitle}>Delete</ThemedText>
-                        <ThemedText style={{ marginTop: 8 }}>Delete product from cart</ThemedText>
-                        <FullButton onPress={confirmDelete} text="Delete" />
-                        <BorderButton onPress={cancelDelete} text="Cancel" />
+                        <ThemedText style={styles.modalTitle}>{t('cart.shortdelete')}</ThemedText>
+                        <ThemedText style={{ marginTop: 8 }}>{t('cart.delete')}</ThemedText>
+                        <FullButton onPress={confirmDelete} text={t('cart.shortdelete')} />
+                        <BorderButton onPress={cancelDelete} text={t('common.cancel')} />
                     </ThemedView>
                 </KeyboardAvoidingView>
             </Modal>

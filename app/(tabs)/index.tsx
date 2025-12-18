@@ -16,8 +16,10 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { http } from '@/services/http';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const schemeRaw = useColorScheme();
   const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
@@ -35,12 +37,12 @@ export default function HomeScreen() {
     }
     router.push({ pathname: '/productList', params: routeParams });
   };
-  const categories = [{ id: '1', name: 'Racket', image: <RacketIcon width={48} height={48} />, filter: 1 },
-  { id: '2', name: 'Shoes', image: <ShoesIcon width={48} height={48} />, filter: 3 },
-  { id: '3', name: 'Clothes', image: <ClothesIcon width={48} height={48} />, filter: 4 },
-  { id: '4', name: 'Bags', image: <BagsIcon width={48} height={48} />, filter: 5 },
-  { id: '5', name: 'Shuttlecock', image: <ShuttlecockIcon width={48} height={48} />, filter: 2 },
-  { id: '6', name: 'Others', image: <OtherIcon width={48} height={48} /> }];
+  const categories = [{ id: '1', name: t('categories.rackets'), image: <RacketIcon width={48} height={48} />, filter: 1 },
+  { id: '2', name: t('categories.shoes'), image: <ShoesIcon width={48} height={48} />, filter: 3 },
+  { id: '3', name: t('categories.clothes'), image: <ClothesIcon width={48} height={48} />, filter: 4 },
+  { id: '4', name: t('categories.bags'), image: <BagsIcon width={48} height={48} />, filter: 5 },
+  { id: '5', name: t('categories.shuttlecocks'), image: <ShuttlecockIcon width={48} height={48} />, filter: 2 },
+  { id: '6', name: t('categories.other'), image: <OtherIcon width={48} height={48} /> }];
   const [products, setProducts] = React.useState<any[]>([]);
 
   const handleSeeAllProductsPress = () => {
@@ -75,9 +77,9 @@ export default function HomeScreen() {
           </ThemedView>
           <ThemedView>
             <ThemedView style={styles.headerSection}>
-              <ThemedText type="defaultSemiBold" style={{ fontSize: 20 }}>Category</ThemedText>
+              <ThemedText type="defaultSemiBold" style={{ fontSize: 20 }}>{t('home.category')}</ThemedText>
               <Pressable onPress={handleSeeAllCategoriesPress}>
-                <ThemedText type="link" style={{ color: tint }}>See All</ThemedText>
+                <ThemedText type="link" style={{ color: tint }}>{t('common.seeAll')}</ThemedText>
               </Pressable>
             </ThemedView>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
@@ -99,9 +101,24 @@ export default function HomeScreen() {
           </ThemedView>
           <ThemedView>
             <ThemedView style={styles.headerSection}>
-              <ThemedText type="defaultSemiBold" style={{ fontSize: 20 }}>Lastest Product</ThemedText>
+              <ThemedText type="defaultSemiBold" style={{ fontSize: 20 }}>{t('home.bestSelling')}</ThemedText>
               <Pressable onPress={handleSeeAllProductsPress}>
-                <ThemedText type="link" style={{ color: tint }}>See All</ThemedText>
+                <ThemedText type="link" style={{ color: tint }}>{t('common.seeAll')}</ThemedText>
+              </Pressable>
+            </ThemedView>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+              {products.map((product) =>
+              (<ThemedView key={product.id} style={{ marginRight: 12 }}>
+                <ProductCard key={product.id} product={product} />
+              </ThemedView>)
+              )}
+            </ScrollView>
+          </ThemedView>
+          <ThemedView>
+            <ThemedView style={styles.headerSection}>
+              <ThemedText type="defaultSemiBold" style={{ fontSize: 20 }}>{t('home.latestProducts')}</ThemedText>
+              <Pressable onPress={() => { handleSeeAllProductsPress() }}>
+                <ThemedText type="link" style={{ color: tint }}>{t('common.seeAll')}</ThemedText>
               </Pressable>
             </ThemedView>
             <ThemedView style={{ gap: 10, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>

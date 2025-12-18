@@ -6,6 +6,7 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useRouter } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ColorSchemeName,
     StyleSheet,
@@ -13,6 +14,7 @@ import {
 } from 'react-native';
 
 const ForgotPasswordScreen: React.FC = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const schemeRaw = useColorScheme() as ColorSchemeName | undefined | null;
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
@@ -24,7 +26,7 @@ const ForgotPasswordScreen: React.FC = () => {
             <ThemedView style={styles.headerContainer}>
                 <ThemedView style={styles.leftHeader}>
                     <GoBackButton />
-                    <ThemedText type="title" style={{ fontSize: 20 }}>Forgot password</ThemedText>
+                    <ThemedText type="title" style={{ fontSize: 20 }}>{t('forgotPassword.title')}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.rightHeader}>
                     <ThemedText type="default" style={{ fontSize: 16, color: Colors[scheme].text }}>01 / </ThemedText>
@@ -34,10 +36,10 @@ const ForgotPasswordScreen: React.FC = () => {
 
             <ThemedView style={styles.content}>
                 <ThemedText type="title" style={styles.heading}>
-                    Confirmation Email
+                    {t('forgotPassword.confirmEmail')}
                 </ThemedText>
                 <ThemedText style={[styles.subtitle, { color: Colors[scheme].secondaryText }]}>
-                    Enter your email address for verification.
+                    {t('forgotPassword.confirmDescription')}
                 </ThemedText>
 
                 <ThemedView style={styles.fieldGroup}>
@@ -52,7 +54,7 @@ const ForgotPasswordScreen: React.FC = () => {
                         ]}
                         value={email}
                         onChangeText={setEmail}
-                        placeholder="Enter your email"
+                        placeholder={t('forgotPassword.enterEmail')}
                         placeholderTextColor={Colors[scheme].secondaryText}
                         keyboardType="email-address"
                         autoCapitalize="none"
@@ -62,7 +64,7 @@ const ForgotPasswordScreen: React.FC = () => {
                 </ThemedView>
 
                 <ThemedView style={styles.buttonsContainer}>
-                    <FullButton text="Send" onPress={() => { router.push('/forgotPassword/emailVerification') }} />
+                    <FullButton text={t('forgotPassword.send')} onPress={() => { router.push('/forgotPassword/emailVerification') }} />
                 </ThemedView>
             </ThemedView>
         </ThemedView>

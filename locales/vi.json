@@ -1,0 +1,468 @@
+{
+    "common": {
+        "appName": "BadmintonGear",
+        "login": "Đăng nhập",
+        "signup": "Đăng ký",
+        "email": "Email hoặc Tên đăng nhập",
+        "password": "Mật khẩu",
+        "forgotPassword": "Quên mật khẩu?",
+        "loggingIn": "Đang đăng nhập…",
+        "loginWithGoogle": "Đăng nhập với Google",
+        "continue": "Tiếp tục",
+        "cancel": "Hủy",
+        "save": "Lưu",
+        "delete": "Xóa",
+        "edit": "Chỉnh sửa",
+        "confirm": "Xác nhận",
+        "back": "Quay lại",
+        "next": "Tiếp theo",
+        "finish": "Hoàn thành",
+        "loading": "Đang tải...",
+        "error": "Lỗi",
+        "success": "Thành công",
+        "skipForNow": "Bỏ qua",
+        "getStarted": "Bắt đầu",
+        "seeAll": "Xem tất cả",
+        "retry": "Thử lại",
+        "signupWithGoogle": "Đăng ký bằng Google",
+        "fullName": "Họ và tên"
+    },
+    "layout": {
+        "home": "Trang chủ",
+        "categories": "Danh mục",
+        "cart": "Giỏ hàng",
+        "profile": "Hồ sơ",
+        "wishlist": "Yêu thích"
+    },
+    "onboarding": {
+        "exploreProducts": "Khám phá đa dạng sản phẩm",
+        "description": "Khám phá đa dạng sản phẩm ngay trong tầm tay bạn. BadmintonGear cung cấp bộ sưu tập phong phú để đáp ứng nhu cầu của bạn.",
+        "unlockOffers": "Mở khóa ưu đãi và giảm giá độc quyền",
+        "offersDescription": "Truy cập các ưu đãi giới hạn thời gian và khuyến mãi đặc biệt chỉ dành cho khách hàng quý giá của chúng tôi.",
+        "safeAndSecurePayments": "Thanh toán an toàn và bảo mật",
+        "paymentsDescription": "BadmintonGear sử dụng mã hóa hàng đầu trong ngành và cổng thanh toán đáng tin cậy để bảo vệ thông tin tài chính của bạn."
+    },
+    "login": {
+        "title": "Đăng nhập",
+        "dontHaveAccount": "Chưa có tài khoản?",
+        "emailPlaceholder": "Nhập email hoặc tên đăng nhập",
+        "passwordPlaceholder": "Nhập mật khẩu",
+        "emailRequired": "Email và mật khẩu là bắt buộc.",
+        "loginFailed": "Đăng nhập thất bại. Vui lòng thử lại.",
+        "invalidCredentials": "Tên đăng nhập hoặc mật khẩu không đúng. Vui lòng thử lại.",
+        "termsText": "Bằng việc đăng nhập, bạn đồng ý với",
+        "termsOfService": "Điều khoản dịch vụ",
+        "and": "và",
+        "privacyPolicy": "Chính sách bảo mật"
+    },
+    "forgotPassword": {
+        "title": "Quên mật khẩu",
+        "confirmEmail": "Xác nhận Email",
+        "confirmDescription": "Nhập địa chỉ email của bạn để xác minh.",
+        "enterEmail": "Nhập email của bạn",
+        "send": "Gửi",
+        "emailVerification": "Mã xác minh",
+        "verificationDescription": "Nhập mã 6 chữ số được gửi đến địa chỉ email của bạn.",
+        "resendCode": "Gửi lại mã",
+        "verify": "Xác minh",
+        "codeRequired": "Vui lòng nhập đầy đủ mã xác minh.",
+        "invalidCode": "Mã xác minh không hợp lệ. Vui lòng thử lại.",
+        "invalidPassword": "Mật khẩu phải có ít nhất 8 ký tự và bao gồm ít nhất một chữ hoa, một chữ thường, một số và một ký tự đặc biệt.",
+        "matchError": "Mật khẩu không khớp. Vui lòng thử lại.",
+        "create": "Tạo mật khẩu mới",
+        "newPassword": "Mật khẩu mới",
+        "newPasswordDescription": "Nhập mật khẩu mới và ghi nhớ nó.",
+        "newPasswordPlaceholder": "Nhập mật khẩu mới của bạn",
+        "confirmNewPassword": "Xác nhận mật khẩu mới",
+        "confirmNewPasswordPlaceholder": "Xác nhận mật khẩu mới của bạn",
+        "successTitle": "Đặt lại mật khẩu thành công",
+        "passwordResetSuccess": "Chúc mừng! Mật khẩu của bạn đã được đặt thành công. Vui lòng tiếp tục đến màn hình đăng nhập để xác minh tài khoản của bạn."
+    },
+    "signup": {
+        "title": "Đăng ký",
+        "alreadyHaveAccount": "Đã có tài khoản?",
+        "createAccount": "Tạo tài khoản",
+        "fullNamePlaceholder": "Nhập họ và tên",
+        "emailPlaceholder": "Nhập email",
+        "passwordPlaceholder": "Nhập mật khẩu"
+    },
+    "home": {
+        "welcome": "Chào mừng",
+        "category": "Danh mục",
+        "bestSelling": "Bán chạy nhất",
+        "latestProducts": "Sản phẩm mới nhất"
+    },
+    "profile": {
+        "title": "Hồ sơ",
+        "editProfile": "Chỉnh sửa hồ sơ",
+        "personalInformation": "Thông tin cá nhân",
+        "shippingAddress": "Địa chỉ giao hàng",
+        "changePassword": "Đổi mật khẩu",
+        "darkTheme": "Giao diện tối",
+        "supportInformation": "Hỗ trợ & Thông tin",
+        "privacyPolicy": "Chính sách bảo mật",
+        "termsAndConditions": "Điều khoản & Điều kiện",
+        "faqs": "Câu hỏi thường gặp",
+        "chatbot": "Trợ lý ảo",
+        "orderHistory": "Lịch sử đơn hàng",
+        "settings": "Cài đặt",
+        "language": "Ngôn ngữ",
+        "theme": "Giao diện",
+        "logout": "Đăng xuất"
+    },
+    "cart": {
+        "title": "Giỏ hàng của tôi",
+        "empty": "Giỏ hàng của bạn đang trống",
+        "explore": "Khám phá sản phẩm",
+        "orderInfo": "Thông tin đơn hàng",
+        "subtotal": "Tạm tính",
+        "shippingCost": "Phí vận chuyển",
+        "discount": "Giảm giá",
+        "voucherCode": "Mã giảm giá",
+        "total": "Tổng cộng",
+        "checkout": "Thanh toán",
+        "enterVoucherCode": "Nhập mã giảm giá",
+        "apply": "Áp dụng",
+        "delete": "Xóa sản phẩm khỏi giỏ hàng",
+        "deleteProductFromCart": "Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng không?",
+        "checkouttitle": "Vật phẩm",
+        "shortdelete": "Xóa"
+    },
+    "categories": {
+        "title": "Danh mục",
+        "rackets": "Vợt",
+        "shoes": "Giày",
+        "clothes": "Quần áo",
+        "shuttlecocks": "Cầu lông",
+        "bags": "Túi",
+        "other": "Khác"
+    },
+    "wishlist": {
+        "title": "Danh sách yêu thích của tôi",
+        "empty": "Danh sách yêu thích của bạn đang trống",
+        "emptyDescription": "Nhấn nút trái tim để bắt đầu lưu các mục yêu thích của bạn.",
+        "explore": "Khám phá sản phẩm",
+        "addToCart": "Thêm vào giỏ hàng",
+        "delete": "Xóa sản phẩm khỏi danh sách yêu thích",
+        "deleteProductFromWishlist": "Bạn có chắc chắn muốn xóa sản phẩm này khỏi danh sách yêu thích không?"
+    },
+    "chat": {
+        "title": "Trò chuyện",
+        "typeMessage": "Nhập tin nhắn...",
+        "startConversation": "Bắt đầu cuộc trò chuyện với người bán",
+        "chatWithSeller": "Trò chuyện với người bán"
+    },
+    "faqs": {
+        "title": "FAQs",
+        "question1": "Tôi có thể hủy đơn hàng không?",
+        "answer1": "Có, chỉ khi đơn hàng chưa được gửi đi. Bạn có thể liên hệ với bộ phận chăm sóc khách hàng của chúng tôi để hủy đơn hàng.",
+        "question2": "Tôi có nhận được sản phẩm giống như trong ảnh không?",
+        "answer2": "Màu sắc sản phẩm thực tế có thể khác với hình ảnh hiển thị. Mỗi màn hình hoặc thiết bị di động có khả năng hiển thị màu sắc khác nhau, và mỗi người có thể nhìn thấy màu sắc khác nhau. Ngoài ra, điều kiện ánh sáng khi chụp ảnh cũng có thể ảnh hưởng đến màu sắc của hình ảnh.",
+        "question3": "Làm thế nào để khôi phục mật khẩu đã quên?",
+        "answer3": "Nếu bạn quên mật khẩu, bạn có thể khôi phục từ phần \"Đăng nhập - Quên mật khẩu?\". Bạn sẽ nhận được email với liên kết để nhập và xác nhận mật khẩu mới.",
+        "question4": "Thông tin cá nhân của tôi có được bảo mật không?",
+        "answer4": "Thông tin cá nhân của bạn được bảo mật. Chúng tôi không cho thuê, bán, trao đổi hoặc giao dịch địa chỉ email. Khi bạn đặt hàng với chúng tôi, chúng tôi thu thập tên, địa chỉ, số điện thoại, thông tin thẻ tín dụng và địa chỉ email của bạn. Chúng tôi sử dụng thông tin này để thực hiện đơn hàng và liên lạc với bạn về đơn hàng của bạn. Tất cả thông tin của bạn được giữ bí mật và sẽ không được tiết lộ cho bất kỳ ai trừ khi được yêu cầu bởi các cơ quan chính phủ.",
+        "question5": "Tôi có thể sử dụng phương thức thanh toán nào để mua hàng?",
+        "answer5": "Chúng tôi cung cấp các phương thức thanh toán sau: PayPal, VNPay và Mã giảm giá, nếu có.",
+        "more": "Đối với bất kỳ thắc mắc nào, bạn có thể truy cập trang web của chúng tôi để",
+        "help": "Trung tâm trợ giúp",
+        "at": "tại BadmintonGear.com"
+    },
+    "feedback": {
+        "title": "Phản hồi",
+        "yourRating": "Đánh giá của bạn:",
+        "yourComment": "Bình luận của bạn:",
+        "commentDescription": "Hãy chia sẻ cảm nhận của bạn...",
+        "submit": "Gửi",
+        "thankYou": "Cảm ơn bạn đã phản hồi!",
+        "alertTitleMissingRating": "Thiếu thông tin",
+        "pleaseSelectRating": "Vui lòng chọn số sao đánh giá."
+    },
+    "orders": {
+        "title": "Lịch sử đơn hàng",
+        "ongoing": "Đang xử lý",
+        "completed": "Đã hoàn thành",
+        "noOngoing": "Không có đơn hàng đang xử lý",
+        "onDescription": " Hiện tại bạn không có đơn hàng nào đang được xử lý. Hãy khám phá sản phẩm và đặt hàng mới.",
+        "explore": "Khám phá sản phẩm",
+        "noCompleted": "Không có đơn hàng đã hoàn thành.",
+        "compDescription": "Bạn không có đơn hàng đã hoàn thành trong quá khứ. Hãy bắt đầu mua sắm ngay bây giờ và tạo đơn hàng đầu tiên với chúng tôi.",
+        "buyAgain": "Mua lại",
+        "rate": "Đánh giá",
+        "cancel": "Hủy",
+        "products": "sản phẩm",
+        "total": "Tổng cộng",
+        "cancelOrderTitle": "Hủy đơn hàng",
+        "cancelOrderMessage": "Bạn có chắc chắn muốn hủy đơn hàng này không?",
+        "confirmCancel": "Có, hủy đơn hàng"
+    },
+    "product": {
+        "reviews": "đánh giá",
+        "review": "đánh giá",
+        "readMore": "Xem thêm",
+        "showMore": "Xem thêm",
+        "showLess": "Thu gọn",
+        "quantity": "Số lượng",
+        "brand": "Thương hiệu",
+        "addToCart": "Thêm vào giỏ",
+        "buyNow": "Mua ngay",
+        "productId": "Mã sản phẩm",
+        "topRated": "Đánh giá cao",
+        "freeShipping": "Miễn phí vận chuyển",
+        "relatedProducts": "Sản phẩm liên quan",
+        "Reviews": "Đánh giá"
+    },
+    "order": {
+        "orderDetail": "Chi tiết đơn hàng",
+        "item": "Sản phẩm",
+        "shippingAddress": "Địa chỉ giao hàng",
+        "fullName": "Họ và tên",
+        "phoneNumber": "Số điện thoại",
+        "country": "Quốc gia",
+        "city": "Thành phố",
+        "district": "Quận/Huyện",
+        "streetAddress": "Địa chỉ",
+        "orderInformation": "Thông tin đơn hàng",
+        "subtotal": "Tạm tính",
+        "shippingCost": "Phí vận chuyển",
+        "discount": "Giảm giá",
+        "total": "Tổng cộng",
+        "buyAgain": "Mua lại",
+        "rate": "Đánh giá",
+        "cancel": "Hủy",
+        "orderId": "Mã đơn hàng"
+    },
+    "changePassword": {
+        "title": "Đổi mật khẩu",
+        "currentPassword": "Mật khẩu hiện tại",
+        "currentPasswordDescription": "Nhập mật khẩu hiện tại của bạn để đổi mật khẩu.",
+        "enterCurrentPassword": "Nhập mật khẩu hiện tại của bạn",
+        "invalidCurrentPassword": "Mật khẩu hiện tại không đúng. Vui lòng thử lại.",
+        "fillAll": "Vui lòng điền đầy đủ tất cả các trường."
+    },
+    "privacy": {
+        "title": "Chính sách quyền riêng tư",
+        "intro": "Tại BadmintonGear, chúng tôi cam kết bảo vệ quyền riêng tư và bảo mật thông tin cá nhân của người dùng. Chính sách quyền riêng tư này mô tả cách chúng tôi thu thập, sử dụng, chia sẻ và bảo vệ thông tin được thu thập thông qua ứng dụng thương mại điện tử của chúng tôi. Khi sử dụng BadmintonGear, bạn đồng ý với các thực tiễn được mô tả trong chính sách này.",
+        "section1": {
+            "title": "1. Thu thập thông tin:",
+            "item1": " - Thông tin cá nhân: Chúng tôi có thể thu thập các thông tin cá nhân như tên, địa chỉ, email và số điện thoại khi bạn tạo tài khoản, thực hiện mua hàng hoặc tương tác với dịch vụ của chúng tôi.",
+            "item2": " - Thông tin giao dịch: Chúng tôi thu thập thông tin liên quan đến các giao dịch mua của bạn, bao gồm lịch sử đơn hàng, phương thức thanh toán và thông tin giao hàng.",
+            "item3": " - Dữ liệu sử dụng: Chúng tôi có thể thu thập dữ liệu về cách bạn tương tác với ứng dụng, chẳng hạn như hành vi duyệt, tìm kiếm và các tùy chọn cá nhân."
+        },
+        "section2": {
+            "title": "2. Sử dụng thông tin:",
+            "item1": " - Cung cấp dịch vụ: Thông tin thu thập được sử dụng để xử lý đơn hàng, giao sản phẩm và hỗ trợ khách hàng.",
+            "item2": " - Cá nhân hóa: Chúng tôi có thể sử dụng thông tin của bạn để cá nhân hóa trải nghiệm mua sắm, đề xuất sản phẩm và hiển thị nội dung phù hợp.",
+            "item3": " - Liên lạc: Chúng tôi có thể sử dụng thông tin liên hệ của bạn để gửi các thông báo quan trọng, ưu đãi hoặc bản tin. Bạn có thể từ chối nhận các thông tin này bất kỳ lúc nào."
+        },
+        "section3": {
+            "title": "3. Chia sẻ thông tin:",
+            "item1": " - Đối tác dịch vụ bên thứ ba: Chúng tôi có thể chia sẻ thông tin của bạn với các đối tác đáng tin cậy để hỗ trợ vận hành ứng dụng, xử lý đơn hàng và cải thiện dịch vụ.",
+            "item2": " - Tuân thủ pháp luật: Chúng tôi có thể tiết lộ thông tin cá nhân khi được yêu cầu bởi pháp luật hoặc theo yêu cầu hợp pháp từ cơ quan có thẩm quyền."
+        },
+        "section4": {
+            "title": "4. Bảo mật dữ liệu:",
+            "item1": " - Chúng tôi áp dụng các biện pháp bảo mật phù hợp để bảo vệ thông tin của bạn khỏi truy cập trái phép, thay đổi, tiết lộ hoặc phá hủy.",
+            "item2": " - Tuy nhiên, không có phương thức truyền tải dữ liệu hoặc lưu trữ điện tử nào an toàn tuyệt đối. Chúng tôi không thể đảm bảo an toàn tuyệt đối cho thông tin của bạn."
+        },
+        "section5": {
+            "title": "5. Quyền của người dùng:",
+            "item1": " - Truy cập và cập nhật: Bạn có quyền truy cập, chỉnh sửa hoặc cập nhật thông tin cá nhân được lưu trữ trong ứng dụng.",
+            "item2": " - Lưu trữ dữ liệu: Chúng tôi lưu trữ thông tin cá nhân của bạn trong thời gian cần thiết để cung cấp dịch vụ và tuân thủ các nghĩa vụ pháp lý."
+        },
+        "section6": {
+            "title": "6. Quyền riêng tư của trẻ em:",
+            "item1": " - BadmintonGear không dành cho trẻ em dưới 13 tuổi. Chúng tôi không cố ý thu thập hoặc yêu cầu thông tin cá nhân từ trẻ em."
+        },
+        "section7": {
+            "title": "7. Cập nhật chính sách quyền riêng tư:",
+            "item1": " - Chúng tôi có quyền cập nhật Chính sách quyền riêng tư này theo thời gian. Mọi thay đổi sẽ được đăng tải trên ứng dụng và có hiệu lực ngay khi được công bố."
+        },
+        "outro": "Nếu bạn có bất kỳ câu hỏi hoặc thắc mắc nào liên quan đến Chính sách quyền riêng tư, vui lòng liên hệ bộ phận hỗ trợ khách hàng. Khi sử dụng BadmintonGear, bạn xác nhận rằng mình đã đọc, hiểu và đồng ý với các điều khoản của chính sách này."
+    },
+    "products": {
+        "all": "Tất cả",
+        "search": "Tìm kiếm",
+        "empty": "Không có sản phẩm nào",
+        "category": "Danh mục",
+        "brand": "Thương hiệu",
+        "priceRange": "Khoảng giá (VND)",
+        "minPrice": "Giá thấp nhất",
+        "maxPrice": "Giá cao nhất"
+    },
+    "search": {
+        "all": "Tất cả",
+        "search": "Tìm kiếm...",
+        "category": "Danh mục",
+        "brand": "Thương hiệu",
+        "priceRange": "Khoảng giá (VND)",
+        "min": "Tối thiểu",
+        "max": "Tối đa",
+        "minPrice": "Giá thấp nhất",
+        "maxPrice": "Giá cao nhất",
+        "apply": "Áp dụng"
+    },
+    "shippingAddress": {
+        "title": "Địa chỉ giao hàng",
+        "fields": {
+            "fullName": "Họ và tên",
+            "phone": "Số điện thoại",
+            "country": "Quốc gia",
+            "province": "Tỉnh / Thành phố",
+            "district": "Quận / Huyện",
+            "detailedAddress": "Địa chỉ chi tiết"
+        },
+        "placeholders": {
+            "fullName": "Nhập họ và tên",
+            "phone": "Nhập số điện thoại",
+            "country": "Chọn quốc gia",
+            "selectCountryFirst": "Vui lòng chọn quốc gia trước",
+            "selectProvince": "Chọn tỉnh / thành phố",
+            "selectProvinceFirst": "Chọn tỉnh / thành phố trước",
+            "selectDistrict": "Chọn quận / huyện",
+            "loadingProvinces": "Đang tải danh sách tỉnh/thành...",
+            "loadingDistricts": "Đang tải danh sách quận/huyện...",
+            "detailedAddress": "Số nhà, đường, toà nhà..."
+        },
+        "dropdown": {
+            "selectOption": "Chọn một mục",
+            "noOptions": "Không có lựa chọn",
+            "noCountries": "Không có quốc gia",
+            "noProvinces": "Không có tỉnh/thành",
+            "noDistricts": "Không có quận/huyện"
+        },
+        "validation": {
+            "fullNameRequired": "Vui lòng nhập họ và tên.",
+            "phoneRequired": "Vui lòng nhập số điện thoại.",
+            "detailedAddressRequired": "Vui lòng nhập địa chỉ chi tiết.",
+            "provinceDistrictRequired": "Vui lòng chọn tỉnh/thành và quận/huyện."
+        },
+        "errors": {
+            "loadAddress": "Không thể tải địa chỉ. Kiểm tra kết nối và thử lại."
+        }
+    },
+    "terms": {
+        "title": "Điều khoản và Điều kiện",
+        "intro": "Chào mừng bạn đến với BadmintonGear! Các Điều khoản và Điều kiện (\"Điều khoản\") này quy định việc bạn sử dụng ứng dụng thương mại điện tử của chúng tôi. Khi truy cập hoặc sử dụng BadmintonGear, bạn đồng ý bị ràng buộc bởi các Điều khoản này. Vui lòng đọc kỹ trước khi tiếp tục.",
+        "section1": {
+            "title": "1. Đăng ký tài khoản:",
+            "bullet1": " - Bạn cần tạo tài khoản để sử dụng một số tính năng của BadmintonGear.",
+            "bullet2": " - Bạn chịu trách nhiệm cung cấp thông tin chính xác và cập nhật trong quá trình đăng ký.",
+            "bullet3": " - Bạn cần bảo mật thông tin đăng nhập và thông báo ngay cho chúng tôi nếu phát hiện truy cập trái phép."
+        },
+        "section2": {
+            "title": "2. Thông tin sản phẩm và giá:",
+            "bullet1": " - BadmintonGear cố gắng cung cấp mô tả, hình ảnh và giá sản phẩm chính xác.",
+            "bullet2": " - Chúng tôi có quyền thay đổi thông tin sản phẩm và giá mà không cần báo trước.",
+            "bullet3": " - Nếu có lỗi, chúng tôi có thể hủy hoặc từ chối đơn hàng đặt cho sản phẩm có giá hiển thị sai."
+        },
+        "section3": {
+            "title": "3. Đặt hàng và xử lý đơn:",
+            "bullet1": " - Khi đặt hàng trên BadmintonGear, bạn đồng ý mua sản phẩm đã chọn theo giá được niêm yết.",
+            "bullet2": " - Chúng tôi có quyền chấp nhận hoặc từ chối đơn hàng; đồng thời có thể hủy đơn do hết hàng, sai giá hoặc nghi ngờ gian lận.",
+            "bullet3": " - Sau khi xác nhận đơn, chúng tôi sẽ nỗ lực hợp lý để giao hàng đúng thời gian."
+        },
+        "section4": {
+            "title": "4. Thanh toán:",
+            "bullet1": " - BadmintonGear hỗ trợ nhiều phương thức thanh toán, bao gồm thẻ tín dụng/ghi nợ và các nền tảng thanh toán trực tuyến.",
+            "bullet2": " - Khi cung cấp thông tin thanh toán, bạn xác nhận rằng bạn có quyền sử dụng phương thức thanh toán đó.",
+            "bullet3": " - Mọi thanh toán có thể cần được xác minh và phê duyệt bởi các tổ chức tài chính liên quan."
+        },
+        "section5": {
+            "title": "5. Vận chuyển và giao hàng:",
+            "bullet1": " - BadmintonGear sẽ nỗ lực hợp lý để giao hàng đúng thời gian.",
+            "bullet2": " - Thời gian vận chuyển có thể thay đổi do các yếu tố ngoài tầm kiểm soát như địa điểm, thời tiết, hoặc chậm trễ từ đơn vị vận chuyển.",
+            "bullet3": " - Rủi ro mất mát hoặc hư hỏng sẽ chuyển sang bạn khi hàng được giao."
+        },
+        "section6": {
+            "title": "6. Đổi trả và hoàn tiền:",
+            "bullet1": " - Chính sách đổi trả/hoàn tiền của BadmintonGear được quy định riêng và áp dụng cho quy trình đổi trả hoặc yêu cầu hoàn tiền.",
+            "bullet2": " - Một số sản phẩm có thể không được đổi trả hoặc có điều kiện áp dụng."
+        },
+        "section7": {
+            "title": "7. Sở hữu trí tuệ:",
+            "bullet1": " - BadmintonGear và nội dung của ứng dụng (logo, thương hiệu, văn bản, hình ảnh, phần mềm...) được bảo vệ bởi quyền sở hữu trí tuệ.",
+            "bullet2": " - Bạn không được sử dụng, sao chép, chỉnh sửa, phân phối hoặc hiển thị bất kỳ phần nào của BadmintonGear khi chưa có sự đồng ý bằng văn bản."
+        },
+        "section8": {
+            "title": "8. Hành vi người dùng:",
+            "bullet1": " - Bạn đồng ý sử dụng BadmintonGear tuân thủ pháp luật và quy định hiện hành.",
+            "bullet2": " - Bạn không được thực hiện hành vi gây gián đoạn hoạt động của ứng dụng hoặc xâm phạm quyền lợi của người khác.",
+            "bullet3": " - Mọi hành vi truy cập trái phép hoặc cố gắng truy cập khu vực hạn chế/tài khoản người dùng đều bị nghiêm cấm."
+        },
+        "section9": {
+            "title": "9. Giới hạn trách nhiệm:",
+            "bullet1": " - BadmintonGear và các bên liên quan không chịu trách nhiệm cho thiệt hại trực tiếp/gián tiếp/phát sinh/hệ quả do việc sử dụng hoặc không thể sử dụng ứng dụng hay sản phẩm mua qua ứng dụng.",
+            "bullet2": " - Chúng tôi không đảm bảo tính chính xác, đầy đủ hoặc độ tin cậy tuyệt đối của thông tin trên BadmintonGear."
+        },
+        "section10": {
+            "title": "10. Luật áp dụng:",
+            "bullet1": " - Các Điều khoản này được điều chỉnh và giải thích theo pháp luật của [Khu vực tài phán].",
+            "bullet2": " - Mọi tranh chấp liên quan sẽ được giải quyết tại tòa án có thẩm quyền của [Khu vực tài phán]."
+        },
+        "footer": "Nếu bạn có bất kỳ câu hỏi hoặc thắc mắc nào về các Điều khoản và Điều kiện này, vui lòng liên hệ bộ phận hỗ trợ khách hàng. Khi sử dụng BadmintonGear, bạn xác nhận rằng bạn đã đọc, hiểu và đồng ý với các Điều khoản và Điều kiện này."
+    },
+    "checkout": {
+        "title": "Thanh toán",
+        "fields": {
+            "fullName": "Họ và tên",
+            "phone": "Số điện thoại",
+            "country": "Quốc gia",
+            "province": "Tỉnh/Thành phố",
+            "district": "Quận/Huyện",
+            "detailedAddress": "Địa chỉ chi tiết"
+        },
+        "placeholders": {
+            "fullName": "Nhập họ và tên",
+            "phone": "Nhập số điện thoại",
+            "country": "Chọn quốc gia",
+            "selectCountryFirst": "Chọn quốc gia trước",
+            "selectProvince": "Chọn tỉnh/thành phố",
+            "selectProvinceFirst": "Chọn tỉnh/thành phố trước",
+            "selectDistrict": "Chọn quận/huyện",
+            "loadingProvinces": "Đang tải tỉnh/thành phố...",
+            "loadingDistricts": "Đang tải quận/huyện...",
+            "detailedAddress": "Đường, toà nhà, số nhà"
+        },
+        "dropdown": {
+            "selectOption": "Chọn một mục",
+            "noOptions": "Không có lựa chọn",
+            "noCountries": "Không có quốc gia",
+            "noProvinces": "Không có tỉnh/thành phố",
+            "noDistricts": "Không có quận/huyện"
+        },
+        "errors": {
+            "loadAddress": "Không thể tải địa chỉ. Kiểm tra kết nối và thử lại."
+        }
+    },
+    "checkoutResult": {
+        "title": "Đơn hàng của bạn đã được đặt thành công",
+        "subtitle": "Cảm ơn bạn đã lựa chọn chúng tôi! Hãy tiếp tục mua sắm và khám phá nhiều sản phẩm đa dạng. Chúc bạn mua sắm vui vẻ!",
+        "continueShopping": "Tiếp tục mua sắm"
+    },
+    "checkoutPayment": {
+        "title": "Thanh toán"
+    },
+    "checkoutReview": {
+        "title": "Thanh toán",
+        "item": "Sản phẩm",
+        "shippingAddressTitle": "Địa chỉ giao hàng",
+        "orderInformationTitle": "Thông tin đơn hàng",
+        "fields": {
+            "fullName": "Họ và tên",
+            "phoneNumber": "Số điện thoại",
+            "country": "Quốc gia",
+            "city": "Tỉnh/Thành phố",
+            "district": "Quận/Huyện",
+            "streetAddress": "Địa chỉ"
+        },
+        "summary": {
+            "subtotal": "Tạm tính",
+            "shippingCost": "Phí vận chuyển",
+            "discount": "Giảm giá",
+            "discountValue": "{{value}} %",
+            "total": "Tổng cộng"
+        },
+        "placeOrder": "Đặt hàng"
+    }
+}

@@ -7,10 +7,12 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useRouter } from 'expo-router';
 import React, { FC, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 
 const ChangePassword02Screen: FC = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
@@ -31,11 +33,11 @@ const ChangePassword02Screen: FC = () => {
             return;
         }
         if (!isValidPassword(newPassword)) {
-            setError('Invalid password');
+            setError(t('forgotPassword.invalidPassword'));
             return;
         }
         if (confirmPassword.length > 0 && newPassword !== confirmPassword) {
-            setError('Passwords do not match');
+            setError(t('forgotPassword.matchError'));
         } else {
             setError(null);
         }
@@ -46,7 +48,7 @@ const ChangePassword02Screen: FC = () => {
             <ThemedView style={styles.headerContainer}>
                 <ThemedView style={styles.leftHeader}>
                     <GoBackButton />
-                    <ThemedText type="title" style={{ fontSize: 20 }}>Change password</ThemedText>
+                    <ThemedText type="title" style={{ fontSize: 20 }}>{t('changePassword.title')}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.rightHeader}>
                     <ThemedText type="default" style={{ fontSize: 16, color: textColor }}>02 / </ThemedText>
@@ -54,13 +56,13 @@ const ChangePassword02Screen: FC = () => {
                 </ThemedView>
             </ThemedView>
             <ThemedView>
-                <ThemedText type="title" style={{ fontSize: 24, marginBottom: 12, color: textColor }}>New Password</ThemedText>
-                <ThemedText type="default" style={{ fontSize: 14, marginBottom: 24, color: secondaryText }}>Enter your new password and remember it.</ThemedText>
+                <ThemedText type="title" style={{ fontSize: 24, marginBottom: 12, color: textColor }}>{t('forgotPassword.newPassword')}</ThemedText>
+                <ThemedText type="default" style={{ fontSize: 14, marginBottom: 24, color: secondaryText }}>{t('forgotPassword.newPasswordDescription')}</ThemedText>
                 <ThemedView>
-                    <ThemedText type="defaultSemiBold" style={{ fontSize: 16, marginBottom: 8, color: textColor }}>New Password *</ThemedText>
+                    <ThemedText type="defaultSemiBold" style={{ fontSize: 16, marginBottom: 8, color: textColor }}>{t('forgotPassword.newPassword')} *</ThemedText>
                     <ThemedView style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <PasswordInput
-                            placeholder="Enter your new password"
+                            placeholder={t('forgotPassword.newPasswordPlaceholder')}
                             placeholderTextColor={secondaryText}
                             value={newPassword}
                             onChangeText={setNewPassword}
@@ -69,10 +71,10 @@ const ChangePassword02Screen: FC = () => {
                 </ThemedView>
 
                 <ThemedView style={{ marginTop: 20 }}>
-                    <ThemedText type="defaultSemiBold" style={{ fontSize: 16, marginBottom: 8, color: textColor }}>Confirm Password *</ThemedText>
+                    <ThemedText type="defaultSemiBold" style={{ fontSize: 16, marginBottom: 8, color: textColor }}>{t('forgotPassword.confirmNewPassword')} *</ThemedText>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <PasswordInput
-                            placeholder="Confirm your new password"
+                            placeholder={t('forgotPassword.confirmNewPasswordPlaceholder')}
                             placeholderTextColor={secondaryText}
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
@@ -86,16 +88,16 @@ const ChangePassword02Screen: FC = () => {
                     <ThemedView style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <FullButton onPress={() => {
                             if (!newPassword || !confirmPassword) {
-                                setError('Please fill both fields');
+                                setError(t('changePassword.fillAll'));
                                 return;
                             }
                             if (newPassword !== confirmPassword) {
-                                setError('Passwords do not match');
+                                setError(t('forgotPassword.matchError'));
                                 return;
                             }
                             // proceed
                             router.push('/changepassword/03' as any);
-                        }} text='Save' style={{ flex: 1 }} />
+                        }} text={t('common.save')} style={{ flex: 1 }} />
                     </ThemedView>
                 </ThemedView>
             </ThemedView>

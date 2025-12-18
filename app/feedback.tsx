@@ -5,11 +5,13 @@ import GoBackButton from '@/components/ui/gobackbutton';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import React, { FC } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 
 const FeedbackScreen: FC = () => {
+    const { t } = useTranslation();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const textColor: string = Colors[scheme].text;
@@ -22,11 +24,11 @@ const FeedbackScreen: FC = () => {
 
     const onSubmit = () => {
         if (rating <= 0) {
-            Alert.alert('Thiếu thông tin', 'Vui lòng chọn số sao đánh giá.');
+            Alert.alert(t('feedback.alertTitleMissingRating'), t('feedback.pleaseSelectRating'));
             return;
         }
         // Optionally validate comment length; we’ll accept empty comment
-        Alert.alert('Cảm ơn bạn!', 'Đánh giá của bạn đã được ghi nhận.');
+        Alert.alert(t('feedback.thankYou'));
         // Here you could call an API to submit rating/comment
         setRating(0);
         setComment('');
@@ -48,14 +50,14 @@ const FeedbackScreen: FC = () => {
             <ThemedView style={styles.headerContainer}>
                 <ThemedView style={styles.leftHeader}>
                     <GoBackButton />
-                    <ThemedText type="title" style={{ fontSize: 20 }}>Feedback</ThemedText>
+                    <ThemedText type="title" style={{ fontSize: 20 }}>{t('feedback.title')}</ThemedText>
                 </ThemedView>
             </ThemedView>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
                 <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                     <ThemedView style={{ gap: 16 }}>
                         <ThemedView style={{ gap: 8 }}>
-                            <ThemedText style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>Score</ThemedText>
+                            <ThemedText style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>{t('feedback.yourRating')}</ThemedText>
                             <View style={styles.starsRow}>
                                 {[1, 2, 3, 4, 5].map((i) => (
                                     <Pressable key={i} onPress={() => setRating(i)} hitSlop={8}>
@@ -63,11 +65,11 @@ const FeedbackScreen: FC = () => {
                                     </Pressable>
                                 ))}
                             </View>
-                            <ThemedText style={{ color: secondaryText, fontSize: 12 }}>{rating > 0 ? `${rating}/5` : 'Chọn số sao'}</ThemedText>
+                            <ThemedText style={{ color: secondaryText, fontSize: 12 }}>{rating > 0 ? `${rating}/5` : t('feedback.pleaseSelectRating')}</ThemedText>
                         </ThemedView>
 
                         <ThemedView style={{ gap: 8 }}>
-                            <ThemedText style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>Comment</ThemedText>
+                            <ThemedText style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>{t('feedback.yourComment')}</ThemedText>
                             <TextInput
                                 style={[
                                     styles.input,
@@ -80,7 +82,7 @@ const FeedbackScreen: FC = () => {
                                 numberOfLines={5}
                                 value={comment}
                                 onChangeText={setComment}
-                                placeholder="Hãy chia sẻ cảm nhận của bạn..."
+                                placeholder={t('feedback.commentDescription')}
                                 placeholderTextColor={Colors[scheme].icon}
                                 onFocus={() => setIsFocused(true)}
                                 onBlur={() => setIsFocused(false)}
@@ -88,7 +90,7 @@ const FeedbackScreen: FC = () => {
                             />
                             <ThemedText style={{ color: secondaryText, fontSize: 12 }}>{comment.length}/500</ThemedText>
                         </ThemedView>
-                        <FullButton text="Submit Feedback" onPress={onSubmit} />
+                        <FullButton text={t('feedback.submit')} onPress={onSubmit} />
                     </ThemedView>
                 </ScrollView>
             </KeyboardAvoidingView>

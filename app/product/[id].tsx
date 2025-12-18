@@ -6,8 +6,12 @@ import GoBackButton from '@/components/ui/gobackbutton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { addCart } from '@/services/cartService';
+import { getProductById } from '@/services/productService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Dimensions,
     ImageBackground,
@@ -27,39 +31,46 @@ type ProductRouteParams = {
 const { width } = Dimensions.get('window');
 const IMAGE_HEIGHT = width * 0.9;
 
-const PRODUCT_MOCK = {
-    id: "1",
-    name: "Vợt Yonex Astrox 88D",
-    price: 3200000,
-    discount: 20,
-    category: 1,
-    brand: "Yonex",
-    rating: 4.5,
-    reviews: 2495,
-    description:
-        'Constructed with high-quality silicone material, the Loop Silicone Strong Magnetic Watch ensures a comfortable and secure fit on your wrist. The soft and flexible silicone is gentle on the skin, making it ideal for...',
-    images: [
-        require("@/assets/images/product1.png"),
-        require("@/assets/images/product1.png"),
-        require("@/assets/images/product1.png"),
-    ],
+type ApiProduct = {
+    id: string | number;
+    name?: string;
+    price?: number;
+    discount?: number;
+    brand?: string;
+    description?: string;
+    Imagesproducts?: { url: string }[];
+    images?: any[];
+    rating?: number;
+    reviews?: number;
+    [key: string]: any;
 };
 
 const ProductDetailScreen: React.FC = () => {
+    const { t } = useTranslation();
     const { id } = useLocalSearchParams<ProductRouteParams>();
     const [quantity, setQuantity] = useState(1);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [product, setProduct] = useState<ApiProduct | null>(null);
     const [activeSlide, setActiveSlide] = useState(0);
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+    const [visibleReviews, setVisibleReviews] = useState(2);
+    const [adding, setAdding] = useState(false);
     const scheme = useColorScheme() ?? 'light';
     const palette = Colors[scheme];
-    const currentPrice: number = (PRODUCT_MOCK.price) * (1 - (PRODUCT_MOCK.discount ?? 0) / 100);
-    const product = PRODUCT_MOCK;
+    const currentPrice: number = useMemo(() => {
+        const price = Number(product?.price ?? 0);
+        const disc = Number(product?.discount ?? 0);
+        return price * (1 - disc / 100);
+    }, [product?.price, product?.discount]);
     const DESCRIPTION_PREVIEW_LENGTH = 160;
-    const isDescriptionLong = product.description.length > DESCRIPTION_PREVIEW_LENGTH;
+    const description = product?.description ?? '';
+    const isDescriptionLong = description.length > DESCRIPTION_PREVIEW_LENGTH;
     const descriptionText = isDescriptionExpanded || !isDescriptionLong
-        ? product.description
-        : `${product.description.slice(0, DESCRIPTION_PREVIEW_LENGTH).trimEnd()}...`;
-
+        ? description
+        : `${description.slice(0, DESCRIPTION_PREVIEW_LENGTH).trimEnd()}...`;
+    const showMoreReviews = () => setVisibleReviews((prev) => prev + 2);
+    const showLessReviews = () => setVisibleReviews(2);
     const toggleDescription = () => setIsDescriptionExpanded((prev) => !prev);
 
     const decreaseQuantity = () => setQuantity((prev) => (prev > 0 ? prev - 1 : 0));
@@ -87,6 +98,78 @@ const ProductDetailScreen: React.FC = () => {
         return stars;
     };
 
+    const handleAddToCart = useCallback(async () => {
+        if (adding) return;
+        if (!product?.id) return;
+        try {
+            setAdding(true);
+            let userId: string | number | undefined;
+            const userData = await AsyncStorage.getItem('userData');
+            if (userData) {
+                try {
+                    const parsed = JSON.parse(userData);
+                    userId = parsed?.id ?? parsed?._id;
+                } catch { }
+            }
+            if (!userId) {
+                const storedId = await AsyncStorage.getItem('userId');
+                if (storedId) userId = storedId;
+            }
+
+            if (!userId) {
+                console.warn('No user id found for adding to cart');
+                return;
+            }
+
+            await addCart({
+                userId,
+                items: [
+                    {
+                        productId: product.id,
+                        quantity: quantity > 0 ? quantity : 1,
+                    },
+                ],
+            });
+        } catch (e) {
+            console.error('Failed to add to cart', e);
+        } finally {
+            setAdding(false);
+        }
+    }, [adding, product?.id, quantity]);
+
+    // Load product from API
+    useEffect(() => {
+        const load = async () => {
+            if (!id) {
+                setError('Missing product id');
+                setLoading(false);
+                return;
+            }
+            try {
+                setLoading(true);
+                const data = await getProductById(id);
+                setProduct(data);
+                setError(null);
+            } catch (e: any) {
+                setError(e?.message || 'Failed to load product');
+            } finally {
+                setLoading(false);
+            }
+        };
+        load();
+    }, [id]);
+
+    // Prepare images array (from API Imagesproducts or images); fallback to local asset
+    const imagesArray = useMemo(() => {
+        const apiImages = product?.Imagesproducts?.map((img) => ({ uri: img.url })) ?? [];
+        const legacyImages = (product?.images ?? []).map((img: any) => img);
+        const combined = [...apiImages, ...legacyImages];
+        if (combined.length === 0) {
+            return [require('@/assets/images/product1.png')];
+        }
+        return combined;
+    }, [product?.Imagesproducts, product?.images]);
+
     return (
         <ThemedView style={styles.container}>
             <StatusBar barStyle="dark-content" />
@@ -101,6 +184,16 @@ const ProductDetailScreen: React.FC = () => {
             </ThemedView>
 
             <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+                {loading && (
+                    <ThemedView style={{ padding: 16 }}>
+                        <ThemedText>{t('common.loading')}</ThemedText>
+                    </ThemedView>
+                )}
+                {error && !loading && (
+                    <ThemedView style={{ padding: 16 }}>
+                        <ThemedText style={{ color: 'red' }}>{error}</ThemedText>
+                    </ThemedView>
+                )}
                 <ThemedView style={styles.carouselWrapper}>
                     <ScrollView
                         horizontal
@@ -108,7 +201,7 @@ const ProductDetailScreen: React.FC = () => {
                         showsHorizontalScrollIndicator={false}
                         onMomentumScrollEnd={handleImageMomentum}
                     >
-                        {product.images.map((imageUrl, i) => (
+                        {imagesArray.map((imageUrl, i) => (
                             <ImageBackground
                                 key={i}
                                 source={imageUrl}
@@ -118,7 +211,7 @@ const ProductDetailScreen: React.FC = () => {
                         ))}
                     </ScrollView>
                     <ThemedView style={styles.paginationDots}>
-                        {product.images.map((_, index) => (
+                        {imagesArray.map((_, index) => (
                             <ThemedView
                                 key={`pagination-dot-${index}`}
                                 style={[
@@ -133,30 +226,39 @@ const ProductDetailScreen: React.FC = () => {
                 <ThemedView style={styles.contentContainer}>
                     <ThemedView style={styles.tagsContainer}>
                         <ThemedView style={[styles.tag, styles.tagTopRated]}>
-                            <ThemedText style={styles.tagText}>Top Rated</ThemedText>
+                            <ThemedText style={styles.tagText}>{t('product.topRated')}</ThemedText>
                         </ThemedView>
                         <ThemedView style={[styles.tag, styles.tagFreeShipping]}>
-                            <ThemedText style={styles.tagText}>Free Shipping</ThemedText>
+                            <ThemedText style={styles.tagText}>{t('product.freeShipping')}</ThemedText>
                         </ThemedView>
                     </ThemedView>
 
                     <ThemedView style={styles.titlePriceContainer}>
-                        <ThemedText type='title' style={styles.title}>{product.name}</ThemedText>
+                        <ThemedText type='title' style={styles.title}>{product?.name ?? ''}</ThemedText>
                         <ThemedView style={styles.priceContainer}>
                             <ThemedText style={[styles.price, { color: palette.text }]}>{currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
-                            <ThemedText style={[styles.originalPrice, { color: palette.secondaryText }]}>
-                                {product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                            </ThemedText>
+                            {typeof product?.price === 'number' && product?.discount ? (
+                                <ThemedText style={[styles.originalPrice, { color: palette.secondaryText }]}>
+                                    {Number(product?.price).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                </ThemedText>
+                            ) : null}
                         </ThemedView>
                     </ThemedView>
 
-                    <ThemedView style={styles.ratingContainer}>
-                        {renderStars(product.rating)}
-                        <ThemedText style={styles.reviews}>({product.reviews.toLocaleString()} reviews)</ThemedText>
-                    </ThemedView>
+                    {(typeof product?.rating === 'number' || typeof product?.reviews === 'number') && (
+                        <ThemedView style={styles.ratingContainer}>
+                            {renderStars(Number(product?.rating ?? 0))}
+                            {typeof product?.reviews === 'number' && (
+                                <ThemedText style={styles.reviews}>({Number(product?.reviews).toLocaleString()} {t('product.reviews')})</ThemedText>
+                            )}
+                        </ThemedView>
+                    )}
                     <ThemedView style={{ flexDirection: 'row', marginBottom: 16 }}>
-                        <ThemedText type='defaultSemiBold' style={{ fontSize: 18, marginBottom: 10 }}>Brand: </ThemedText>
-                        <ThemedText style={{ fontSize: 18, color: palette.text }}>{product.brand}</ThemedText>
+                        <ThemedText type='defaultSemiBold' style={{ fontSize: 18, marginBottom: 10 }}>{t('product.brand')}: </ThemedText>
+                        <ThemedText style={{ fontSize: 18, color: palette.text }}>{product?.brand ?? ''}</ThemedText>
+                        {id && (
+                            <ThemedText style={[styles.productId, { color: palette.secondaryText, marginBottom: 10 }]}>{t('product.productId')}: {id}</ThemedText>
+                        )}
                     </ThemedView>
                     <ThemedText style={styles.description}>
                         {descriptionText}
@@ -164,13 +266,13 @@ const ProductDetailScreen: React.FC = () => {
                     {isDescriptionLong && (
                         <TouchableOpacity onPress={toggleDescription}>
                             <ThemedText style={[styles.readMoreText, { color: palette.tint }]}>
-                                {isDescriptionExpanded ? 'Show less' : 'Read more'}
+                                {isDescriptionExpanded ? t('product.showLess') : t('product.readMore')}
                             </ThemedText>
                         </TouchableOpacity>
                     )}
 
                     <ThemedView style={styles.quantityContainer}>
-                        <ThemedText style={styles.quantityLabel}>Quantity</ThemedText>
+                        <ThemedText style={styles.quantityLabel}>{t('product.quantity')}</ThemedText>
                         <ThemedView style={[styles.quantitySelector, { borderColor: palette.border }]}>
                             <TouchableOpacity onPress={decreaseQuantity} style={styles.quantityButton}>
                                 <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -187,9 +289,55 @@ const ProductDetailScreen: React.FC = () => {
                         </ThemedView>
                     </ThemedView>
 
-                    {id && (
-                        <ThemedText style={[styles.productId, { color: palette.secondaryText }]}>Product ID: {id}</ThemedText>
-                    )}
+                    <ThemedView style={styles.reviewsContainer}>
+                        <ThemedText type='title' style={styles.reviewsTitle}>
+                            {product?.reviews} {product?.reviews === 1 ? t('product.review') : t('product.reviews')}
+                        </ThemedText>
+                        <ThemedView style={styles.starsContainer}>{renderStars(product?.rating ?? 0)}</ThemedView>
+
+                        {/* Mock Reviews - Total 10 reviews */}
+                        <ThemedView style={styles.reviewsList}>
+                            {Array.from({ length: Math.min(visibleReviews, 10) }, (_, i) => i + 1).map((reviewId) => (
+                                <ThemedView key={reviewId} style={[styles.reviewItem, { borderBottomColor: palette.border }]}>
+                                    <ThemedView style={styles.reviewHeader}>
+                                        <ThemedText type='defaultSemiBold'>Customer {reviewId}</ThemedText>
+                                        <ThemedView style={styles.reviewStars}>
+                                            {renderStars(reviewId % 2 === 0 ? 4 : 5)}
+                                        </ThemedView>
+                                    </ThemedView>
+                                    <ThemedText style={[styles.reviewComment, { color: palette.secondaryText }]}>
+                                        {reviewId % 2 === 0
+                                            ? 'Good value for money. Product matches the description perfectly.'
+                                            : 'Great product! Very good quality and fast shipping. Highly recommended!'}
+                                    </ThemedText>
+                                </ThemedView>
+                            ))}
+                        </ThemedView>
+
+                        {/* Show More/Less buttons */}
+                        <ThemedView style={styles.reviewButtonsContainer}>
+                            {visibleReviews < 10 && (
+                                <TouchableOpacity onPress={showMoreReviews} style={styles.expandReviewsButton}>
+                                    <ThemedText style={[styles.expandReviewsText, { color: palette.tint }]}>
+                                        {t('product.showMore')}
+                                    </ThemedText>
+                                </TouchableOpacity>
+                            )}
+                            {visibleReviews > 2 && (
+                                <TouchableOpacity onPress={showLessReviews} style={styles.expandReviewsButton}>
+                                    <ThemedText style={[styles.expandReviewsText, { color: palette.tint }]}>
+                                        {t('product.showLess')}
+                                    </ThemedText>
+                                </TouchableOpacity>
+                            )}
+                        </ThemedView>
+                    </ThemedView>
+
+                    <ThemedView style={styles.relatedProductsContainer}>
+                        <ThemedText type='title' style={styles.relatedProductsTitle}>{t('product.relatedProducts')}</ThemedText>
+                        {/* TODO: Render related products here */}
+                    </ThemedView>
+
                 </ThemedView>
             </ScrollView>
 
@@ -208,7 +356,7 @@ const ProductDetailScreen: React.FC = () => {
                     style={[styles.footerButton, styles.footerButtonLeft]}
                 />
                 <FullButton
-                    onPress={() => { }}
+                    onPress={handleAddToCart}
                     text="Add to Cart"
                     style={styles.footerButton}
                 />
@@ -381,6 +529,60 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         minWidth: 40,
         textAlign: 'center',
+    },
+    reviewsContainer: {
+        marginBottom: 20,
+    },
+    reviewsTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 12,
+    },
+    starsContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    reviewsList: {
+        marginVertical: 16,
+    },
+    reviewItem: {
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+    },
+    reviewHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    reviewStars: {
+        flexDirection: 'row',
+    },
+    reviewComment: {
+        fontSize: 14,
+        lineHeight: 20,
+    },
+    expandReviewsButton: {
+        paddingVertical: 12,
+    },
+    expandReviewsText: {
+        fontSize: 15,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+    reviewButtonsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 16,
+    },
+    relatedProductsContainer: {
+        marginTop: 24,
+    },
+    relatedProductsTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 16,
     },
     productId: {
         marginTop: 12,

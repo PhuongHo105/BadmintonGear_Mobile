@@ -7,6 +7,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import React, { FC } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -14,6 +15,7 @@ import Svg, { Path } from 'react-native-svg';
 
 
 const CheckoutScreen: FC = () => {
+    const { t } = useTranslation();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const [isHolderFocused, setIsHolderFocused] = React.useState(false);
@@ -31,7 +33,7 @@ const CheckoutScreen: FC = () => {
             <ThemedView style={styles.headerContainer}>
                 <ThemedView style={styles.leftHeader}>
                     <GoBackButton />
-                    <ThemedText type="title" style={{ fontSize: 20 }}>Checkout</ThemedText>
+                    <ThemedText type="title" style={{ fontSize: 20 }}>{t('checkoutPayment.title')}</ThemedText>
                 </ThemedView>
             </ThemedView>
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -186,7 +188,7 @@ const CheckoutScreen: FC = () => {
                     </ThemedView> */}
 
                 </ThemedView>
-                <FullButton text='Continue' onPress={() => { router.push('/checkout/review') }} style={{ marginTop: 20, flex: 1 }} />
+                <FullButton text={t('common.continue')} onPress={() => { router.push('/checkout/review') }} style={{ marginTop: 20, flex: 1 }} />
             </ScrollView>
         </ThemedView>
     )

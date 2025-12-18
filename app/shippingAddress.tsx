@@ -5,6 +5,7 @@ import GoBackButton from '@/components/ui/gobackbutton';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import React, { FC } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
@@ -38,6 +39,7 @@ const GITHUB_FALLBACK_URL =
     'https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json';
 
 const ShippingAddressScreen: FC = () => {
+    const { t } = useTranslation();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const [shippingAddress, setShippingAddress] = React.useState({
@@ -115,12 +117,12 @@ const ShippingAddressScreen: FC = () => {
                 setAddressData(normalizeFromGithub(data2));
             } catch (err2) {
                 console.error('Failed to load provinces', err2);
-                setAddressError('Không thể tải địa chỉ. Kiểm tra kết nối và thử lại.');
+                setAddressError((t('shippingAddress.errors.loadAddress')));
             }
         } finally {
             setIsLoadingAddresses(false);
         }
-    }, [selectedCountry]);
+    }, [selectedCountry, t]);
 
     React.useEffect(() => {
         if (selectedCountry !== 'Vietnam') {
@@ -178,7 +180,7 @@ const ShippingAddressScreen: FC = () => {
         disabled: boolean = false,
         emptyMessage?: string,
     ) => {
-        const displayValue = value || placeholder || 'Select an option';
+        const displayValue = value || placeholder || t('shippingAddress.dropdown.selectOption');
         const isSelectionAvailable = options.length > 0;
 
         return (
@@ -233,7 +235,7 @@ const ShippingAddressScreen: FC = () => {
                         ) : (
                             <View style={styles.dropdownItem}>
                                 <ThemedText style={{ color: Colors[scheme].secondaryText, fontSize: 16 }}>
-                                    {emptyMessage || 'No options available'}
+                                    {emptyMessage || t('shippingAddress.dropdown.noOptions')}
                                 </ThemedText>
                             </View>
                         )}
@@ -247,19 +249,19 @@ const ShippingAddressScreen: FC = () => {
 
     const provincePlaceholder =
         selectedCountry !== 'Vietnam'
-            ? 'Select a country first'
+            ? t('shippingAddress.placeholders.selectCountryFirst')
             : isLoadingAddresses
-                ? 'Loading provinces...'
-                : 'Select province / city';
+                ? t('shippingAddress.placeholders.loadingProvinces')
+                : t('shippingAddress.placeholders.selectProvince');
 
     const districtPlaceholder =
         selectedCountry !== 'Vietnam'
-            ? 'Select a country first'
+            ? t('shippingAddress.placeholders.selectCountryFirst')
             : !selectedProvince
-                ? 'Select province first'
+                ? t('shippingAddress.placeholders.selectProvinceFirst')
                 : isLoadingAddresses
-                    ? 'Loading districts...'
-                    : 'Select district';
+                    ? t('shippingAddress.placeholders.loadingDistricts')
+                    : t('shippingAddress.placeholders.selectDistrict');
 
     const isProvinceDisabled = selectedCountry !== 'Vietnam' || isLoadingAddresses;
     const isDistrictDisabled = selectedCountry !== 'Vietnam' || !selectedProvince || isLoadingAddresses;
@@ -267,19 +269,19 @@ const ShippingAddressScreen: FC = () => {
     function saveAddress() {
         // Basic validation for required fields
         if (!fullName.trim()) {
-            setError('Full name is required.');
+            setError(t('shippingAddress.validation.fullNameRequired'));
             return;
         }
         if (!phone.trim()) {
-            setError('Phone number is required.');
+            setError(t('shippingAddress.validation.phoneRequired'));
             return;
         }
         if (!detailedAddress.trim()) {
-            setError('Detailed address is required.');
+            setError(t('shippingAddress.validation.detailedAddressRequired'));
             return;
         }
         if (selectedCountry === 'Vietnam' && (!selectedProvince || !selectedDistrict)) {
-            setError('Please select province and district.');
+            setError(t('shippingAddress.validation.provinceDistrictRequired'));
             return;
         }
 
@@ -311,7 +313,7 @@ const ShippingAddressScreen: FC = () => {
                 <ThemedView style={styles.leftHeader}>
                     <GoBackButton />
                     <ThemedText type="title" style={{ fontSize: 20 }}>
-                        Shipping Address
+                        {t('shippingAddress.title')}
                     </ThemedText>
                 </ThemedView>
             </ThemedView>
@@ -322,7 +324,7 @@ const ShippingAddressScreen: FC = () => {
                 <ScrollView showsVerticalScrollIndicator={false}>
                     <ThemedView style={styles.content}>
                         <ThemedView style={styles.fieldGroup}>
-                            <ThemedText>Full Name *</ThemedText>
+                            <ThemedText>{t('shippingAddress.fields.fullName')} *</ThemedText>
                             <TextInput
                                 style={[
                                     styles.input,
@@ -330,7 +332,7 @@ const ShippingAddressScreen: FC = () => {
                                 ]}
                                 value={fullName}
                                 onChangeText={setFullName}
-                                placeholder="Enter your full name"
+                                placeholder={t('shippingAddress.placeholders.fullName')}
                                 placeholderTextColor={Colors[scheme].icon}
                                 keyboardType="default"
                                 autoCapitalize="words"
@@ -341,7 +343,7 @@ const ShippingAddressScreen: FC = () => {
                         </ThemedView>
 
                         <ThemedView style={styles.fieldGroup}>
-                            <ThemedText>Phone Number *</ThemedText>
+                            <ThemedText>{t('shippingAddress.fields.phone')} *</ThemedText>
                             <TextInput
                                 style={[
                                     styles.input,
@@ -349,7 +351,7 @@ const ShippingAddressScreen: FC = () => {
                                 ]}
                                 value={phone}
                                 onChangeText={setPhone}
-                                placeholder="Enter your phone number"
+                                placeholder={t('shippingAddress.placeholders.phone')}
                                 placeholderTextColor={Colors[scheme].icon}
                                 keyboardType="default"
                                 autoCapitalize="words"
@@ -361,7 +363,7 @@ const ShippingAddressScreen: FC = () => {
 
                         <ThemedView style={styles.fieldGroup}>
                             {renderDropdown(
-                                'Country *',
+                                `${t('shippingAddress.fields.country')} *`,
                                 selectedCountry,
                                 () => setIsCountryMenuOpen((v) => !v),
                                 isCountryMenuOpen,
@@ -379,15 +381,15 @@ const ShippingAddressScreen: FC = () => {
                                         loadAddresses();
                                     }
                                 },
-                                'Select country',
+                                t('shippingAddress.placeholders.country'),
                                 isReadOnly,
-                                'No countries available',
+                                t('shippingAddress.dropdown.noCountries'),
                             )}
                         </ThemedView>
 
                         <ThemedView style={styles.fieldGroup}>
                             {renderDropdown(
-                                'Province / City *',
+                                `${t('shippingAddress.fields.province')} *`,
                                 selectedProvince,
                                 () => setIsProvinceMenuOpen((v) => !v),
                                 isProvinceMenuOpen,
@@ -399,7 +401,7 @@ const ShippingAddressScreen: FC = () => {
                                 },
                                 provincePlaceholder,
                                 isReadOnly || isProvinceDisabled,
-                                addressError ?? 'No provinces available',
+                                addressError ?? t('shippingAddress.dropdown.noProvinces'),
                             )}
                             {isLoadingAddresses && (
                                 <View style={{ marginTop: 8 }}>
@@ -412,7 +414,7 @@ const ShippingAddressScreen: FC = () => {
                                         {addressError}
                                     </ThemedText>
                                     <Pressable onPress={loadAddresses} style={{ paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: Colors[scheme].tint, borderRadius: 6 }}>
-                                        <ThemedText style={{ color: Colors[scheme].tint }}>Retry</ThemedText>
+                                        <ThemedText style={{ color: Colors[scheme].tint }}>{t('common:retry')}</ThemedText>
                                     </Pressable>
                                 </ThemedView>
                             )}
@@ -420,7 +422,7 @@ const ShippingAddressScreen: FC = () => {
 
                         <ThemedView style={styles.fieldGroup}>
                             {renderDropdown(
-                                'District *',
+                                `${t('shippingAddress.fields.district')} *`,
                                 selectedDistrict,
                                 () => setIsDistrictMenuOpen((v) => !v),
                                 isDistrictMenuOpen,
@@ -428,12 +430,12 @@ const ShippingAddressScreen: FC = () => {
                                 (option) => setSelectedDistrict(option),
                                 districtPlaceholder,
                                 isReadOnly || isDistrictDisabled,
-                                selectedProvince ? 'No districts available' : 'Select province first',
+                                selectedProvince ? t('shippingAddress.dropdown.noDistricts') : t('shippingAddress.placeholders.selectProvinceFirst'),
                             )}
                         </ThemedView>
 
                         <ThemedView style={styles.fieldGroup}>
-                            <ThemedText>Detailed Address *</ThemedText>
+                            <ThemedText>{t('shippingAddress.fields.detailedAddress')} *</ThemedText>
                             <TextInput
                                 style={[
                                     styles.input,
@@ -454,7 +456,7 @@ const ShippingAddressScreen: FC = () => {
                     {error ? (
                         <ThemedText style={[styles.errorText, { color: Colors[scheme].tint, textAlign: 'center', marginTop: 10 }]}>{error}</ThemedText>
                     ) : null}
-                    <FullButton text={mode === 'edit' ? 'Save' : 'Edit'} onPress={() => {
+                    <FullButton text={mode === 'edit' ? t('common:save') : t('common:edit')} onPress={() => {
                         if (mode === 'edit') {
                             saveAddress();
                         }

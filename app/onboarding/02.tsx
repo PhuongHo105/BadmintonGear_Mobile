@@ -7,6 +7,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ColorSchemeName,
     Pressable,
@@ -14,6 +15,7 @@ import {
 } from 'react-native';
 
 const Onboarding2Screen: React.FC = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const schemeRaw = useColorScheme() as ColorSchemeName | undefined | null;
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
@@ -25,7 +27,7 @@ const Onboarding2Screen: React.FC = () => {
                     <ThemedView style={styles.headerContainer}>
                         <GoBackButton />
                         <Pressable onPress={() => { router.push('/login') }} >
-                            <ThemedText type="link" style={{ color: Colors[scheme].tint, fontSize: 16 }}>Skip for now</ThemedText>
+                            <ThemedText type="link" style={{ color: Colors[scheme].tint, fontSize: 16 }}>{t('common.skipForNow')}</ThemedText>
                         </Pressable>
                     </ThemedView>
                     <Image
@@ -35,13 +37,13 @@ const Onboarding2Screen: React.FC = () => {
                     />
                 </ThemedView>
                 <ThemedText type="title" style={styles.heading}>
-                    Unlock exclusive offers and discounts
+                    {t('onboarding.unlockOffers')}
                 </ThemedText>
                 <ThemedText style={[styles.subtitle, { color: Colors[scheme].secondaryText, textAlign: 'center' }]}>
-                    Get access to limited-time deals and special promotions available only to our valued customers.
+                    {t('onboarding.offersDescription')}
                 </ThemedText>
                 <ThemedView style={styles.buttonsContainer}>
-                    <FullButton text="Next" onPress={() => { router.push('/onboarding/03') }} />
+                    <FullButton text={t('common.next')} onPress={() => { router.push('/onboarding/03') }} />
                 </ThemedView>
             </ThemedView>
         </ThemedView>

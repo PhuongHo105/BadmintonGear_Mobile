@@ -8,16 +8,17 @@ import ProductCard from '@/components/ui/productcard';
 import Slider from '@/components/ui/slider';
 import {
     CATEGORY_LABEL_MAP,
-    CATEGORY_OPTIONS,
+    formatPrice,
+    getCategoryOptions,
     PRICE_STEP,
-    type ProductFilters,
-    formatPrice
+    type ProductFilters
 } from '@/constants/product-data';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { http } from '@/services/http';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 
 type ProductsScreenProps = {
@@ -27,6 +28,7 @@ type ProductsScreenProps = {
 type ProductListRouteParams = Partial<Record<keyof ProductFilters, string | string[]>>;
 
 const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
+    const { t } = useTranslation();
     const scheme = useColorScheme() ?? 'light';
     const palette = Colors[scheme];
     const params = useLocalSearchParams<ProductListRouteParams>();
@@ -162,7 +164,7 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
             }
         }
 
-        return 'All';
+        return undefined;
     }, [appliedFilters.categoriesid, appliedFilters.searchQuery]);
 
     const handleSearchChange = (value: string) => {
@@ -326,7 +328,7 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
                 <ThemedView style={styles.filterSection}>
                     {searchMode && (
                         <TextInput
-                            placeholder="Search"
+                            placeholder={t('products.search')}
                             placeholderTextColor={palette.secondaryText}
                             value={draftFilters.searchQuery ?? ''}
                             onChangeText={handleSearchChange}
@@ -338,7 +340,7 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
 
                 </ThemedView>
                 <ThemedView style={styles.grid}>
-                    {products.length === 0 && (<ThemedText style={{ color: palette.text, width: '100%', textAlign: 'center' }}>Không có sản phẩm nào</ThemedText>)}
+                    {products.length === 0 && (<ThemedText style={{ color: palette.text, width: '100%', textAlign: 'center' }}>{t('products.empty')}</ThemedText>)}
                     {products.map((product) => (
                         <ProductCard key={product.id} product={product} />
                     ))}
@@ -362,17 +364,17 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
                     />
                     <ThemedView style={[styles.modalContent, { backgroundColor: palette.modalBackground }]}>
                         <ThemedText type="defaultSemiBold" style={styles.sectionLabel}>
-                            Category
+                            {t('products.category')}
                         </ThemedText>
-                        <ThemedView style={styles.chipGroup}>{renderChip<number>(CATEGORY_OPTIONS, draftFilters.categoriesid, handleCategoriesIdPress)}</ThemedView>
+                        <ThemedView style={styles.chipGroup}>{renderChip<number>(getCategoryOptions(), draftFilters.categoriesid, handleCategoriesIdPress)}</ThemedView>
 
                         <ThemedText type="defaultSemiBold" style={styles.sectionLabel}>
-                            Brand
+                            {t('products.brand')}
                         </ThemedText>
                         <ThemedView style={styles.chipGroup}>{renderChip<string>(brandOptions, draftFilters.brand, handleBrandPress)}</ThemedView>
 
                         <ThemedText type="defaultSemiBold" style={styles.sectionLabel}>
-                            Price Range (VND)
+                            {t('products.priceRange')} (VND)
                         </ThemedText>
                         <ThemedView style={styles.priceSection}>
                             <ThemedView style={styles.rangeLabels}>
@@ -380,7 +382,7 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
                                 <ThemedText style={styles.rangeLabel}>Max: {formatPrice(priceInputs.max)}</ThemedText>
                             </ThemedView>
                             <ThemedView style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <ThemedText>Min Price</ThemedText>
+                                <ThemedText>{t('products.minPrice')}</ThemedText>
                                 <Slider
                                     style={styles.slider}
                                     minimumValue={computedRange.min}
@@ -394,7 +396,7 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
                                 />
                             </ThemedView>
                             <ThemedView style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <ThemedText>Max Price</ThemedText>
+                                <ThemedText>{t('products.maxPrice')}</ThemedText>
                                 <Slider
                                     style={styles.slider}
                                     minimumValue={computedRange.min}
@@ -408,8 +410,8 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
                                 />
                             </ThemedView>
                         </ThemedView>
-                        <FullButton text="Apply" onPress={handleApplyFilters} />
-                        <BorderButton text='Clear' onPress={handleClearFilters} />
+                        <FullButton text={t('common.apply')} onPress={handleApplyFilters} />
+                        <BorderButton text={t('common.clear')} onPress={handleClearFilters} />
                     </ThemedView>
                 </KeyboardAvoidingView>
             </Modal>

@@ -8,10 +8,12 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import React, { FC, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 
 const OrderListScreen: FC = () => {
+    const { t } = useTranslation();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const textColor: string = Colors[scheme].text;
@@ -45,20 +47,20 @@ const OrderListScreen: FC = () => {
             return activeTab === 'ongoing' ? (
                 <ThemedView>
                     <Image source={require('@/assets/images/noOrder.png')} style={{ width: '100%', height: 300, marginTop: 50, marginBottom: 20 }} />
-                    <ThemedText type="defaultSemiBold" style={{ fontWeight: '600', fontSize: 30, color: textColor, textAlign: 'center', marginTop: 30, padding: 10 }}>No ongoing order</ThemedText>
+                    <ThemedText type="defaultSemiBold" style={{ fontWeight: '600', fontSize: 30, color: textColor, textAlign: 'center', marginTop: 30, padding: 10 }}>{t('orders.noOngoing')}</ThemedText>
                     <ThemedText type="default" style={{ fontSize: 16, color: secondaryText, textAlign: 'center', marginTop: 10, paddingHorizontal: 30 }}>
-                        We currently don&apos;t have any active orders in progress. Feel free to explore our products and place a new order.
+                        {t('orders.onDescription')}
                     </ThemedText>
-                    <FullButton text='Explore Products' onPress={() => { router.push('/') }} style={{ marginTop: 20, flex: 1 }} />
+                    <FullButton text={t('orders.explore')} onPress={() => { router.push('/') }} style={{ marginTop: 20, flex: 1 }} />
                 </ThemedView>
             ) : (
                 <ThemedView>
                     <Image source={require('@/assets/images/noOrder.png')} style={{ width: '100%', height: 300, marginTop: 50, marginBottom: 20 }} />
-                    <ThemedText type="defaultSemiBold" style={{ fontWeight: '600', fontSize: 30, color: textColor, textAlign: 'center', marginTop: 30, padding: 10 }}>No completed order</ThemedText>
+                    <ThemedText type="defaultSemiBold" style={{ fontWeight: '600', fontSize: 30, color: textColor, textAlign: 'center', marginTop: 30, padding: 10 }}>{t('orders.noCompleted')}</ThemedText>
                     <ThemedText type="default" style={{ fontSize: 16, color: secondaryText, textAlign: 'center', marginTop: 10, paddingHorizontal: 30 }}>
-                        We don&apos;t have any past orders that have been completed. Start shopping now and create your first order with us.
+                        {t('orders.compDescription')}
                     </ThemedText>
-                    <FullButton text='Explore Products' onPress={() => { router.push('/') }} style={{ marginTop: 20, flex: 1 }} />
+                    <FullButton text={t('orders.explore')} onPress={() => { router.push('/') }} style={{ marginTop: 20, flex: 1 }} />
                 </ThemedView>
             );
         }
@@ -77,7 +79,7 @@ const OrderListScreen: FC = () => {
             <ThemedView style={styles.headerContainer}>
                 <ThemedView style={styles.leftHeader}>
                     <GoBackButton />
-                    <ThemedText type="title" style={{ fontSize: 20 }}>Order History</ThemedText>
+                    <ThemedText type="title" style={{ fontSize: 20 }}>{t('orders.title')}</ThemedText>
                 </ThemedView>
             </ThemedView>
             <ThemedView style={[styles.tabContainer, { backgroundColor: Colors[scheme].tabBackground }]}>
@@ -87,7 +89,7 @@ const OrderListScreen: FC = () => {
                     onPress={() => setActiveTab('ongoing')}
                 >
                     <ThemedText style={[styles.tabText, activeTab === 'ongoing' && { color: Colors[scheme].activeTabText }]}>
-                        Ongoing
+                        {t('orders.ongoing')}
                     </ThemedText>
                 </Pressable>
                 <Pressable
@@ -95,7 +97,7 @@ const OrderListScreen: FC = () => {
                     onPress={() => setActiveTab('completed')}
                 >
                     <ThemedText style={[styles.tabText, activeTab === 'completed' && { color: Colors[scheme].activeTabText }]}>
-                        Completed
+                        {t('orders.completed')}
                     </ThemedText>
                 </Pressable>
             </ThemedView>

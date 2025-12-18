@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { ImageSourcePropType } from "react-native";
 
 export type Product = {
@@ -75,22 +76,24 @@ export const PRICE_RANGE = (() => {
 })();
 
 export const CATEGORY_LABEL_MAP: Record<number, string> = {
-  1: "Racket",
-  2: "Shoes",
-  3: "Clothes",
-  4: "Bags",
-  5: "Shuttlecocks",
-  6: "Others",
+  1: t('categories.rackets'),
+  2: t('categories.shoes'),
+  3: t('categories.clothes'),
+  4: t('categories.bags'),
+  5: t('categories.shuttlecocks'),
+  6: t('categories.other'),
 };
 
-export const CATEGORY_OPTIONS: { label: string; value?: number }[] = [
-  { label: "Tất cả", value: undefined },
-  { label: CATEGORY_LABEL_MAP[1], value: 1 },
-  { label: CATEGORY_LABEL_MAP[2], value: 2 },
-  { label: CATEGORY_LABEL_MAP[3], value: 3 },
-  { label: CATEGORY_LABEL_MAP[4], value: 4 },
-  { label: CATEGORY_LABEL_MAP[5], value: 5 },
-];
+export const getCategoryOptions = (): { label: string; value?: number }[] => {
+  return [
+    { label: t('products.all'), value: undefined },
+    { label: CATEGORY_LABEL_MAP[1], value: 1 },
+    { label: CATEGORY_LABEL_MAP[2], value: 2 },
+    { label: CATEGORY_LABEL_MAP[3], value: 3 },
+    { label: CATEGORY_LABEL_MAP[4], value: 4 },
+    { label: CATEGORY_LABEL_MAP[5], value: 5 },
+  ];
+};
 
 export const BRAND_OPTIONS: { label: string; value?: string }[] = [
   { label: "All", value: undefined },

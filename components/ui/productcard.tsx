@@ -46,7 +46,14 @@ export default function ProductCard({ product }: Props) {
                         </ThemedView>
                     ) : null}
                 </ThemedView>
-                <ThemedText type="defaultSemiBold" style={{ fontSize: 14, marginTop: 8 }}>{product.name}</ThemedText>
+                <ThemedText
+                    type="defaultSemiBold"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    style={{ fontSize: 14, marginTop: 8 }}
+                >
+                    {product.name}
+                </ThemedText>
                 <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: tint }}>{currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                 {typeof product.discount === 'number' && product.discount > 0 ? (
                     <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: discountColor, textDecorationLine: 'line-through' }}>{product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
@@ -61,6 +68,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         borderRadius: 12,
         borderWidth: 1,
+        height: 310,
         shadowColor: '#686868ff',
     },
     inner: {

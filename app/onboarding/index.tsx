@@ -6,6 +6,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ColorSchemeName,
     ImageSourcePropType,
@@ -14,6 +15,7 @@ import {
 } from 'react-native';
 
 const Onboarding1Screen: React.FC = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const schemeRaw = useColorScheme() as ColorSchemeName | undefined | null;
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
@@ -28,10 +30,10 @@ const Onboarding1Screen: React.FC = () => {
                     <ThemedView style={styles.headerContainer}>
                         <ThemedView style={styles.logoContainer}>
                             <Image source={logoSource} style={styles.logo} />
-                            <ThemedText type="title" style={[styles.title, { color: Colors[scheme].text }]}>BadmintonGear</ThemedText>
+                            <ThemedText type="title" style={[styles.title, { color: Colors[scheme].text }]}>{t('common.appName')}</ThemedText>
                         </ThemedView>
                         <Pressable onPress={() => { router.push('/login') }} >
-                            <ThemedText type="link" style={{ color: Colors[scheme].tint, fontSize: 16 }}>Skip for now</ThemedText>
+                            <ThemedText type="link" style={{ color: Colors[scheme].tint, fontSize: 16 }}>{t('common.skipForNow')}</ThemedText>
                         </Pressable>
                     </ThemedView>
                     <Image
@@ -41,13 +43,13 @@ const Onboarding1Screen: React.FC = () => {
                     />
                 </ThemedView>
                 <ThemedText type="title" style={styles.heading}>
-                    Explore a wide range of products
+                    {t('onboarding.exploreProducts')}
                 </ThemedText>
                 <ThemedText style={[styles.subtitle, { color: Colors[scheme].secondaryText, textAlign: 'center' }]}>
-                    Explore a wide range of products at your fingertips. QuickMart offers an extensive collection to suit your needs.
+                    {t('onboarding.description')}
                 </ThemedText>
                 <ThemedView style={styles.buttonsContainer}>
-                    <FullButton text="Next" onPress={() => { router.push('/onboarding/02') }} />
+                    <FullButton text={t('common.next')} onPress={() => { router.push('/onboarding/02') }} />
                 </ThemedView>
             </ThemedView>
         </ThemedView>

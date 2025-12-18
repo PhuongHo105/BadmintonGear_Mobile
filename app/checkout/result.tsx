@@ -6,12 +6,14 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ColorSchemeName,
     StyleSheet
 } from 'react-native';
 
 const ResultCheckoutScreen: React.FC = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const schemeRaw = useColorScheme() as ColorSchemeName | undefined | null;
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
@@ -27,13 +29,13 @@ const ResultCheckoutScreen: React.FC = () => {
                     />
                 </ThemedView>
                 <ThemedText type="title" style={styles.heading}>
-                    Your order has been placed successfully
+                    {t('checkoutResult.title')}
                 </ThemedText>
                 <ThemedText style={[styles.subtitle, { color: Colors[scheme].secondaryText, textAlign: 'center' }]}>
-                    Thank you for choosing us! Feel free to continue shopping and explore our wide range of products. Happy Shopping!
+                    {t('checkoutResult.subtitle')}
                 </ThemedText>
                 <ThemedView style={styles.buttonsContainer}>
-                    <FullButton text="Continue Shopping" onPress={() => { router.push('/') }} />
+                    <FullButton text={t('checkoutResult.continueShopping')} onPress={() => { router.push('/') }} />
                 </ThemedView>
             </ThemedView>
         </ThemedView>

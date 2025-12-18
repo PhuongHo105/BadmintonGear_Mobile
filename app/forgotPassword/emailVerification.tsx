@@ -6,6 +6,7 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useRouter } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ColorSchemeName,
     Pressable,
@@ -14,6 +15,7 @@ import {
 } from 'react-native';
 
 const EmailVerificationScreen: React.FC = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const schemeRaw = useColorScheme() as ColorSchemeName | undefined | null;
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
@@ -43,11 +45,11 @@ const EmailVerificationScreen: React.FC = () => {
 
     const handleSubmit = () => {
         const code = codeValues.join('');
-        if (code.length === 6) {
+        if (code === '000000') {
             router.push('/forgotPassword/setNewPassword');
         }
         else {
-            setError('Please enter the complete 6-digit code.');
+            setError(t('forgotPassword.codeRequired'));
         }
     };
 
@@ -56,7 +58,7 @@ const EmailVerificationScreen: React.FC = () => {
             <ThemedView style={styles.headerContainer}>
                 <ThemedView style={styles.leftHeader}>
                     <GoBackButton />
-                    <ThemedText type="title" style={{ fontSize: 20 }}>Email Verification</ThemedText>
+                    <ThemedText type="title" style={{ fontSize: 20 }}>{t('forgotPassword.emailVerification')}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.rightHeader}>
                     <ThemedText type="default" style={{ fontSize: 16, color: Colors[scheme].text }}>02 / </ThemedText>
@@ -66,10 +68,10 @@ const EmailVerificationScreen: React.FC = () => {
 
             <ThemedView style={styles.content}>
                 <ThemedText type="title" style={styles.heading}>
-                    Email Verification
+                    {t('forgotPassword.emailVerification')}
                 </ThemedText>
                 <ThemedText style={[styles.subtitle, { color: Colors[scheme].secondaryText }]}>
-                    Enter the 6-digit verification code sent to your email address.
+                    {t('forgotPassword.verificationDescription')}
                 </ThemedText>
 
                 <ThemedView style={styles.codeRow}>
@@ -104,7 +106,7 @@ const EmailVerificationScreen: React.FC = () => {
                 </ThemedView>
                 <Pressable>
                     <ThemedText type="default" style={{ marginTop: 16, color: Colors[scheme].tint, textAlign: 'center' }}>
-                        Resend Code
+                        {t('forgotPassword.resendCode')}
                     </ThemedText>
                 </Pressable>
 
@@ -113,7 +115,7 @@ const EmailVerificationScreen: React.FC = () => {
                 ) : null}
 
                 <ThemedView style={styles.buttonsContainer}>
-                    <FullButton text="Proceed" onPress={handleSubmit} />
+                    <FullButton text={t('forgotPassword.verify')} onPress={handleSubmit} />
                 </ThemedView>
             </ThemedView>
         </ThemedView>

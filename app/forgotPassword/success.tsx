@@ -6,12 +6,14 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ColorSchemeName,
     StyleSheet
 } from 'react-native';
 
 const SuccessSetPasswordScreen: React.FC = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const schemeRaw = useColorScheme() as ColorSchemeName | undefined | null;
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
@@ -27,13 +29,13 @@ const SuccessSetPasswordScreen: React.FC = () => {
                     />
                 </ThemedView>
                 <ThemedText type="title" style={styles.heading}>
-                    New password set successfully
+                    {t('forgotPassword.successTitle')}
                 </ThemedText>
                 <ThemedText style={[styles.subtitle, { color: Colors[scheme].secondaryText, textAlign: 'center' }]}>
-                    Congratulations! Your password has been set successfully. Please proceed to the login screen to verify your account.
+                    {t('forgotPassword.passwordResetSuccess')}
                 </ThemedText>
                 <ThemedView style={styles.buttonsContainer}>
-                    <FullButton text="Login" onPress={() => { router.push('/login') }} />
+                    <FullButton text={t('common.login')} onPress={() => { router.push('/login') }} />
                 </ThemedView>
             </ThemedView>
         </ThemedView>

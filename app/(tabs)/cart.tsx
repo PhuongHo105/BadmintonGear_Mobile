@@ -6,13 +6,18 @@ import FullButton from '@/components/ui/fullbutton'
 import GoBackButton from '@/components/ui/gobackbutton'
 import { Colors } from '@/constants/theme'
 import { useColorScheme } from '@/hooks/use-color-scheme'
+import { getCartByUserID } from '@/services/cartService'
+import { getProductById } from '@/services/productService'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import React, { FC, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput } from 'react-native'
 
 
 const CartScreen: FC = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const scheme = useColorScheme() ?? 'light';
     const palette = Colors[scheme];
@@ -23,32 +28,77 @@ const CartScreen: FC = () => {
     const [selectedToRemove, setSelectedToRemove] = useState<string | null>(null);
     const [discount] = useState(0);
     const [currentTotal, setCurrentTotal] = useState(0);
-    const [cartItems, setCartItems] = useState([
-        {
-            product: {
-                id: '1',
-                name: 'Badminton Racket',
-                price: 500000,
-                image: require('../../assets/images/product1.png'),
-                discount: 10,
-            },
-            numberOfItems: 2,
-            checked: false,
-        },
-        {
-            product: {
-                id: '2',
-                name: 'Shuttlecock',
-                price: 100000,
-                image: require('../../assets/images/product1.png'),
-                discount: 5,
-            },
-            numberOfItems: 1,
-            checked: false,
-        },
-    ]);
+    type LocalProduct = { id: string; name?: string; price?: number; discount?: number; image?: any };
+    type LocalCartItem = { product: LocalProduct; numberOfItems: number; checked: boolean };
+    const [cartItems, setCartItems] = useState<LocalCartItem[]>([]);
 
-    const recalcTotals = (items: typeof cartItems) => {
+    // Load cart from API based on stored user id (if available)
+    useEffect(() => {
+        const load = async () => {
+            try {
+                let userId: string | number | undefined;
+                const userData = await AsyncStorage.getItem('userData');
+                if (userData) {
+                    try {
+                        const parsed = JSON.parse(userData);
+                        userId = parsed?.id ?? parsed?._id;
+                    } catch { }
+                }
+                // Optional: try a plain userId key
+                if (!userId) {
+                    const storedId = await AsyncStorage.getItem('userId');
+                    if (storedId) userId = storedId;
+                }
+
+                if (!userId) {
+                    // No user id available; keep empty cart view
+                    return;
+                }
+
+                const serverCart = await getCartByUserID(userId);
+                const rawItems: any[] = Array.isArray((serverCart as any)?.items)
+                    ? (serverCart as any).items
+                    : Array.isArray(serverCart)
+                        ? (serverCart as any)
+                        : [];
+
+                const enriched: LocalCartItem[] = await Promise.all(
+                    rawItems.map(async (item: any) => {
+                        const pid = item.productId ?? item.productid ?? item.product?.id ?? item.product?.productId;
+                        let productData: any = item.product;
+                        if (!productData && pid != null) {
+                            try {
+                                productData = await getProductById(pid);
+                            } catch (e) {
+                                console.warn('Failed to fetch product', pid, e);
+                            }
+                        }
+                        const image = productData?.Imagesproducts?.[0]?.url
+                            ? { uri: productData.Imagesproducts[0].url }
+                            : require('@/assets/images/product1.png');
+                        const localProduct: LocalProduct = {
+                            id: String(productData?.id ?? pid ?? Math.random().toString(36).slice(2)),
+                            name: productData?.name ?? item.name,
+                            price: productData?.price ?? item.price,
+                            discount: productData?.discount ?? item.discount,
+                            image,
+                        };
+                        const qty = Number(item.quantity ?? item.numberOfItems ?? 1) || 1;
+                        return { product: localProduct, numberOfItems: qty, checked: false };
+                    })
+                );
+
+                setCartItems(enriched);
+                recalcTotals(enriched as any);
+            } catch (error) {
+                console.error('Error fetching cart items:', error);
+            }
+        };
+        load();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const recalcTotals = (items: LocalCartItem[]) => {
         let newTotal = 0;
         let newNumberOfChecked = 0;
         items.forEach(cartItem => {
@@ -115,8 +165,8 @@ const CartScreen: FC = () => {
     return cartItems.length === 0 ? (
         <ThemedView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
             <Image source={require('@/assets/images/emptyCart.png')} style={{ width: '100%', height: 350 }} />
-            <ThemedText type="title" style={{ textAlign: 'center', marginTop: 30, fontSize: 20 }}>Your cart is empty</ThemedText>
-            <FullButton onPress={() => { router.push('/productList') }} text="Explore Products" />
+            <ThemedText type="title" style={{ textAlign: 'center', marginTop: 30, fontSize: 20 }}>{t('cart.empty')}</ThemedText>
+            <FullButton onPress={() => { router.push('/productList') }} text={t('cart.explore')} style={{ width: "100%", marginTop: 16 }} />
         </ThemedView>
     ) : (
         <ThemedView>
@@ -124,10 +174,10 @@ const CartScreen: FC = () => {
                 <ThemedView style={styles.headerContainer}>
                     <ThemedView style={styles.leftHeader}>
                         <GoBackButton />
-                        <ThemedText type="title" style={{ fontSize: 20 }}>My Cart</ThemedText>
+                        <ThemedText type="title" style={{ fontSize: 20 }}>{t('cart.title')}</ThemedText>
                     </ThemedView>
                     <Pressable onPress={() => setIsModalVisible(true)}>
-                        <ThemedText style={{ color: palette.tint }}>Voucher Code</ThemedText>
+                        <ThemedText style={{ color: palette.tint }}>{t('cart.voucherCode')}</ThemedText>
                     </Pressable>
                 </ThemedView>
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
@@ -145,27 +195,27 @@ const CartScreen: FC = () => {
                 </ScrollView>
                 <ThemedView style={styles.orderinfo}>
                     <ThemedView style={{ gap: 5 }}>
-                        <ThemedText type="title" style={{ fontSize: 18 }}>Order Info</ThemedText>
+                        <ThemedText type="title" style={{ fontSize: 18 }}>{t('cart.orderInfo')}</ThemedText>
                         <ThemedView style={styles.info}>
-                            <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>Total: </ThemedText>
+                            <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>{t('cart.subtotal')}: </ThemedText>
                             <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>{total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.info}>
-                            <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>Shipping cost: </ThemedText>
+                            <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>{t('cart.shippingCost')}: </ThemedText>
                             <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>{(0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         </ThemedView>
                         {discount > 0 && (
                             <ThemedView style={styles.info}>
-                                <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>Discount: </ThemedText>
+                                <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>{t('cart.discount')}: </ThemedText>
                                 <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>- {discount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                             </ThemedView>
                         )}
                         <ThemedView style={styles.info}>
-                            <ThemedText type="title" style={{ fontSize: 18 }}>Total: </ThemedText>
+                            <ThemedText type="title" style={{ fontSize: 18 }}>{t('cart.total')}: </ThemedText>
                             <ThemedText type="title" style={{ fontSize: 18 }}>{currentTotal.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         </ThemedView>
                     </ThemedView>
-                    <FullButton onPress={() => { handleCheckout() }} text={`Checkout (${numberOfChecked})`} />
+                    <FullButton onPress={() => { handleCheckout() }} text={`${t('cart.checkout')} (${numberOfChecked})`} />
                 </ThemedView>
             </ThemedView>
             <Modal
@@ -185,15 +235,15 @@ const CartScreen: FC = () => {
                         onPress={() => setIsModalVisible(false)}
                     />
                     <ThemedView style={[styles.modalContent, { backgroundColor: palette.modalBackground }]}>
-                        <ThemedText style={styles.modalTitle}>Voucher Code</ThemedText>
+                        <ThemedText style={styles.modalTitle}>{t('cart.voucherCode')}</ThemedText>
                         <TextInput
                             style={styles.input}
-                            placeholder="Enter Voucher Code"
+                            placeholder={t('cart.enterVoucherCode')}
                             placeholderTextColor="#999"
                         />
                         <FullButton
                             onPress={() => setIsModalVisible(false)}
-                            text="Apply"
+                            text={t('cart.apply')}
                         />
                     </ThemedView>
                 </KeyboardAvoidingView>
@@ -215,10 +265,10 @@ const CartScreen: FC = () => {
                         onPress={() => setIsDeleteModalVisible(false)}
                     />
                     <ThemedView style={[styles.modalContent, { backgroundColor: palette.modalBackground }]}>
-                        <ThemedText style={styles.modalTitle}>Delete</ThemedText>
-                        <ThemedText style={{ marginTop: 8 }}>Delete product from cart</ThemedText>
-                        <FullButton onPress={confirmDelete} text="Delete" />
-                        <BorderButton onPress={cancelDelete} text="Cancel" />
+                        <ThemedText style={styles.modalTitle}>{t('cart.delete')}</ThemedText>
+                        <ThemedText style={{ marginTop: 8 }}>{t('cart.deleteProductFromCart')}</ThemedText>
+                        <FullButton onPress={confirmDelete} text={t('common.delete')} />
+                        <BorderButton onPress={cancelDelete} text={t('common.cancel')} />
                     </ThemedView>
                 </KeyboardAvoidingView>
             </Modal>

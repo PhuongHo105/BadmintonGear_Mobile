@@ -1,4 +1,5 @@
 import { Colors } from '@/constants/theme';
+import '@/i18n';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';

@@ -4,32 +4,72 @@ import FullButton from "@/components/ui/fullbutton";
 import Header from "@/components/ui/header";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import Slider from "@/components/ui/slider";
-import { BRAND_OPTIONS, CATEGORY_OPTIONS, PRICE_RANGE, PRICE_STEP, type ProductFilters, formatPrice } from "@/constants/product-data";
+import { formatPrice, getCategoryOptions, PRICE_STEP, type ProductFilters } from "@/constants/product-data";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { http } from "@/services/http";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput } from "react-native";
 
 const SearchScreen: React.FC = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const scheme = useColorScheme() ?? 'light';
     const palette = Colors[scheme];
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [value, setValue] = useState('');
     const [draftFilters, setDraftFilters] = useState<ProductFilters>({});
+    const [productList, setProductList] = useState<any[]>([]);
+
+    useEffect(() => {
+        // Fetch products to derive brand list and price range
+        const fetchProducts = async () => {
+            try {
+                const productsResponse = await http.get('/products');
+                setProductList(productsResponse);
+            } catch (error) {
+                console.error('Error fetching products for search filters:', error);
+            }
+        };
+        fetchProducts();
+    }, []);
+
+    const computedRange = useMemo(() => {
+        const prices = productList
+            .map((p) => Number(p?.price))
+            .filter((n) => Number.isFinite(n));
+        if (prices.length === 0) return { min: 0, max: PRICE_STEP * 20 };
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        const roundedMin = Math.floor(minPrice / PRICE_STEP) * PRICE_STEP;
+        const roundedMax = Math.ceil(maxPrice / PRICE_STEP) * PRICE_STEP;
+        return { min: roundedMin, max: Math.max(roundedMax, roundedMin + PRICE_STEP) };
+    }, [productList]);
+
+    const brandOptions = useMemo(() => {
+        const set = new Set<string>();
+        for (const p of productList) {
+            const b = (p?.brand ?? '').toString().trim();
+            if (b) set.add(b);
+        }
+        const brands = Array.from(set).sort((a, b) => a.localeCompare(b));
+        return [{ label: 'All', value: undefined as string | undefined }, ...brands.map((b) => ({ label: b, value: b }))];
+    }, [productList]);
+
     const [priceInputs, setPriceInputs] = useState<{ min: number; max: number }>(() => ({
-        min: PRICE_RANGE.min,
-        max: PRICE_RANGE.max,
+        min: computedRange.min,
+        max: computedRange.max,
     }));
 
     const handleCategoryPress = (value?: number) => {
         setDraftFilters((prev) => {
             const next: ProductFilters = { ...prev };
-            if (value === undefined || prev.category === value) {
-                delete next.category;
+            if (value === undefined || prev.categoriesid === value) {
+                delete next.categoriesid;
             } else {
-                next.category = value;
+                next.categoriesid = value;
             }
             return next;
         });
@@ -50,13 +90,13 @@ const SearchScreen: React.FC = () => {
     const updatePriceDraft = (minValue: number, maxValue: number) => {
         setDraftFilters((prev) => {
             const next: ProductFilters = { ...prev };
-            if (minValue <= PRICE_RANGE.min) {
+            if (minValue <= computedRange.min) {
                 delete next.minPrice;
             } else {
                 next.minPrice = minValue;
             }
 
-            if (maxValue >= PRICE_RANGE.max) {
+            if (maxValue >= computedRange.max) {
                 delete next.maxPrice;
             } else {
                 next.maxPrice = maxValue;
@@ -98,7 +138,7 @@ const SearchScreen: React.FC = () => {
             const isActive = option.value === undefined ? activeValue === undefined : option.value === activeValue;
             return (
                 <Pressable
-                    key={option.label}
+                    key={`${option.label}-${String(option.value)}`}
                     onPress={() => onPress(option.value)}
                     style={({ pressed }) => [
                         styles.chip,
@@ -124,19 +164,19 @@ const SearchScreen: React.FC = () => {
             params.searchQuery = trimmedQuery;
         }
 
-        if (typeof draftFilters.category === 'number') {
-            params.category = String(draftFilters.category);
+        if (typeof draftFilters.categoriesid === 'number') {
+            params.categoriesid = String(draftFilters.categoriesid);
         }
 
         if (draftFilters.brand) {
             params.brand = draftFilters.brand;
         }
 
-        if (typeof draftFilters.minPrice === 'number' && draftFilters.minPrice > PRICE_RANGE.min) {
+        if (typeof draftFilters.minPrice === 'number' && draftFilters.minPrice > computedRange.min) {
             params.minPrice = String(draftFilters.minPrice);
         }
 
-        if (typeof draftFilters.maxPrice === 'number' && draftFilters.maxPrice < PRICE_RANGE.max) {
+        if (typeof draftFilters.maxPrice === 'number' && draftFilters.maxPrice < computedRange.max) {
             params.maxPrice = String(draftFilters.maxPrice);
         }
 
@@ -152,7 +192,7 @@ const SearchScreen: React.FC = () => {
             <ThemedView>
                 <ThemedView style={[styles.searchInputContainer, { borderColor: palette.border, backgroundColor: palette.background }]}>
                     <TextInput
-                        placeholder="Search..."
+                        placeholder={t("search.search")}
                         placeholderTextColor={palette.icon}
                         style={[styles.searchInput, { color: palette.text, backgroundColor: palette.background }]}
                         value={value}
@@ -194,29 +234,29 @@ const SearchScreen: React.FC = () => {
                     />
                     <ThemedView style={[styles.modalContent, { backgroundColor: palette.modalBackground }]}>
                         <ThemedText type="defaultSemiBold" style={styles.sectionLabel}>
-                            Category
+                            {t("search.category")}
                         </ThemedText>
-                        <ThemedView style={styles.chipGroup}>{renderChip<number>(CATEGORY_OPTIONS, draftFilters.category, handleCategoryPress)}</ThemedView>
+                        <ThemedView style={styles.chipGroup}>{renderChip<number>(getCategoryOptions(), draftFilters.categoriesid, handleCategoryPress)}</ThemedView>
 
                         <ThemedText type="defaultSemiBold" style={styles.sectionLabel}>
-                            Brand
+                            {t("search.brand")}
                         </ThemedText>
-                        <ThemedView style={styles.chipGroup}>{renderChip<string>(BRAND_OPTIONS, draftFilters.brand, handleBrandPress)}</ThemedView>
+                        <ThemedView style={styles.chipGroup}>{renderChip<string>(brandOptions, draftFilters.brand, handleBrandPress)}</ThemedView>
 
                         <ThemedText type="defaultSemiBold" style={styles.sectionLabel}>
-                            Price Range (VND)
+                            {t("search.priceRange")}
                         </ThemedText>
                         <ThemedView style={styles.priceSection}>
                             <ThemedView style={styles.rangeLabels}>
-                                <ThemedText style={styles.rangeLabel}>Tối thiểu: {formatPrice(priceInputs.min)}</ThemedText>
-                                <ThemedText style={styles.rangeLabel}>Tối đa: {formatPrice(priceInputs.max)}</ThemedText>
+                                <ThemedText style={styles.rangeLabel}>{t("search.min")}: {formatPrice(priceInputs.min)}</ThemedText>
+                                <ThemedText style={styles.rangeLabel}>{t("search.max")}: {formatPrice(priceInputs.max)}</ThemedText>
                             </ThemedView>
                             <ThemedView style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <ThemedText>Min Price</ThemedText>
+                                <ThemedText>{t("search.minPrice")}</ThemedText>
                                 <Slider
                                     style={styles.slider}
-                                    minimumValue={PRICE_RANGE.min}
-                                    maximumValue={PRICE_RANGE.max}
+                                    minimumValue={computedRange.min}
+                                    maximumValue={computedRange.max}
                                     value={priceInputs.min}
                                     step={PRICE_STEP}
                                     minimumTrackTintColor={palette.tint}
@@ -226,11 +266,11 @@ const SearchScreen: React.FC = () => {
                                 />
                             </ThemedView>
                             <ThemedView style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <ThemedText>Max Price</ThemedText>
+                                <ThemedText>{t("search.maxPrice")}</ThemedText>
                                 <Slider
                                     style={styles.slider}
-                                    minimumValue={PRICE_RANGE.min}
-                                    maximumValue={PRICE_RANGE.max}
+                                    minimumValue={computedRange.min}
+                                    maximumValue={computedRange.max}
                                     value={priceInputs.max}
                                     step={PRICE_STEP}
                                     minimumTrackTintColor={palette.border}
@@ -240,7 +280,7 @@ const SearchScreen: React.FC = () => {
                                 />
                             </ThemedView>
                         </ThemedView>
-                        <FullButton text="Apply" onPress={handleApplyFilters} />
+                        <FullButton text={t("search.apply")} onPress={handleApplyFilters} />
                     </ThemedView>
                 </KeyboardAvoidingView>
             </Modal>

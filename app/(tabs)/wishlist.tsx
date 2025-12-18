@@ -9,9 +9,11 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { FC, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 const WishlistScreen: FC = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const scheme = useColorScheme() ?? 'light';
     const palette = Colors[scheme];
@@ -43,16 +45,16 @@ const WishlistScreen: FC = () => {
     return wishlistItems.length === 0 ? (
         <ThemedView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
             <Image source={require('@/assets/images/emptyWishlist.png')} style={{ width: '100%', height: 350 }} />
-            <ThemedText type="title" style={{ textAlign: 'center', marginTop: 30, fontSize: 20 }}>Your wishlist is empty</ThemedText>
-            <ThemedText type="default" style={{ textAlign: 'center', marginTop: 10, color: palette.secondaryText }}>Tap heart button to start saving your favorite items.</ThemedText>
-            <FullButton onPress={() => { router.push('/productList') }} text="Explore Products" />
+            <ThemedText type="title" style={{ textAlign: 'center', marginTop: 30, fontSize: 20 }}>{t('wishlist.empty')}</ThemedText>
+            <ThemedText type="default" style={{ textAlign: 'center', marginTop: 10, color: palette.secondaryText }}>{t('wishlist.emptyDescription')}</ThemedText>
+            <FullButton onPress={() => { router.push('/productList') }} text={t('wishlist.explore')} />
         </ThemedView>
     ) : (
         <View>
             <ThemedView style={styles.container}>
                 <ThemedView style={styles.headerContainer}>
                     <GoBackButton />
-                    <ThemedText type="title" style={{ fontSize: 20 }}>My Wishlist</ThemedText>
+                    <ThemedText type="title" style={{ fontSize: 20 }}>{t('wishlist.title')}</ThemedText>
                 </ThemedView>
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
                     {wishlistItems.map((item) => (
@@ -71,9 +73,10 @@ const WishlistScreen: FC = () => {
                     >
                         <Pressable style={[styles.modalOverlay, { backgroundColor: palette.modalOverlay }]} onPress={cancelRemove} />
                         <View style={[styles.modalContent, { backgroundColor: palette.modalBackground }]}>
-                            <ThemedText style={styles.modalTitle}>Delete product from wishlist</ThemedText>
-                            <FullButton onPress={confirmRemove} text="Delete" />
-                            <BorderButton onPress={cancelRemove} text="Cancel" />
+                            <ThemedText style={styles.modalTitle}>{t('wishlist.delete')}</ThemedText>
+                            <ThemedText type="default" style={{ color: palette.secondaryText }}>{t('wishlist.deleteProductFromWishlist')}</ThemedText>
+                            <FullButton onPress={confirmRemove} text={t('common.delete')} />
+                            <BorderButton onPress={cancelRemove} text={t('common.cancel')} />
                         </View>
                     </KeyboardAvoidingView>
                 </Modal>

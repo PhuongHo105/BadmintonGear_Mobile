@@ -7,11 +7,13 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { router } from 'expo-router';
 import React, { FC, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 
 const CheckoutScreen: FC = () => {
+    const { t } = useTranslation();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const checkoutData = {
@@ -45,7 +47,7 @@ const CheckoutScreen: FC = () => {
             <ThemedView style={styles.headerContainer}>
                 <ThemedView style={styles.leftHeader}>
                     <GoBackButton />
-                    <ThemedText type="title" style={{ fontSize: 20 }}>Checkout</ThemedText>
+                    <ThemedText type="title" style={{ fontSize: 20 }}>{t('checkoutReview.title')}</ThemedText>
                 </ThemedView>
             </ThemedView>
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -72,59 +74,59 @@ const CheckoutScreen: FC = () => {
                 </ThemedView>
                 <ThemedView style={styles.content}>
                     <ThemedView style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 20 }}>
-                        <ThemedText type='title' style={{ fontSize: 20 }}>Item ({checkoutData.items.length})</ThemedText>
+                        <ThemedText type='title' style={{ fontSize: 20 }}>{t('checkoutReview.item')} ({checkoutData.items.length})</ThemedText>
                         <Pressable onPress={() => { router.push('/checkout/items') }}>
                             <IconSymbol name='chevron-right' size={36} color={Colors[scheme].text} />
                         </Pressable>
                     </ThemedView>
                     <ThemedView >
-                        <ThemedText type='title' style={{ fontSize: 20 }}>Shipping Address</ThemedText>
+                        <ThemedText type='title' style={{ fontSize: 20 }}>{t('checkoutReview.shippingAddressTitle')}</ThemedText>
                         <ThemedView style={styles.contentContainer}>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>Full Name</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.fields.fullName')}</ThemedText>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.shippingAddress.fullName}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>Phone Number</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.fields.phoneNumber')}</ThemedText>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.shippingAddress.phoneNumber}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>Country</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.fields.country')}</ThemedText>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.shippingAddress.country}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>City</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.fields.city')}</ThemedText>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.shippingAddress.city}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>District</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.fields.district')}</ThemedText>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.shippingAddress.district}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>Street Address</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.fields.streetAddress')}</ThemedText>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.shippingAddress.detailAddress}</ThemedText>
                         </ThemedView>
                     </ThemedView>
                     <ThemedView >
-                        <ThemedText type='title' style={{ fontSize: 20 }}>Order Information</ThemedText>
+                        <ThemedText type='title' style={{ fontSize: 20 }}>{t('checkoutReview.orderInformationTitle')}</ThemedText>
                         <ThemedView style={styles.contentContainer}>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>Subtotal</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.summary.subtotal')}</ThemedText>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{subtotal.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>Shipping Cost</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.summary.shippingCost')}</ThemedText>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.shippingCost.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>Discount</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.summary.discount')}</ThemedText>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.discount} %</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
-                            <ThemedText type='default' style={{ fontSize: 18, color: Colors[scheme].text }}>Total</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 18, color: Colors[scheme].text }}>{t('checkoutReview.summary.total')}</ThemedText>
                             <ThemedText type='default' style={{ fontSize: 18, color: Colors[scheme].text }}>{total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         </ThemedView>
                     </ThemedView>
                 </ThemedView>
-                <FullButton text='Place Order' onPress={() => { router.push('/checkout/result') }} style={{ marginTop: 30, marginBottom: 50 }} />
+                <FullButton text={t('checkoutReview.placeOrder')} onPress={() => { router.push('/checkout/result') }} style={{ marginTop: 30, marginBottom: 50 }} />
             </ScrollView >
         </ThemedView >
     )

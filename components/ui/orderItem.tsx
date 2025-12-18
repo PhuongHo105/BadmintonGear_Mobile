@@ -3,7 +3,8 @@ import { useColorScheme } from '@/hooks/use-color-scheme'
 import { Image } from 'expo-image'
 import { router } from 'expo-router'
 import React from 'react'
-import { Pressable, StyleSheet } from 'react-native'
+import { useTranslation } from 'react-i18next'
+import { Alert, Pressable, StyleSheet } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
 import { ThemedText } from '../themed-text'
 import { ThemedView } from '../themed-view'
@@ -32,6 +33,7 @@ type Props = {
 }
 
 export default function OrderItem({ order }: Props) {
+    const { t } = useTranslation();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const tint: string = Colors[scheme].tint;
@@ -45,6 +47,27 @@ export default function OrderItem({ order }: Props) {
         const itemPrice = item.price * (1 - (item.discount ?? 0) / 100);
         return sum + itemPrice * item.quantity;
     }, 0) * (1 - (order.discount ?? 0) / 100);
+
+    const handleCancelOrder = () => {
+        Alert.alert(
+            t('orders.cancelOrderTitle'),
+            t('orders.cancelOrderMessage'),
+            [
+                {
+                    text: t('common.cancel'),
+                    style: 'cancel'
+                },
+                {
+                    text: t('orders.confirmCancel'),
+                    style: 'destructive',
+                    onPress: () => {
+                        // TODO: Call API to cancel order
+                        console.log('Order cancelled:', order.id);
+                    }
+                }
+            ]
+        );
+    };
 
     return (
         <Pressable onPress={() => { router.push(`/order/${order.id}` as any) }}>
@@ -93,10 +116,10 @@ export default function OrderItem({ order }: Props) {
                                 </Pressable>
                             </ThemedView>
                             {order.details.length > 1 ? (
-                                <ThemedText style={{ fontSize: 12, fontWeight: '600', color: secondaryText }}>+ {order.details.length - 1} products</ThemedText>
+                                <ThemedText style={{ fontSize: 12, fontWeight: '600', color: secondaryText }}>+ {order.details.length - 1}  {t('orders.products')}</ThemedText>
                             ) : null}
                             <ThemedView style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <ThemedText style={{ fontSize: 16, fontWeight: '700', color: textColor }}>Total:</ThemedText>
+                                <ThemedText style={{ fontSize: 16, fontWeight: '700', color: textColor }}>{t('orders.total')}:</ThemedText>
                                 <ThemedText style={{ fontSize: 16, fontWeight: '700', color: textColor }}>{total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                             </ThemedView>
                         </ThemedView>
@@ -105,13 +128,13 @@ export default function OrderItem({ order }: Props) {
                 </ThemedView >
                 {order.status === 'Delivered' ? (
                     <ThemedView style={{ paddingHorizontal: 12, flexDirection: 'row', gap: 12 }}>
-                        <BorderButton text='Buy Again' onPress={() => { }} style={{ flex: 1 }} />
-                        <FullButton text='Rate' onPress={() => { router.push('/feedback') }} style={{ flex: 1 }} />
+                        <BorderButton text={t('orders.buyAgain')} onPress={() => { }} style={{ flex: 1 }} />
+                        <FullButton text={t('orders.rate')} onPress={() => { router.push('/feedback') }} style={{ flex: 1 }} />
                     </ThemedView>
                 ) : null}
                 {order.status === 'Pending' ? (
                     <ThemedView style={{ paddingHorizontal: 12, justifyContent: 'flex-end', gap: 12 }}>
-                        <FullButton text='Cancel' onPress={() => { }} style={{ flex: 1 }} />
+                        <FullButton text={t('orders.cancel')} onPress={handleCancelOrder} style={{ flex: 1 }} />
                     </ThemedView>
                 ) : null}
             </ThemedView>

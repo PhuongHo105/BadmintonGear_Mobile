@@ -60,3 +60,6 @@ pnpm-lock.yaml
 *.apk
 *.aab
 *.ipa
+
+#env
+.env

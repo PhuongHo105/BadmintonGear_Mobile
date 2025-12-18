@@ -7,6 +7,7 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ColorSchemeName,
     StyleSheet,
@@ -14,6 +15,7 @@ import {
 } from 'react-native';
 
 const SetNewPasswordScreen: React.FC = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const schemeRaw = useColorScheme() as ColorSchemeName | undefined | null;
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
@@ -34,11 +36,11 @@ const SetNewPasswordScreen: React.FC = () => {
             return;
         }
         if (!isValidPassword(newPassword)) {
-            setError('Invalid password');
+            setError((t('forgotPassword.invalidPassword')));
             return;
         }
         if (confirmPassword.length > 0 && newPassword !== confirmPassword) {
-            setError('Passwords do not match');
+            setError(t('forgotPassword.matchError'));
         } else {
             setError(null);
         }
@@ -56,7 +58,7 @@ const SetNewPasswordScreen: React.FC = () => {
             <ThemedView style={styles.headerContainer}>
                 <ThemedView style={styles.leftHeader}>
                     <GoBackButton />
-                    <ThemedText type="title" style={{ fontSize: 20 }}>Create Password</ThemedText>
+                    <ThemedText type="title" style={{ fontSize: 20 }}>{t('forgotPassword.create')}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.rightHeader}>
                     <ThemedText type="default" style={{ fontSize: 16, color: Colors[scheme].text }}>03 / </ThemedText>
@@ -66,16 +68,16 @@ const SetNewPasswordScreen: React.FC = () => {
 
             <ThemedView style={styles.content}>
                 <ThemedText type="title" style={styles.heading}>
-                    New Password
+                    {t('forgotPassword.newPassword')}
                 </ThemedText>
                 <ThemedText style={[styles.subtitle, { color: Colors[scheme].secondaryText }]}>
-                    Enter your new password and remember it.
+                    {t('forgotPassword.newPasswordDescription')}
                 </ThemedText>
 
                 <ThemedView style={styles.fieldGroup}>
-                    <ThemedText>Password *</ThemedText>
+                    <ThemedText>{t('forgotPassword.newPassword')} *</ThemedText>
                     <PasswordInput
-                        placeholder="Enter your new password"
+                        placeholder={t('forgotPassword.newPasswordPlaceholder')}
                         placeholderTextColor={Colors[scheme].secondaryText}
                         value={newPassword}
                         onChangeText={setNewPassword}
@@ -90,9 +92,9 @@ const SetNewPasswordScreen: React.FC = () => {
                     />
                 </ThemedView>
                 <ThemedView style={styles.fieldGroup}>
-                    <ThemedText>Confirm Password *</ThemedText>
+                    <ThemedText>{t('forgotPassword.confirmNewPassword')} *</ThemedText>
                     <PasswordInput
-                        placeholder="Confirm your new password"
+                        placeholder={t('forgotPassword.confirmNewPasswordPlaceholder')}
                         placeholderTextColor={Colors[scheme].secondaryText}
                         value={confirmPassword}
                         onChangeText={setConfirmPassword}
@@ -112,7 +114,7 @@ const SetNewPasswordScreen: React.FC = () => {
                 ) : null}
 
                 <ThemedView style={styles.buttonsContainer}>
-                    <FullButton text="Save" onPress={handleSubmit} />
+                    <FullButton text={t('common.save')} onPress={handleSubmit} />
                 </ThemedView>
             </ThemedView>
         </ThemedView>

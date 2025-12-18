@@ -9,10 +9,12 @@ import { login } from '@/services/authenticationService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ColorSchemeName, Image, ImageSourcePropType, Pressable, StyleSheet, TextInput } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 const LoginScreen: React.FC = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const schemeRaw = useColorScheme() as ColorSchemeName | undefined | null;
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
@@ -29,7 +31,7 @@ const LoginScreen: React.FC = () => {
     const handleLogin = async (email: string, password: string) => {
         setError(null);
         if (!email.trim() || !password.trim()) {
-            setError('Email and password are required.');
+            setError(t('login.emailRequired'));
             return;
         }
         try {
@@ -42,10 +44,10 @@ const LoginScreen: React.FC = () => {
                 await AsyncStorage.setItem('password', password);
                 router.push('/');
             } else {
-                setError('Username or password is incorrect. Please try again.');
+                setError(t('login.invalidCredentials'));
             }
         } catch {
-            setError('Login failed. Please try again.');
+            setError(t('login.loginFailed'));
         } finally {
             setIsLoading(false);
         }
@@ -56,28 +58,28 @@ const LoginScreen: React.FC = () => {
             <ThemedView style={styles.logoContainer}>
                 <Image source={logoSource} style={styles.logo} />
                 <ThemedText type="title" style={[styles.title, { color: Colors[scheme].text }]}>
-                    BadmintonGear
+                    {t('common.appName')}
                 </ThemedText>
             </ThemedView>
 
             <ThemedView style={styles.content}>
                 <ThemedText type="title" style={styles.heading}>
-                    Login
+                    {t('login.title')}
                 </ThemedText>
                 <ThemedView style={styles.signupRow}>
                     <ThemedText type="default" style={styles.signupPrompt}>
-                        Don’t have an account?
+                        {t('login.dontHaveAccount')}
                     </ThemedText>
                     <Pressable onPress={() => router.push('/signup')}>
                         <ThemedText type="link" style={[styles.signupLink, { color: Colors[scheme].tint }]}>
-                            Sign up
+                            {t('common.signup')}
                         </ThemedText>
                     </Pressable>
                 </ThemedView>
 
                 <ThemedView>
                     <ThemedView style={styles.fieldGroup}>
-                        <ThemedText>Email or Username *</ThemedText>
+                        <ThemedText>{t('common.email')} *</ThemedText>
                         <TextInput
                             style={[
                                 styles.input,
@@ -88,7 +90,7 @@ const LoginScreen: React.FC = () => {
                             ]}
                             value={email}
                             onChangeText={setEmail}
-                            placeholder="Enter your email or username"
+                            placeholder={t('login.emailPlaceholder')}
                             placeholderTextColor={Colors[scheme].secondaryText}
                             keyboardType="email-address"
                             autoCapitalize="none"
@@ -98,9 +100,9 @@ const LoginScreen: React.FC = () => {
                     </ThemedView>
 
                     <ThemedView style={styles.fieldGroup}>
-                        <ThemedText>Password *</ThemedText>
+                        <ThemedText>{t('common.password')} *</ThemedText>
                         <PasswordInput
-                            placeholder="Enter your password"
+                            placeholder={t('login.passwordPlaceholder')}
                             placeholderTextColor={Colors[scheme].secondaryText}
                             value={password}
                             onChangeText={setPassword}
@@ -123,14 +125,14 @@ const LoginScreen: React.FC = () => {
                     <ThemedView style={styles.forgotPasswordRow}>
                         <Pressable onPress={() => router.push('/forgotPassword')}>
                             <ThemedText type="link" style={[styles.forgotPasswordLink, { color: Colors[scheme].tint }]}>
-                                Forgot Password?
+                                {t('common.forgotPassword')}
                             </ThemedText>
                         </Pressable>
                     </ThemedView>
                     <ThemedView style={{ marginTop: 32 }}>
-                        <FullButton text={isLoading ? 'Logging in…' : 'Login'} onPress={() => { if (!isLoading) handleLogin(email, password) }} />
+                        <FullButton text={isLoading ? t('common.loggingIn') : t('common.login')} onPress={() => { if (!isLoading) handleLogin(email, password) }} />
                         <BorderButton
-                            text='Login with Google'
+                            text={t('common.loginWithGoogle')}
                             onPress={() => { }}
                             style={{ marginTop: 12 }}
                             icon={
@@ -147,7 +149,7 @@ const LoginScreen: React.FC = () => {
             </ThemedView>
             <ThemedView style={styles.lastContainer}>
                 <ThemedText type="default" style={{ color: Colors[scheme].secondaryText, textAlign: 'center' }}>
-                    By logging in, you agree to our <ThemedText type="link" onPress={() => { router.push('/termcondition') }}>Terms of Service</ThemedText> and <ThemedText type="link" onPress={() => { router.push('/privacy') }}>Privacy Policy</ThemedText>.
+                    {t('login.termsText')} <ThemedText type="link" onPress={() => { router.push('/termcondition') }}>{t('login.termsOfService')}</ThemedText> and <ThemedText type="link" onPress={() => { router.push('/privacy') }}>{t('login.privacyPolicy')}</ThemedText>.
                 </ThemedText>
             </ThemedView>
         </ThemedView>

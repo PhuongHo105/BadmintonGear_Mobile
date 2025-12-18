@@ -7,10 +7,12 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useRouter } from 'expo-router';
 import React, { FC } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 
 const ChangePassword01Screen: FC = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
@@ -18,13 +20,22 @@ const ChangePassword01Screen: FC = () => {
     const iconColor: string = Colors[scheme].icon;
     const secondaryText: string = Colors[scheme].secondaryText;
     const [error, setError] = React.useState<string | null>(null);
+    const [currentPassword, setCurrentPassword] = React.useState('');
+    const handleCheckCurrentPassword = () => {
+        if (currentPassword != '123')
+            setError(t('changePassword.invalidCurrentPassword'));
+        else {
+            setError(null);
+            router.push("/changepassword/02" as any)
+        }
+    }
 
     return (
         <ThemedView style={styles.container}>
             <ThemedView style={styles.headerContainer}>
                 <ThemedView style={styles.leftHeader}>
                     <GoBackButton />
-                    <ThemedText type="title" style={{ fontSize: 20 }}>Change password</ThemedText>
+                    <ThemedText type="title" style={{ fontSize: 20 }}>{t('changePassword.title')}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.rightHeader}>
                     <ThemedText type="default" style={{ fontSize: 16, color: textColor }}>01 / </ThemedText>
@@ -32,14 +43,16 @@ const ChangePassword01Screen: FC = () => {
                 </ThemedView>
             </ThemedView>
             <ThemedView>
-                <ThemedText type="title" style={{ fontSize: 24, marginBottom: 12, color: textColor }}>Old Password</ThemedText>
-                <ThemedText type="default" style={{ fontSize: 14, marginBottom: 24, color: secondaryText }}>Enter old password to change the password.</ThemedText>
+                <ThemedText type="title" style={{ fontSize: 24, marginBottom: 12, color: textColor }}>{t('changePassword.currentPassword')}</ThemedText>
+                <ThemedText type="default" style={{ fontSize: 14, marginBottom: 24, color: secondaryText }}>{t('changePassword.currentPasswordDescription')}</ThemedText>
                 <ThemedView>
-                    <ThemedText type="defaultSemiBold" style={{ fontSize: 16, marginBottom: 8, color: textColor }}>Old Password *</ThemedText>
+                    <ThemedText type="defaultSemiBold" style={{ fontSize: 16, marginBottom: 8, color: textColor }}>{t('changePassword.currentPassword')} *</ThemedText>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <PasswordInput
-                            placeholder="Enter your old password"
+                            placeholder={t('changePassword.enterCurrentPassword')}
                             placeholderTextColor={secondaryText}
+                            value={currentPassword}
+                            onChangeText={setCurrentPassword}
                         />
                     </View>
                 </ThemedView>
@@ -48,7 +61,7 @@ const ChangePassword01Screen: FC = () => {
                 ) : null}
                 <ThemedView style={{ marginTop: 30 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <FullButton onPress={() => { router.push("/changepassword/02") }} text='Continue' style={{ flex: 1 }} />
+                        <FullButton onPress={handleCheckCurrentPassword} text={t('common.continue')} style={{ flex: 1 }} />
                     </View>
                 </ThemedView>
             </ThemedView>

@@ -2,6 +2,7 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Image } from "expo-image";
 import { FC } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { ThemedText } from "../themed-text";
@@ -20,6 +21,7 @@ type WishlistItemProps = Product & {
 }
 
 const WishlistItem: FC<WishlistItemProps> = ({ id, name, price, image, discount, onDeleteRequest }) => {
+    const { t } = useTranslation();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const textColor: string = Colors[scheme].text;
@@ -53,7 +55,7 @@ const WishlistItem: FC<WishlistItemProps> = ({ id, name, price, image, discount,
                                     <Path d="M18 12C18 12.41 17.66 12.75 17.25 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H17.25C17.66 11.25 18 11.59 18 12Z" fill={secondaryText} />
                                     <Path d="M12 18C11.59 18 11.25 17.66 11.25 17.25V6C11.25 5.59 11.59 5.25 12 5.25C12.41 5.25 12.75 5.59 12.75 6V17.25C12.75 17.66 12.41 18 12 18Z" fill={secondaryText} />
                                 </Svg>
-                                <Text style={{ fontSize: 16, paddingHorizontal: 2, color: secondaryText }}>Add to cart</Text>
+                                <Text style={{ fontSize: 16, paddingHorizontal: 2, color: secondaryText }}>{t('wishlist.addToCart')}</Text>
                             </ThemedView>
                         </Pressable>
                     </ThemedView>

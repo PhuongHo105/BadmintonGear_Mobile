@@ -2,12 +2,14 @@ import { useThemePreference } from '@/app/providers/ThemePreferenceProvider';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import CustomSwitch from '@/components/ui/customSwitch';
+import LanguageSelector from '@/components/ui/language-selector';
 import ProfileMenuItem from '@/components/ui/profileMenuItem';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Alert,
     ColorSchemeName,
@@ -20,6 +22,7 @@ import {
 } from 'react-native';
 
 const ProfileScreen: React.FC = () => {
+    const { t } = useTranslation();
     const router = useRouter();
     const schemeRaw = useColorScheme() as ColorSchemeName | null | undefined;
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors
@@ -61,39 +64,39 @@ const ProfileScreen: React.FC = () => {
                 style={[styles.contentContainer, { backgroundColor: background }]}
                 showsVerticalScrollIndicator={false}>
                 <ThemedView style={styles.section}>
-                    <ThemedText style={[styles.sectionTitle, { color: textColor }]}>Personal Information</ThemedText>
+                    <ThemedText style={[styles.sectionTitle, { color: textColor }]}>{t('profile.personalInformation')}</ThemedText>
                     <ProfileMenuItem
                         icon="box"
-                        name="Shipping Address"
+                        name={t('profile.shippingAddress')}
                         onPress={() => router.push('/shippingAddress' as any)}
                     />
                     <ProfileMenuItem
                         icon="clipboard"
-                        name="Order History"
+                        name={t('profile.orderHistory')}
                         onPress={() => router.push('/orderList' as any)}
                     />
                 </ThemedView>
 
                 <ThemedView style={styles.section}>
-                    <ThemedText style={[styles.sectionTitle, { color: textColor }]}>Support & Information</ThemedText>
+                    <ThemedText style={[styles.sectionTitle, { color: textColor }]}>{t('profile.supportInformation')}</ThemedText>
                     <ProfileMenuItem
                         icon="shield"
-                        name="Privacy Policy"
+                        name={t('profile.privacyPolicy')}
                         onPress={() => router.push('/privacy' as any)}
                     />
                     <ProfileMenuItem
                         icon="file-text"
-                        name="Terms & Conditions"
+                        name={t('profile.termsAndConditions')}
                         onPress={() => router.push('/termcondition' as any)}
                     />
                     <ProfileMenuItem
                         icon="help-circle"
-                        name="FAQs"
+                        name={t('profile.faqs')}
                         onPress={() => router.push('/faqs' as any)}
                     />
                     <ProfileMenuItem
                         icon="message-circle"
-                        name="Chatbot"
+                        name={t('profile.chatbot')}
                         onPress={() => router.push('/chat' as any)}
                     />
                 </ThemedView>
@@ -102,15 +105,19 @@ const ProfileScreen: React.FC = () => {
                     <ThemedText style={[styles.sectionTitle, { color: textColor }]}>Account Management</ThemedText>
                     <ProfileMenuItem
                         icon="lock"
-                        name="Change Password"
+                        name={t('profile.changePassword')}
                         onPress={() => router.push('/changepassword/01' as any)}
                     />
                     <CustomSwitch
                         icon="moon"
-                        name="Dark Theme"
+                        name={t('profile.darkTheme')}
                         value={!!isDarkTheme}
                         onValueChange={setTheme}
                     />
+                </ThemedView>
+                <ThemedView style={styles.section}>
+                    <ThemedText style={[styles.sectionTitle, { color: textColor }]}>{t('profile.language')}</ThemedText>
+                    <LanguageSelector />
                 </ThemedView>
                 <View style={{ height: 50 }} />
             </ScrollView>
