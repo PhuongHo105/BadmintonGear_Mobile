@@ -225,4 +225,3 @@ const styles = StyleSheet.create({
     }
 });
 
-// Removed jwtDecode stub (not used in React Native login flow)

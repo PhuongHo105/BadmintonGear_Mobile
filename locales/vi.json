@@ -150,7 +150,11 @@
         "title": "Trò chuyện",
         "typeMessage": "Nhập tin nhắn...",
         "startConversation": "Bắt đầu cuộc trò chuyện với người bán",
-        "chatWithSeller": "Trò chuyện với người bán"
+        "chatWithSeller": "Trò chuyện với người bán",
+        "botMode": "Bot",
+        "sellerMode": "Người bán",
+        "welcomeMessage": "Xin chào! Tôi có thể giúp gì cho bạn hôm nay?",
+        "processing": "Đang xử lý..."
     },
     "faqs": {
         "title": "FAQs",

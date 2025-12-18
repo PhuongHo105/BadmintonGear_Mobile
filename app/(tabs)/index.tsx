@@ -64,7 +64,7 @@ export default function HomeScreen() {
       }
     };
 
-    fetchData();
+    // fetchData();
   }, []);
 
   return (
