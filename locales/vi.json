@@ -362,7 +362,11 @@
         },
         "errors": {
             "loadAddress": "Không thể tải địa chỉ. Kiểm tra kết nối và thử lại."
-        }
+        },
+        "updateSuccessTitle": "Thành công",
+        "updateSuccessMessage": "Địa chỉ giao hàng của bạn đã được cập nhật thành công.",
+        "updateErrorTitle": "Lỗi",
+        "updateErrorMessage": "Đã xảy ra lỗi khi cập nhật địa chỉ giao hàng của bạn. Vui lòng thử lại sau."
     },
     "terms": {
         "title": "Điều khoản và Điều kiện",

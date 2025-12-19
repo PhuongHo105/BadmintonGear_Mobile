@@ -361,7 +361,11 @@
         },
         "errors": {
             "loadAddress": "Unable to load address data. Check your connection and try again."
-        }
+        },
+        "updateSuccessTitle": "Success",
+        "updateSuccessMessage": "Your shipping address has been updated successfully.",
+        "updateErrorTitle": "Error",
+        "updateErrorMessage": "There was an error updating your shipping address. Please try again later."
     },
     "terms": {
         "title": "Terms and Conditions",

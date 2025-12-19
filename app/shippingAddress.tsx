@@ -4,9 +4,12 @@ import FullButton from '@/components/ui/fullbutton';
 import GoBackButton from '@/components/ui/gobackbutton';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import React, { FC } from 'react';
+import { getUserById, updateUserProfile } from '@/services/userService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { jwtDecode } from 'jwt-decode';
+import React, { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 type ID = string;
@@ -62,14 +65,108 @@ const ShippingAddressScreen: FC = () => {
     const [selectedDistrict, setSelectedDistrict] = React.useState('');
     const [detailedAddress, setDetailedAddress] = React.useState('');
     const [isDetailedFocused, setIsDetailedFocused] = React.useState(false);
-
     const [isCountryMenuOpen, setIsCountryMenuOpen] = React.useState(false);
     const [isProvinceMenuOpen, setIsProvinceMenuOpen] = React.useState(false);
     const [isDistrictMenuOpen, setIsDistrictMenuOpen] = React.useState(false);
-
     const [addressData, setAddressData] = React.useState<ProvinceOption[]>([]);
     const [isLoadingAddresses, setIsLoadingAddresses] = React.useState(false);
     const [addressError, setAddressError] = React.useState<string | null>(null);
+    const [pendingAddress, setPendingAddress] = React.useState<{ province: string; district: string } | null>(null);
+    const [userData, setUserData] = React.useState<any>(null);
+    const handleGetAddress = async () => {
+        const token = await AsyncStorage.getItem('loginToken');
+        const decoded = jwtDecode(token ?? '');
+        const userId = (decoded as any).userid;
+        const user = await getUserById(userId);
+        setUserData(user);
+
+        // Parse address string separated by commas
+        let detailedAddress = '';
+        let district = '';
+        let province = '';
+
+        if (user.address && typeof user.address === 'string') {
+            const parts = user.address.split(',').map((part: string) => part.trim());
+            detailedAddress = parts[0] || '';
+            district = parts[1] || '';
+            province = parts[2] || '';
+        }
+
+        setShippingAddress({
+            fullName: user.name || '',
+            phone: user.phonenumber || '',
+            country: user.country || 'Vietnam',
+            province: province,
+            district: district,
+            detailedAddress: detailedAddress,
+        });
+
+        // Store pending address to apply after addressData loads
+        if (province || district) {
+            setPendingAddress({ province, district });
+        }
+    }
+    useEffect(() => {
+        handleGetAddress();
+    }, []);
+
+    const handleUpdateAddress = async () => {
+        if (!fullName.trim()) {
+            setError(t('shippingAddress.validation.fullNameRequired'));
+            return;
+        }
+        if (!phone.trim()) {
+            setError(t('shippingAddress.validation.phoneRequired'));
+            return;
+        }
+        if (!detailedAddress.trim()) {
+            setError(t('shippingAddress.validation.detailedAddressRequired'));
+            return;
+        }
+        if (selectedCountry === 'Vietnam' && (!selectedProvince || !selectedDistrict)) {
+            setError(t('shippingAddress.validation.provinceDistrictRequired'));
+            return;
+        }
+        const body = {
+            name: fullName,
+            username: userData?.username || '',
+            password: userData?.password || '',
+            email: userData?.email || '',
+            gender: userData?.gender || '',
+            address: detailedAddress + ', ' + selectedDistrict + ', ' + selectedProvince + ', ' + selectedCountry,
+            phonenumber: phone,
+            roleid: userData?.roleid || 2,
+        }
+        try {
+            const response = await updateUserProfile(userData?.id, body);
+            if (response.id !== undefined) {
+                Alert.alert(t('shippingAddress.updateSuccessTitle'), t('shippingAddress.updateSuccessMessage'));
+                setShippingAddress({
+                    fullName: fullName.trim(),
+                    phone: phone.trim(),
+                    country: selectedCountry,
+                    province: selectedProvince,
+                    district: selectedDistrict,
+                    detailedAddress: detailedAddress.trim(),
+                });
+
+                // Reset UI state
+                setIsCountryMenuOpen(false);
+                setIsProvinceMenuOpen(false);
+                setIsDistrictMenuOpen(false);
+                setIsFullNameFocused(false);
+                setIsPhoneFocused(false);
+                setIsDetailedFocused(false);
+
+                // Switch back to view mode
+                setMode('view');
+            }
+        }
+        catch (error) {
+            Alert.alert(t('shippingAddress.updateErrorTitle'), t('shippingAddress.updateErrorMessage'));
+            console.error('Error updating user profile:', error);
+        }
+    }
 
     const countries = React.useMemo(() => ['Vietnam'], []);
     const provinceOptions = React.useMemo(() => {
@@ -151,6 +248,18 @@ const ShippingAddressScreen: FC = () => {
             setIsDistrictMenuOpen(false);
         }
     }, [mode, shippingAddress]);
+
+    // Apply pending address when addressData is loaded 
+    React.useEffect(() => {
+        if (selectedCountry !== 'Vietnam' || !addressData.length || !pendingAddress) return;
+        const provinceExists = addressData.find((p) => p.name === pendingAddress.province);
+
+        if (provinceExists) {
+            setSelectedProvince(pendingAddress.province);
+            setSelectedDistrict(pendingAddress.district);
+            setPendingAddress(null);
+        }
+    }, [addressData, selectedCountry, pendingAddress]);
 
     React.useEffect(() => {
         if (selectedCountry !== 'Vietnam') return;
@@ -265,48 +374,6 @@ const ShippingAddressScreen: FC = () => {
 
     const isProvinceDisabled = selectedCountry !== 'Vietnam' || isLoadingAddresses;
     const isDistrictDisabled = selectedCountry !== 'Vietnam' || !selectedProvince || isLoadingAddresses;
-
-    function saveAddress() {
-        // Basic validation for required fields
-        if (!fullName.trim()) {
-            setError(t('shippingAddress.validation.fullNameRequired'));
-            return;
-        }
-        if (!phone.trim()) {
-            setError(t('shippingAddress.validation.phoneRequired'));
-            return;
-        }
-        if (!detailedAddress.trim()) {
-            setError(t('shippingAddress.validation.detailedAddressRequired'));
-            return;
-        }
-        if (selectedCountry === 'Vietnam' && (!selectedProvince || !selectedDistrict)) {
-            setError(t('shippingAddress.validation.provinceDistrictRequired'));
-            return;
-        }
-
-        // Persist address to local component state
-        setShippingAddress({
-            fullName: fullName.trim(),
-            phone: phone.trim(),
-            country: selectedCountry,
-            province: selectedProvince,
-            district: selectedDistrict,
-            detailedAddress: detailedAddress.trim(),
-        });
-
-        // Reset UI state
-        setIsCountryMenuOpen(false);
-        setIsProvinceMenuOpen(false);
-        setIsDistrictMenuOpen(false);
-        setIsFullNameFocused(false);
-        setIsPhoneFocused(false);
-        setIsDetailedFocused(false);
-
-        // Switch back to view mode
-        setMode('view');
-    }
-
     return (
         <ThemedView style={styles.container}>
             <ThemedView style={styles.headerContainer}>
@@ -414,7 +481,7 @@ const ShippingAddressScreen: FC = () => {
                                         {addressError}
                                     </ThemedText>
                                     <Pressable onPress={loadAddresses} style={{ paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: Colors[scheme].tint, borderRadius: 6 }}>
-                                        <ThemedText style={{ color: Colors[scheme].tint }}>{t('common:retry')}</ThemedText>
+                                        <ThemedText style={{ color: Colors[scheme].tint }}>{t('common.retry')}</ThemedText>
                                     </Pressable>
                                 </ThemedView>
                             )}
@@ -456,9 +523,9 @@ const ShippingAddressScreen: FC = () => {
                     {error ? (
                         <ThemedText style={[styles.errorText, { color: Colors[scheme].tint, textAlign: 'center', marginTop: 10 }]}>{error}</ThemedText>
                     ) : null}
-                    <FullButton text={mode === 'edit' ? t('common:save') : t('common:edit')} onPress={() => {
+                    <FullButton text={mode === 'edit' ? t('common.save') : t('common.edit')} onPress={() => {
                         if (mode === 'edit') {
-                            saveAddress();
+                            handleUpdateAddress();
                         }
                         else { setMode('edit'); }
                     }} style={{ marginTop: 20, flex: 1 }} />
