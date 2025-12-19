@@ -13,13 +13,15 @@ import Header from '@/components/ui/header';
 import ProductCard from '@/components/ui/productcard';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { http } from '@/services/http';
+import { getCurrentLanguage } from '@/i18n';
+import { getAllProducts, getTopSellingProducts } from '@/services/productService';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 export default function HomeScreen() {
   const { t } = useTranslation();
+  const language = getCurrentLanguage();
   const router = useRouter();
   const schemeRaw = useColorScheme();
   const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
@@ -44,6 +46,7 @@ export default function HomeScreen() {
   { id: '5', name: t('categories.shuttlecocks'), image: <ShuttlecockIcon width={48} height={48} />, filter: 2 },
   { id: '6', name: t('categories.other'), image: <OtherIcon width={48} height={48} /> }];
   const [products, setProducts] = React.useState<any[]>([]);
+  const [bestSellingProducts, setBestSellingProducts] = React.useState<any[]>([]);
 
   const handleSeeAllProductsPress = () => {
     pushProductList();
@@ -57,15 +60,17 @@ export default function HomeScreen() {
     // Fetch products here
     const fetchData = async () => {
       try {
-        const productsResponse = await http.get('/products');
+        const productsResponse = await getAllProducts(language);
+        const bestSellingResponse = await getTopSellingProducts(new Date().getMonth() + 1, new Date().getFullYear(), language);
         setProducts(productsResponse);
+        setBestSellingProducts(bestSellingResponse);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
 
-    // fetchData();
-  }, []);
+    fetchData();
+  }, [language]);
 
   return (
     <View>
@@ -99,21 +104,23 @@ export default function HomeScreen() {
               ))}
             </ScrollView>
           </ThemedView>
-          <ThemedView>
-            <ThemedView style={styles.headerSection}>
-              <ThemedText type="defaultSemiBold" style={{ fontSize: 20 }}>{t('home.bestSelling')}</ThemedText>
-              <Pressable onPress={handleSeeAllProductsPress}>
-                <ThemedText type="link" style={{ color: tint }}>{t('common.seeAll')}</ThemedText>
-              </Pressable>
+          {bestSellingProducts.length > 0 && (
+            <ThemedView>
+              <ThemedView style={styles.headerSection}>
+                <ThemedText type="defaultSemiBold" style={{ fontSize: 20 }}>{t('home.bestSelling')}</ThemedText>
+                <Pressable onPress={handleSeeAllProductsPress}>
+                  <ThemedText type="link" style={{ color: tint }}>{t('common.seeAll')}</ThemedText>
+                </Pressable>
+              </ThemedView>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+                {bestSellingProducts.map((product) =>
+                (<ThemedView key={product.id} style={{ marginRight: 12 }}>
+                  <ProductCard key={product.id} product={product} />
+                </ThemedView>)
+                )}
+              </ScrollView>
             </ThemedView>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
-              {products.map((product) =>
-              (<ThemedView key={product.id} style={{ marginRight: 12 }}>
-                <ProductCard key={product.id} product={product} />
-              </ThemedView>)
-              )}
-            </ScrollView>
-          </ThemedView>
+          )}
           <ThemedView>
             <ThemedView style={styles.headerSection}>
               <ThemedText type="defaultSemiBold" style={{ fontSize: 20 }}>{t('home.latestProducts')}</ThemedText>

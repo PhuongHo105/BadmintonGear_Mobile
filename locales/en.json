@@ -25,7 +25,9 @@
         "seeAll": "See All",
         "retry": "Retry",
         "signupWithGoogle": "Sign Up with Google",
-        "fullName": "Fullname"
+        "fullName": "Fullname",
+        "apply": "Apply",
+        "clear": "Clear"
     },
     "layout": {
         "home": "Home",

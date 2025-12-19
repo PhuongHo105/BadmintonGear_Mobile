@@ -92,6 +92,7 @@ export const getCategoryOptions = (): { label: string; value?: number }[] => {
     { label: CATEGORY_LABEL_MAP[3], value: 3 },
     { label: CATEGORY_LABEL_MAP[4], value: 4 },
     { label: CATEGORY_LABEL_MAP[5], value: 5 },
+    { label: CATEGORY_LABEL_MAP[6], value: 6 },
   ];
 };
 

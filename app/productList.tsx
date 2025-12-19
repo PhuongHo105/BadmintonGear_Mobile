@@ -15,7 +15,8 @@ import {
 } from '@/constants/product-data';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { http } from '@/services/http';
+import { getCurrentLanguage } from '@/i18n';
+import { getAllProducts } from '@/services/productService';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +30,7 @@ type ProductListRouteParams = Partial<Record<keyof ProductFilters, string | stri
 
 const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
     const { t } = useTranslation();
+    const language = getCurrentLanguage();
     const scheme = useColorScheme() ?? 'light';
     const palette = Colors[scheme];
     const params = useLocalSearchParams<ProductListRouteParams>();
@@ -38,7 +40,7 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const productsResponse = await http.get('/products');
+                const productsResponse = await getAllProducts(language);
                 setProductList(productsResponse);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -141,11 +143,12 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
         const query = appliedFilters.searchQuery?.trim().toLowerCase();
 
         return productList.filter((product) => {
+            const name = product.translations?.[0]?.name || product.name || '';
             const matchesCategoriesId = appliedFilters.categoriesid ? product.categoriesid === appliedFilters.categoriesid : true;
             const matchesBrand = appliedFilters.brand ? product.brand === appliedFilters.brand : true;
             const matchesMinPrice = typeof appliedFilters.minPrice === 'number' ? product.price >= appliedFilters.minPrice : true;
             const matchesMaxPrice = typeof appliedFilters.maxPrice === 'number' ? product.price <= appliedFilters.maxPrice : true;
-            const matchesQuery = query ? product.name.toLowerCase().includes(query) : true;
+            const matchesQuery = query ? name.toLowerCase().includes(query) : true;
 
             return matchesCategoriesId && matchesBrand && matchesMinPrice && matchesMaxPrice && matchesQuery;
         });

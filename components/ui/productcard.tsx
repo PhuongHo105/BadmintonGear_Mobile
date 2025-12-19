@@ -1,8 +1,9 @@
 import { Colors } from '@/constants/theme'
 import { useColorScheme } from '@/hooks/use-color-scheme'
+import { getReviewByProductId } from '@/services/reviewService'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { ColorSchemeName, Dimensions, Pressable, StyleSheet } from 'react-native'
 import { ThemedText } from '../themed-text'
 import { ThemedView } from '../themed-view'
@@ -11,6 +12,10 @@ type Product = {
     id: string | number
     name: string
     Imagesproducts: { url: string }[]
+    translations?: {
+        name: string,
+        description: string
+    }[]
     price: number
     discount?: number
 }
@@ -34,6 +39,30 @@ export default function ProductCard({ product }: Props) {
     const imageUrl = product?.Imagesproducts?.[0]?.url
         ? product.Imagesproducts[0].url
         : "@/assets/images/unimage.png";
+    const name = product.translations?.[0]?.name || product.name;
+    const [reviews, setReviews] = React.useState<any[]>([]);
+    const [rate, setRate] = React.useState<number>(0);
+
+    useEffect(() => {
+        async function fetchReviews() {
+            try {
+                const reponse = await getReviewByProductId(Number(product.id));
+                setReviews(reponse);
+                // Calculate average rating
+                if (reponse && reponse.length > 0) {
+                    const totalRate = reponse.reduce((sum: number, review: any) => sum + (review.rate || 0), 0);
+                    const avgRate = totalRate / reponse.length;
+                    setRate(avgRate);
+                } else {
+                    setRate(0);
+                }
+            }
+            catch (error) {
+                console.error('Error fetching reviews for product', product.id, error);
+            }
+        }
+        fetchReviews();
+    }, [product])
 
     return (
         <Pressable key={product.id} onPress={() => router.push(`/product/${product.id}` as any)} style={[styles.card, { width: cardWidth, borderColor: borderColor }]}>
@@ -52,12 +81,18 @@ export default function ProductCard({ product }: Props) {
                     ellipsizeMode="tail"
                     style={{ fontSize: 14, marginTop: 8 }}
                 >
-                    {product.name}
+                    {name}
                 </ThemedText>
                 <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: tint }}>{currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                 {typeof product.discount === 'number' && product.discount > 0 ? (
                     <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: discountColor, textDecorationLine: 'line-through' }}>{product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                 ) : null}
+                <ThemedView style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 4 }}>
+                    <ThemedText type="default" style={{ fontSize: 14, color: '#FFD700' }}>★</ThemedText>
+                    <ThemedText type="default" style={{ fontSize: 12, color: tint }}>
+                        {rate > 0 ? rate.toFixed(1) : '0.0'} ({reviews.length})
+                    </ThemedText>
+                </ThemedView>
             </ThemedView>
         </Pressable>
     )

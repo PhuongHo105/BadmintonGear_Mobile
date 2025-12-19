@@ -25,7 +25,9 @@
         "seeAll": "Xem tất cả",
         "retry": "Thử lại",
         "signupWithGoogle": "Đăng ký bằng Google",
-        "fullName": "Họ và tên"
+        "fullName": "Họ và tên",
+        "apply": "Áp dụng",
+        "clear": "Xóa"
     },
     "layout": {
         "home": "Trang chủ",

@@ -4,12 +4,15 @@ import BorderButton from '@/components/ui/borderbutton';
 import FullButton from '@/components/ui/fullbutton';
 import GoBackButton from '@/components/ui/gobackbutton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import ProductCard from '@/components/ui/productcard';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { getCurrentLanguage } from '@/i18n';
 import { addCart } from '@/services/cartService';
-import { getProductById } from '@/services/productService';
+import { getAllProducts } from '@/services/productService';
+import { getReviewByProductId } from '@/services/reviewService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -47,6 +50,8 @@ type ApiProduct = {
 
 const ProductDetailScreen: React.FC = () => {
     const { t } = useTranslation();
+    const language = getCurrentLanguage();
+    const [products, setProducts] = useState<any[]>([]);
     const { id } = useLocalSearchParams<ProductRouteParams>();
     const [quantity, setQuantity] = useState(1);
     const [loading, setLoading] = useState(true);
@@ -64,7 +69,7 @@ const ProductDetailScreen: React.FC = () => {
         return price * (1 - disc / 100);
     }, [product?.price, product?.discount]);
     const DESCRIPTION_PREVIEW_LENGTH = 160;
-    const description = product?.description ?? '';
+    const description = product?.translations?.[0]?.description ?? '';
     const isDescriptionLong = description.length > DESCRIPTION_PREVIEW_LENGTH;
     const descriptionText = isDescriptionExpanded || !isDescriptionLong
         ? description
@@ -75,6 +80,16 @@ const ProductDetailScreen: React.FC = () => {
 
     const decreaseQuantity = () => setQuantity((prev) => (prev > 0 ? prev - 1 : 0));
     const increaseQuantity = () => setQuantity((prev) => prev + 1);
+    const [reviews, setReviews] = useState<any[]>([]);
+    const relatedProducts = useMemo(() => {
+        if (!product) return [];
+        return products.filter((p) => p.id !== product.id && (p.brand === product.brand || p.categoriesid === product.categoriesid)).slice(0, 10);
+    }, [products, product]);
+    const rate = useMemo(() => {
+        if (reviews.length === 0) return 0;
+        const totalRate = reviews.reduce((sum: number, review: any) => sum + (review.rate || 0), 0);
+        return totalRate / reviews.length;
+    }, [reviews]);
 
     const handleImageMomentum = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const offsetX = event.nativeEvent.contentOffset.x;
@@ -147,8 +162,13 @@ const ProductDetailScreen: React.FC = () => {
             }
             try {
                 setLoading(true);
-                const data = await getProductById(id);
-                setProduct(data);
+                const data = await getAllProducts(language);
+                const reviewsData = await getReviewByProductId(Number(id));
+
+                console.log('Loaded product data:', data);
+                setProducts(data);
+                setProduct(data.find((p) => String(p.id) === String(id)) || null);
+                setReviews(reviewsData);
                 setError(null);
             } catch (e: any) {
                 setError(e?.message || 'Failed to load product');
@@ -157,7 +177,7 @@ const ProductDetailScreen: React.FC = () => {
             }
         };
         load();
-    }, [id]);
+    }, [id, language]);
 
     // Prepare images array (from API Imagesproducts or images); fallback to local asset
     const imagesArray = useMemo(() => {
@@ -234,7 +254,7 @@ const ProductDetailScreen: React.FC = () => {
                     </ThemedView>
 
                     <ThemedView style={styles.titlePriceContainer}>
-                        <ThemedText type='title' style={styles.title}>{product?.name ?? ''}</ThemedText>
+                        <ThemedText type='title' style={styles.title}>{product?.translations?.[0]?.name ?? ''}</ThemedText>
                         <ThemedView style={styles.priceContainer}>
                             <ThemedText style={[styles.price, { color: palette.text }]}>{currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                             {typeof product?.price === 'number' && product?.discount ? (
@@ -247,19 +267,20 @@ const ProductDetailScreen: React.FC = () => {
 
                     {(typeof product?.rating === 'number' || typeof product?.reviews === 'number') && (
                         <ThemedView style={styles.ratingContainer}>
-                            {renderStars(Number(product?.rating ?? 0))}
+                            {renderStars(Number(rate ?? 0))}
                             {typeof product?.reviews === 'number' && (
-                                <ThemedText style={styles.reviews}>({Number(product?.reviews).toLocaleString()} {t('product.reviews')})</ThemedText>
+                                <ThemedText style={styles.reviews}>({Number(reviews.length).toLocaleString()} {t('product.reviews')})</ThemedText>
                             )}
                         </ThemedView>
                     )}
                     <ThemedView style={{ flexDirection: 'row', marginBottom: 16 }}>
                         <ThemedText type='defaultSemiBold' style={{ fontSize: 18, marginBottom: 10 }}>{t('product.brand')}: </ThemedText>
                         <ThemedText style={{ fontSize: 18, color: palette.text }}>{product?.brand ?? ''}</ThemedText>
-                        {id && (
-                            <ThemedText style={[styles.productId, { color: palette.secondaryText, marginBottom: 10 }]}>{t('product.productId')}: {id}</ThemedText>
-                        )}
+
                     </ThemedView>
+                    {id && (
+                        <ThemedText style={[styles.productId, { color: palette.secondaryText, marginBottom: 10 }]}>{t('product.productId')}: {id}</ThemedText>
+                    )}
                     <ThemedText style={styles.description}>
                         {descriptionText}
                     </ThemedText>
@@ -291,24 +312,22 @@ const ProductDetailScreen: React.FC = () => {
 
                     <ThemedView style={styles.reviewsContainer}>
                         <ThemedText type='title' style={styles.reviewsTitle}>
-                            {product?.reviews} {product?.reviews === 1 ? t('product.review') : t('product.reviews')}
+                            {reviews.length} {reviews.length === 1 ? t('product.review') : t('product.reviews')}
                         </ThemedText>
                         <ThemedView style={styles.starsContainer}>{renderStars(product?.rating ?? 0)}</ThemedView>
 
-                        {/* Mock Reviews - Total 10 reviews */}
+                        {/* Display actual reviews from API */}
                         <ThemedView style={styles.reviewsList}>
-                            {Array.from({ length: Math.min(visibleReviews, 10) }, (_, i) => i + 1).map((reviewId) => (
-                                <ThemedView key={reviewId} style={[styles.reviewItem, { borderBottomColor: palette.border }]}>
+                            {reviews.slice(0, visibleReviews).map((review: any, index: number) => (
+                                <ThemedView key={review.id || index} style={[styles.reviewItem, { borderBottomColor: palette.border }]}>
                                     <ThemedView style={styles.reviewHeader}>
-                                        <ThemedText type='defaultSemiBold'>Customer {reviewId}</ThemedText>
+                                        <ThemedText type='defaultSemiBold'>{review.customerName || review.name || 'Anonymous'}</ThemedText>
                                         <ThemedView style={styles.reviewStars}>
-                                            {renderStars(reviewId % 2 === 0 ? 4 : 5)}
+                                            {renderStars(review.rate || 0)}
                                         </ThemedView>
                                     </ThemedView>
                                     <ThemedText style={[styles.reviewComment, { color: palette.secondaryText }]}>
-                                        {reviewId % 2 === 0
-                                            ? 'Good value for money. Product matches the description perfectly.'
-                                            : 'Great product! Very good quality and fast shipping. Highly recommended!'}
+                                        {review.comment || review.text || 'No comment'}
                                     </ThemedText>
                                 </ThemedView>
                             ))}
@@ -316,7 +335,7 @@ const ProductDetailScreen: React.FC = () => {
 
                         {/* Show More/Less buttons */}
                         <ThemedView style={styles.reviewButtonsContainer}>
-                            {visibleReviews < 10 && (
+                            {visibleReviews < reviews.length && (
                                 <TouchableOpacity onPress={showMoreReviews} style={styles.expandReviewsButton}>
                                     <ThemedText style={[styles.expandReviewsText, { color: palette.tint }]}>
                                         {t('product.showMore')}
@@ -335,7 +354,17 @@ const ProductDetailScreen: React.FC = () => {
 
                     <ThemedView style={styles.relatedProductsContainer}>
                         <ThemedText type='title' style={styles.relatedProductsTitle}>{t('product.relatedProducts')}</ThemedText>
-                        {/* TODO: Render related products here */}
+                        {relatedProducts.length === 0 && !loading && (
+                            <ThemedText style={{ color: palette.secondaryText }}>{t('product.noRelatedProducts')}</ThemedText>
+                        )}
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+                            {relatedProducts.map((product) =>
+                            (<ThemedView key={product.id} style={{ marginRight: 12 }}>
+                                <ProductCard key={product.id} product={product} />
+                            </ThemedView>)
+                            )}
+                        </ScrollView>
+                        <FullButton text={t('common.seeAll')} onPress={() => { router.push('/products' as any) }} />
                     </ThemedView>
 
                 </ThemedView>

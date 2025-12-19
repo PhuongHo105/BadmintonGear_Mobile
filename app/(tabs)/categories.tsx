@@ -23,10 +23,10 @@ export default function TabTwoScreen() {
   const borderColor: string = Colors[scheme].border;
   const categories = [
     { id: '1', name: t('categories.rackets'), image: <RacketIcon width={60} height={60} /> },
-    { id: '2', name: t('categories.shuttlecocks'), image: <ShuttlecockIcon width={60} height={60} /> },
-    { id: '3', name: t('categories.shoes'), image: <ShoesIcon width={60} height={60} /> },
-    { id: '4', name: t('categories.clothes'), image: <ClothesIcon width={60} height={60} /> },
-    { id: '5', name: t('categories.bags'), image: <BagsIcon width={60} height={60} /> },
+    { id: '5', name: t('categories.shuttlecocks'), image: <ShuttlecockIcon width={60} height={60} /> },
+    { id: '2', name: t('categories.shoes'), image: <ShoesIcon width={60} height={60} /> },
+    { id: '3', name: t('categories.clothes'), image: <ClothesIcon width={60} height={60} /> },
+    { id: '4', name: t('categories.bags'), image: <BagsIcon width={60} height={60} /> },
     { id: '6', name: t('categories.other'), image: <OtherIcon width={60} height={60} /> },
   ];
   return (
