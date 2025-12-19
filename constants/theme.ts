@@ -23,6 +23,8 @@ export const Colors = {
     tabBackground: "#F4F5FD",
     tabButtonBG: "#000",
     activeTabText: "#fff",
+    success: "#2ecc71",
+    error: "#e74c3c",
   },
   dark: {
     text: "#fff",
@@ -38,6 +40,8 @@ export const Colors = {
     tabBackground: "#1C1B1B",
     tabButtonBG: tintColorDark,
     activeTabText: "#fff",
+    success: "#27ae60",
+    error: "#c0392b",
   },
 };
 
