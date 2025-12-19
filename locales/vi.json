@@ -27,7 +27,9 @@
         "signupWithGoogle": "Đăng ký bằng Google",
         "fullName": "Họ và tên",
         "apply": "Áp dụng",
-        "clear": "Xóa"
+        "clear": "Xóa",
+        "phoneNumber": "Số điện thoại",
+        "phoneNumberPlaceholder": "Nhập số điện thoại của bạn"
     },
     "layout": {
         "home": "Trang chủ",
@@ -86,7 +88,15 @@
         "createAccount": "Tạo tài khoản",
         "fullNamePlaceholder": "Nhập họ và tên",
         "emailPlaceholder": "Nhập email",
-        "passwordPlaceholder": "Nhập mật khẩu"
+        "passwordPlaceholder": "Nhập mật khẩu",
+        "phoneNumberPlaceholder": "Nhập số điện thoại của bạn",
+        "fillAllFields": "Vui lòng điền đầy đủ tất cả các trường.",
+        "invalidEmail": "Vui lòng nhập địa chỉ email hợp lệ.",
+        "signupSuccess": "Đăng ký thành công! Vui lòng đăng nhập.",
+        "signupFailed": "Đăng ký thất bại. Vui lòng thử lại.",
+        "username": "Tên đăng nhập",
+        "usernamePlaceholder": "Nhập tên đăng nhập",
+        "invalidPassword": "Mật khẩu phải từ 6-20 ký tự, không chứa khoảng trắng, bao gồm ít nhất một chữ hoa, một chữ thường và một số."
     },
     "home": {
         "welcome": "Chào mừng",

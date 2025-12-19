@@ -20,6 +20,22 @@ export async function login(
     return await http.post<LoginResponse>("/users/login", body);
 }
 
-export default {
-    login,
-};
+export async function register(
+    name: string,
+    username: string,
+    email: string,
+    phone: string,
+    password: string
+): Promise<boolean> {
+    const body = {
+        name: name,
+        username: username,
+        password: password,
+        email: email,
+        phonenumber: phone,
+        roleid: 1
+    }
+    const response = await http.post<any>("/users", body);
+    console.log('Register response:', response);
+    return response.id !== undefined;
+}

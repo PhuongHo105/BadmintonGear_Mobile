@@ -27,7 +27,9 @@
         "signupWithGoogle": "Sign Up with Google",
         "fullName": "Fullname",
         "apply": "Apply",
-        "clear": "Clear"
+        "clear": "Clear",
+        "phoneNumber": "Phone Number",
+        "phoneNumberPlaceholder": "Enter your phone number"
     },
     "layout": {
         "home": "Home",
@@ -86,7 +88,14 @@
         "createAccount": "Create Account",
         "fullNamePlaceholder": "Enter your fullname",
         "emailPlaceholder": "Enter your email",
-        "passwordPlaceholder": "Enter your password"
+        "passwordPlaceholder": "Enter your password",
+        "fillAllFields": "Please fill in all fields.",
+        "invalidEmail": "Please enter a valid email address.",
+        "signupSuccess": "Sign up successful! Please log in.",
+        "signupFailed": "Sign up failed. Please try again.",
+        "username": "Username",
+        "usernamePlaceholder": "Enter your username",
+        "invalidPassword": "Password must be 6-20 characters long, contain no spaces, and include at least one uppercase letter, one lowercase letter, and one number."
     },
     "home": {
         "welcome": "Welcome",

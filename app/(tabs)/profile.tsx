@@ -7,11 +7,11 @@ import ProfileMenuItem from '@/components/ui/profileMenuItem';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    Alert,
     ColorSchemeName,
     Image,
     ScrollView,
@@ -43,6 +43,12 @@ const ProfileScreen: React.FC = () => {
         }
     );
 
+    const handleLogout = async () => {
+        await AsyncStorage.removeItem('loginToken');
+        await AsyncStorage.removeItem('password');
+        router.replace('/login' as any);
+    }
+
     return (
         <ThemedView style={[styles.container, { backgroundColor: tint }]}>
             <StatusBar barStyle="light-content" />
@@ -55,7 +61,7 @@ const ProfileScreen: React.FC = () => {
                     <ThemedText style={styles.userName}>{userInfo.name}</ThemedText>
                     <ThemedText style={styles.userEmail}>{userInfo.email}</ThemedText>
                 </ThemedView>
-                <TouchableOpacity onPress={() => Alert.alert('Đăng xuất!')}>
+                <TouchableOpacity onPress={handleLogout}>
                     <Ionicons name="log-out-outline" size={30} color="#FFFFFF" />
                 </TouchableOpacity>
             </ThemedView>
