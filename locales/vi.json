@@ -80,7 +80,9 @@
         "confirmNewPassword": "Xác nhận mật khẩu mới",
         "confirmNewPasswordPlaceholder": "Xác nhận mật khẩu mới của bạn",
         "successTitle": "Đặt lại mật khẩu thành công",
-        "passwordResetSuccess": "Chúc mừng! Mật khẩu của bạn đã được đặt thành công. Vui lòng tiếp tục đến màn hình đăng nhập để xác minh tài khoản của bạn."
+        "passwordResetSuccess": "Chúc mừng! Mật khẩu của bạn đã được đặt thành công. Vui lòng tiếp tục đến màn hình đăng nhập để xác minh tài khoản của bạn.",
+        "emailSentSuccess": "Mật khẩu tạm thời đã được gửi đến địa chỉ email của bạn. Vui lòng kiểm tra hộp thư đến và sử dụng nó để đăng nhập.",
+        "errorSendingEmail": "Đã xảy ra lỗi khi gửi email. Vui lòng thử lại sau."
     },
     "signup": {
         "title": "Đăng ký",
@@ -120,7 +122,12 @@
         "settings": "Cài đặt",
         "language": "Ngôn ngữ",
         "theme": "Giao diện",
-        "logout": "Đăng xuất"
+        "logout": "Đăng xuất",
+        "logoutConfirmation": "Bạn có chắc chắn muốn đăng xuất không?",
+        "ChangePassSuccessTitle": "Thành công",
+        "ChangePassSuccessMessage": "Mật khẩu của bạn đã được thay đổi thành công.",
+        "ChangePassErrorTitle": "Lỗi",
+        "errorChangingPassword": "Đã xảy ra lỗi khi thay đổi mật khẩu của bạn. Vui lòng thử lại sau."
     },
     "cart": {
         "title": "Giỏ hàng của tôi",

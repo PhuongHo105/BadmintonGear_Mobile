@@ -12,6 +12,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+    Alert,
     ColorSchemeName,
     Image,
     ScrollView,
@@ -44,9 +45,20 @@ const ProfileScreen: React.FC = () => {
     );
 
     const handleLogout = async () => {
-        await AsyncStorage.removeItem('loginToken');
-        await AsyncStorage.removeItem('password');
-        router.replace('/login' as any);
+        Alert.alert(
+            t('profile.logout'),
+            t('profile.logoutConfirmation'),
+            [
+                { text: t('common.cancel'), onPress: () => { }, style: 'cancel' },
+                {
+                    text: t('profile.logout'), onPress: async () => {
+                        await AsyncStorage.removeItem('loginToken');
+                        await AsyncStorage.removeItem('password');
+                        router.replace('/login' as any);
+                    }, style: 'destructive'
+                },
+            ]
+        );
     }
 
     return (

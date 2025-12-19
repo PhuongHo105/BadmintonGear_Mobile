@@ -5,6 +5,7 @@ import FullButton from '@/components/ui/fullbutton';
 import GoBackButton from '@/components/ui/gobackbutton';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,8 +22,9 @@ const ChangePassword01Screen: FC = () => {
     const secondaryText: string = Colors[scheme].secondaryText;
     const [error, setError] = React.useState<string | null>(null);
     const [currentPassword, setCurrentPassword] = React.useState('');
-    const handleCheckCurrentPassword = () => {
-        if (currentPassword != '123')
+    const handleCheckCurrentPassword = async () => {
+        const password = await AsyncStorage.getItem('password');
+        if (currentPassword !== password)
             setError(t('changePassword.invalidCurrentPassword'));
         else {
             setError(null);

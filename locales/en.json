@@ -80,7 +80,9 @@
         "confirmNewPassword": "Confirm Password",
         "confirmNewPasswordPlaceholder": "Confirm your new password",
         "successTitle": "Password Reset Successful",
-        "passwordResetSuccess": "Congratulations! Your password has been set successfully. Please proceed to the login screen to verify your account."
+        "passwordResetSuccess": "Congratulations! Your password has been set successfully. Please proceed to the login screen to verify your account.",
+        "emailSentSuccess": "A temporary password has been sent to your email address. Please check your inbox and use it to log in.",
+        "errorSendingEmail": "There was an error sending the email. Please try again later."
     },
     "signup": {
         "title": "Sign Up",
@@ -119,7 +121,12 @@
         "settings": "Settings",
         "language": "Language",
         "theme": "Theme",
-        "logout": "Logout"
+        "logout": "Logout",
+        "logoutConfirmation": "Are you sure you want to log out?",
+        "ChangePassSuccessTitle": "Success",
+        "ChangePassSuccessMessage": "Your password has been changed successfully.",
+        "ChangePassErrorTitle": "Error",
+        "errorChangingPassword": "There was an error changing your password. Please try again later."
     },
     "cart": {
         "title": "My Cart",
