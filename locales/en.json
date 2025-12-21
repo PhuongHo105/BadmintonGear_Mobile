@@ -232,7 +232,9 @@
         "topRated": "Top Rated",
         "freeShipping": "Free Shipping",
         "relatedProducts": "Related Products",
-        "Reviews": "Reviews"
+        "Reviews": "Reviews",
+        "addedToCart": "Added to Cart",
+        "addToCartFailed": "Failed to add to cart. Please try again."
     },
     "order": {
         "orderDetail": "Order Detail",

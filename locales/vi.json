@@ -233,7 +233,9 @@
         "topRated": "Đánh giá cao",
         "freeShipping": "Miễn phí vận chuyển",
         "relatedProducts": "Sản phẩm liên quan",
-        "Reviews": "Đánh giá"
+        "Reviews": "Đánh giá",
+        "addedToCart": "Đã thêm vào giỏ hàng",
+        "addToCartFailed": "Thêm vào giỏ hàng thất bại. Vui lòng thử lại."
     },
     "order": {
         "orderDetail": "Chi tiết đơn hàng",

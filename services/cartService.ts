@@ -27,9 +27,8 @@ const getCartByUserID = async (id: ID): Promise<Cart> => {
     return await http.get<Cart>(`/carts/${id}`);
 };
 
-const addCart = async (cart: Partial<Cart>): Promise<Cart> => {
-    const headers = await authHeaders();
-    return await http.post<Cart>('/carts', cart, headers);
+const addCart = async (cart: any): Promise<any> => {
+    return await http.post<any>('/carts', cart);
 };
 
 const updateCart = async (id: ID, cart: Partial<Cart>): Promise<Cart> => {

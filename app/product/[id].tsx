@@ -1,3 +1,4 @@
+import { useToast } from '@/app/providers/ToastProvider';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import BorderButton from '@/components/ui/borderbutton';
@@ -13,6 +14,7 @@ import { getAllProducts } from '@/services/productService';
 import { getReviewByProductId } from '@/services/reviewService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useLocalSearchParams } from 'expo-router';
+import { jwtDecode } from 'jwt-decode';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -50,6 +52,7 @@ type ApiProduct = {
 
 const ProductDetailScreen: React.FC = () => {
     const { t } = useTranslation();
+    const toast = useToast();
     const language = getCurrentLanguage();
     const [products, setProducts] = useState<any[]>([]);
     const { id } = useLocalSearchParams<ProductRouteParams>();
@@ -119,34 +122,35 @@ const ProductDetailScreen: React.FC = () => {
         try {
             setAdding(true);
             let userId: string | number | undefined;
-            const userData = await AsyncStorage.getItem('userData');
+            const token = await AsyncStorage.getItem('loginToken');
+            const userData = jwtDecode(token ?? '') as any;
             if (userData) {
                 try {
-                    const parsed = JSON.parse(userData);
-                    userId = parsed?.id ?? parsed?._id;
+                    userId = userData.userid;
                 } catch { }
-            }
-            if (!userId) {
-                const storedId = await AsyncStorage.getItem('userId');
-                if (storedId) userId = storedId;
             }
 
             if (!userId) {
                 console.warn('No user id found for adding to cart');
+                toast.show({ message: t('common.loginRequired') ?? 'Vui lòng đăng nhập để thêm vào giỏ', type: 'info' });
                 return;
             }
 
-            await addCart({
-                userId,
-                items: [
-                    {
-                        productId: product.id,
-                        quantity: quantity > 0 ? quantity : 1,
-                    },
-                ],
+            const response = await addCart({
+                userid: userId,
+                productid: product?.id,
+                quantity: quantity,
+                notes: ''
             });
+            console.log('Add to cart response:', response);
+            if (response && response.id !== undefined) {
+                toast.show({ message: t('product.addedToCart') ?? 'Đã thêm vào giỏ hàng', type: 'success' });
+            } else {
+                toast.show({ message: t('product.addToCartFailed') ?? 'Thêm vào giỏ hàng thất bại', type: 'error' });
+            }
         } catch (e) {
             console.error('Failed to add to cart', e);
+            toast.show({ message: t('product.addToCartFailed') ?? 'Thêm vào giỏ hàng thất bại', type: 'error' });
         } finally {
             setAdding(false);
         }
@@ -164,8 +168,6 @@ const ProductDetailScreen: React.FC = () => {
                 setLoading(true);
                 const data = await getAllProducts(language);
                 const reviewsData = await getReviewByProductId(Number(id));
-
-                console.log('Loaded product data:', data);
                 setProducts(data);
                 setProduct(data.find((p) => String(p.id) === String(id)) || null);
                 setReviews(reviewsData);
