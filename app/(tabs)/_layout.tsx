@@ -47,7 +47,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="wishlist"
         options={{
           title: t('layout.wishlist'),
@@ -55,7 +55,7 @@ export default function TabLayout() {
             <IconSymbol size={28} name="heart.fill" color={color} />
           ),
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="profile"
         options={{

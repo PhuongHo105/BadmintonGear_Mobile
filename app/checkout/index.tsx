@@ -423,7 +423,7 @@ const CheckoutScreen: FC = () => {
 export default CheckoutScreen;
 
 const styles = StyleSheet.create({
-    container: { height: '100%', width: '100%', padding: 15, paddingTop: 50, position: 'relative' },
+    container: { height: '100%', width: '100%', padding: 15, paddingTop: 20, position: 'relative' },
     headerContainer: { width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
     leftHeader: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
     statusBar: { width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
