@@ -1,14 +1,18 @@
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { updateCart } from "@/services/cartService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
+import { jwtDecode } from "jwt-decode";
 import { FC, useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { ThemedText } from "../themed-text";
 import { ThemedView } from "../themed-view";
 
-type Product = {
+type Cart = {
     id: string;
+    productid: string;
     name?: string;
     price?: number;
     image?: any;
@@ -16,7 +20,7 @@ type Product = {
 }
 
 type CartItemProps = {
-    product: Product;
+    product: Cart;
     checked?: boolean;
     numberOfItems?: number;
     onToggle?: (id: string) => void;
@@ -26,6 +30,7 @@ type CartItemProps = {
 };
 
 const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, onToggle, onChangeQuantity, onDeleteRequest, type }) => {
+
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const tint: string = Colors[scheme].tint;
@@ -51,6 +56,18 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
         setLocalChecked((v) => !v);
         onToggle?.(product.id);
     };
+    const fupdateCart = async (newQuantity: number) => {
+        const token = await AsyncStorage.getItem('loginToken');
+        const decode = jwtDecode<any>(token ?? '');
+        await updateCart(product.id,
+            {
+                userid: decode.userid ?? decode.id,
+                productid: product.productid,
+                quantity: newQuantity,
+                notes: ''
+            }
+        );
+    }
 
     const handleInc = () => {
         setQuantity((q) => {
@@ -58,7 +75,10 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
             onChangeQuantity?.(product.id, nq);
             return nq;
         });
+        fupdateCart(quantity + 1);
     };
+
+
 
     const handleDec = () => {
         if (quantity <= 1) {
@@ -70,6 +90,8 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
             onChangeQuantity?.(product.id, nq);
             return nq;
         });
+        fupdateCart(quantity - 1);
+
     };
 
     return (
@@ -159,7 +181,7 @@ export default CartItem;
 
 const styles = StyleSheet.create({
     item: {
-        width: '100%',
+        width: '95%',
         height: 150,
         flexDirection: 'row',
         alignItems: 'center',

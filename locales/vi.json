@@ -142,10 +142,22 @@
         "checkout": "Thanh toán",
         "enterVoucherCode": "Nhập mã giảm giá",
         "apply": "Áp dụng",
+        "availablePromotions": "Ưu đãi hiện có",
+        "noPromotions": "Chưa có ưu đãi khả dụng.",
+        "select": "Chọn",
+        "selected": "Đã chọn",
+        "minSpend": "Đơn tối thiểu",
+        "promotionApplied": "Đã áp dụng ưu đãi.",
+        "promotionInvalid": "Ưu đãi này chưa thể áp dụng cho đơn hàng hiện tại.",
+        "appliedPromotion": "Ưu đãi đang áp dụng",
+        "selectItemsFirst": "Vui lòng chọn ít nhất một sản phẩm để thanh toán.",
         "delete": "Xóa sản phẩm khỏi giỏ hàng",
         "deleteProductFromCart": "Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng không?",
         "checkouttitle": "Vật phẩm",
-        "shortdelete": "Xóa"
+        "shortdelete": "Xóa",
+        "pleaseLogin": "Vui lòng đăng nhập để xem giỏ hàng của bạn.",
+        "deleteSuccess": "Xóa sản phẩm khỏi giỏ hàng thành công.",
+        "deleteFailed": "Xóa sản phẩm khỏi giỏ hàng thất bại. Vui lòng thử lại."
     },
     "categories": {
         "title": "Danh mục",
@@ -234,8 +246,7 @@
         "freeShipping": "Miễn phí vận chuyển",
         "relatedProducts": "Sản phẩm liên quan",
         "Reviews": "Đánh giá",
-        "addedToCart": "Đã thêm vào giỏ hàng",
-        "addToCartFailed": "Thêm vào giỏ hàng thất bại. Vui lòng thử lại."
+        "addToCartSuccess": "Thêm sản phẩm vào giỏ hàng thành công!"
     },
     "order": {
         "orderDetail": "Chi tiết đơn hàng",

@@ -1,4 +1,3 @@
-import { useToast } from '@/app/providers/ToastProvider';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import BorderButton from '@/components/ui/borderbutton';
@@ -28,6 +27,7 @@ import {
     TouchableOpacity
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { useToast } from '../providers/ToastProvider';
 
 type ProductRouteParams = {
     id?: string;
@@ -51,8 +51,8 @@ type ApiProduct = {
 };
 
 const ProductDetailScreen: React.FC = () => {
-    const { t } = useTranslation();
     const toast = useToast();
+    const { t } = useTranslation();
     const language = getCurrentLanguage();
     const [products, setProducts] = useState<any[]>([]);
     const { id } = useLocalSearchParams<ProductRouteParams>();
@@ -122,35 +122,26 @@ const ProductDetailScreen: React.FC = () => {
         try {
             setAdding(true);
             let userId: string | number | undefined;
-            const token = await AsyncStorage.getItem('loginToken');
-            const userData = jwtDecode(token ?? '') as any;
-            if (userData) {
-                try {
-                    userId = userData.userid;
-                } catch { }
-            }
+            const userData = await AsyncStorage.getItem('loginToken');
+            const decode = jwtDecode<any>(userData || '');
+            userId = decode?.id || decode?.userid;
 
             if (!userId) {
                 console.warn('No user id found for adding to cart');
-                toast.show({ message: t('common.loginRequired') ?? 'Vui lòng đăng nhập để thêm vào giỏ', type: 'info' });
                 return;
             }
 
-            const response = await addCart({
+            const result = await addCart({
                 userid: userId,
-                productid: product?.id,
+                productid: product.id,
                 quantity: quantity,
                 notes: ''
             });
-            console.log('Add to cart response:', response);
-            if (response && response.id !== undefined) {
-                toast.show({ message: t('product.addedToCart') ?? 'Đã thêm vào giỏ hàng', type: 'success' });
-            } else {
-                toast.show({ message: t('product.addToCartFailed') ?? 'Thêm vào giỏ hàng thất bại', type: 'error' });
+            if (result && Number(result.userid) === Number(userId) && Number(result.productid) === Number(product.id)) {
+                toast.show({ type: 'success', message: t('product.addToCartSuccess') });
             }
         } catch (e) {
             console.error('Failed to add to cart', e);
-            toast.show({ message: t('product.addToCartFailed') ?? 'Thêm vào giỏ hàng thất bại', type: 'error' });
         } finally {
             setAdding(false);
         }
@@ -181,7 +172,6 @@ const ProductDetailScreen: React.FC = () => {
         load();
     }, [id, language]);
 
-    // Prepare images array (from API Imagesproducts or images); fallback to local asset
     const imagesArray = useMemo(() => {
         const apiImages = product?.Imagesproducts?.map((img) => ({ uri: img.url })) ?? [];
         const legacyImages = (product?.images ?? []).map((img: any) => img);

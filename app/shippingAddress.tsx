@@ -1,4 +1,3 @@
-import { useToast } from '@/app/providers/ToastProvider';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import FullButton from '@/components/ui/fullbutton';
@@ -10,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
 import React, { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 type ID = string;
@@ -46,7 +45,6 @@ const ShippingAddressScreen: FC = () => {
     const { t } = useTranslation();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
-    const toast = useToast();
     const [shippingAddress, setShippingAddress] = React.useState({
         fullName: 'Nguyễn Văn A',
         phone: '0123456789',
@@ -115,22 +113,18 @@ const ShippingAddressScreen: FC = () => {
     const handleUpdateAddress = async () => {
         if (!fullName.trim()) {
             setError(t('shippingAddress.validation.fullNameRequired'));
-            toast.show({ message: t('shippingAddress.validation.fullNameRequired'), type: 'error' });
             return;
         }
         if (!phone.trim()) {
             setError(t('shippingAddress.validation.phoneRequired'));
-            toast.show({ message: t('shippingAddress.validation.phoneRequired'), type: 'error' });
             return;
         }
         if (!detailedAddress.trim()) {
             setError(t('shippingAddress.validation.detailedAddressRequired'));
-            toast.show({ message: t('shippingAddress.validation.detailedAddressRequired'), type: 'error' });
             return;
         }
         if (selectedCountry === 'Vietnam' && (!selectedProvince || !selectedDistrict)) {
             setError(t('shippingAddress.validation.provinceDistrictRequired'));
-            toast.show({ message: t('shippingAddress.validation.provinceDistrictRequired'), type: 'error' });
             return;
         }
         const body = {
@@ -146,8 +140,7 @@ const ShippingAddressScreen: FC = () => {
         try {
             const response = await updateUserProfile(userData?.id, body);
             if (response.id !== undefined) {
-
-                toast.show({ message: t('shippingAddress.updateSuccessMessage'), type: 'success' });
+                Alert.alert(t('shippingAddress.updateSuccessTitle'), t('shippingAddress.updateSuccessMessage'));
                 setShippingAddress({
                     fullName: fullName.trim(),
                     phone: phone.trim(),
@@ -170,7 +163,7 @@ const ShippingAddressScreen: FC = () => {
             }
         }
         catch (error) {
-            toast.show({ message: t('shippingAddress.updateErrorMessage'), type: 'error' });
+            Alert.alert(t('shippingAddress.updateErrorTitle'), t('shippingAddress.updateErrorMessage'));
             console.error('Error updating user profile:', error);
         }
     }

@@ -141,10 +141,22 @@
         "checkout": "Checkout",
         "enterVoucherCode": "Enter Voucher Code",
         "apply": "Apply",
+        "availablePromotions": "Available Promotions",
+        "noPromotions": "No promotions available right now.",
+        "select": "Select",
+        "selected": "Selected",
+        "minSpend": "Min spend",
+        "promotionApplied": "Promotion applied.",
+        "promotionInvalid": "This promotion cannot be applied right now.",
+        "appliedPromotion": "Applied promotion",
+        "selectItemsFirst": "Please select at least one item to checkout.",
         "delete": "Delete Product from Cart",
         "deleteProductFromCart": "Are you sure that you want to delete this product from your cart?",
         "checkouttitle": "Item",
-        "shortdelete": "Delete"
+        "shortdelete": "Delete",
+        "pleaseLogin": "Please log in to view your cart.",
+        "deleteSuccess": "Product removed from cart successfully.",
+        "deleteFailed": "Failed to remove product from cart. Please try again."
     },
     "wishlist": {
         "title": "My Wishlist",
@@ -233,8 +245,7 @@
         "freeShipping": "Free Shipping",
         "relatedProducts": "Related Products",
         "Reviews": "Reviews",
-        "addedToCart": "Added to Cart",
-        "addToCartFailed": "Failed to add to cart. Please try again."
+        "addToCartSuccess": "Product added to cart successfully!"
     },
     "order": {
         "orderDetail": "Order Detail",
