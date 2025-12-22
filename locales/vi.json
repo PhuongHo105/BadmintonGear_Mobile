@@ -472,7 +472,8 @@
             "noDistricts": "Không có quận/huyện"
         },
         "errors": {
-            "loadAddress": "Không thể tải địa chỉ. Kiểm tra kết nối và thử lại."
+            "loadAddress": "Không thể tải địa chỉ. Kiểm tra kết nối và thử lại.",
+            "fillAllFields": "Vui lòng điền vào tất cả các trường bắt buộc."
         }
     },
     "checkoutResult": {
@@ -481,13 +482,16 @@
         "continueShopping": "Tiếp tục mua sắm"
     },
     "checkoutPayment": {
-        "title": "Thanh toán"
+        "title": "Thanh toán",
+        "selectPaymentMethod": "Vui lòng chọn phương thức thanh toán",
+        "cash": "Tiền mặt"
     },
     "checkoutReview": {
         "title": "Thanh toán",
         "item": "Sản phẩm",
         "shippingAddressTitle": "Địa chỉ giao hàng",
         "orderInformationTitle": "Thông tin đơn hàng",
+        "placeOrderSuccess": "Đặt hàng thành công!",
         "fields": {
             "fullName": "Họ và tên",
             "phoneNumber": "Số điện thoại",

@@ -227,10 +227,12 @@ const CartScreen: FC = () => {
         const selected = cartItems
             .filter(ci => ci.checked)
             .map(ci => ({
+                id: ci.product.id,
                 productId: ci.product.productid,
                 quantity: ci.numberOfItems,
                 price: ci.product.price ?? 0,
                 name: ci.product.name ?? '',
+                image: ci.product?.image ?? '',
             }));
 
         if (selected.length === 0) {

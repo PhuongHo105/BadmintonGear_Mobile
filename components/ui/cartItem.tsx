@@ -157,7 +157,7 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
                         </Pressable>
                     )}
 
-                    {mode === 'review' && (
+                    {/* {mode === 'review' && (
                         <Pressable style={styles.iconBtn}
                             onPress={() => {
                                 setMode('editable');
@@ -169,7 +169,7 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
                                 <Path d="M21 22.75H3C2.59 22.75 2.25 22.41 2.25 22C2.25 21.59 2.59 21.25 3 21.25H21C21.41 21.25 21.75 21.59 21.75 22C21.75 22.41 21.41 22.75 21 22.75Z" fill={Colors[scheme].icon} />
                             </Svg>
                         </Pressable>
-                    )}
+                    )} */}
                 </ThemedView>
             </ThemedView>
         </ThemedView >

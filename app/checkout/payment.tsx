@@ -5,28 +5,31 @@ import GoBackButton from '@/components/ui/gobackbutton';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { useToast } from '../providers/ToastProvider';
 
 // Removed unused types
 
 
 const CheckoutScreen: FC = () => {
     const { t } = useTranslation();
+    const params = useLocalSearchParams();
+    const toast = useToast();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
-    const [isHolderFocused, setIsHolderFocused] = React.useState(false);
-    const [holderName, setHolderName] = React.useState('');
-    const [isCardNumberFocused, setIsCardNumberFocused] = React.useState(false);
-    const [cardNumber, setCardNumber] = React.useState('');
-    const [isExpiryFocused, setIsExpiryFocused] = React.useState(false);
-    const [expiry, setExpiry] = React.useState('');
-    const [isCvvFocused, setIsCvvFocused] = React.useState(false);
-    const [cvv, setCvv] = React.useState('');
-    const [paymentMethod, setPaymentMethod] = React.useState<'vnpay' | 'paypal' | null>(null);
+    // const [isHolderFocused, setIsHolderFocused] = React.useState(false);
+    // const [holderName, setHolderName] = React.useState('');
+    // const [isCardNumberFocused, setIsCardNumberFocused] = React.useState(false);
+    // const [cardNumber, setCardNumber] = React.useState('');
+    // const [isExpiryFocused, setIsExpiryFocused] = React.useState(false);
+    // const [expiry, setExpiry] = React.useState('');
+    // const [isCvvFocused, setIsCvvFocused] = React.useState(false);
+    // const [cvv, setCvv] = React.useState('');
+    const [paymentMethod, setPaymentMethod] = React.useState<'vnpay' | 'paypal' | 'cash' | null>('cash');
 
     return (
         <ThemedView style={styles.container}>
@@ -74,7 +77,7 @@ const CheckoutScreen: FC = () => {
                                 borderColor: paymentMethod === 'paypal' ? Colors[scheme].tint : 'transparent',
                             }}
                         >
-                            <Image source={require('@/assets/images/payment/paypal.png')} contentFit="contain" style={{ width: 120, height: 40 }} />
+                            <Image source={require('@/assets/images/payment/paypal.png')} contentFit="contain" style={{ width: 100, height: 40 }} />
                         </Pressable>
                         <Pressable
                             onPress={() => setPaymentMethod('vnpay')}
@@ -88,7 +91,23 @@ const CheckoutScreen: FC = () => {
                                 borderColor: paymentMethod === 'vnpay' ? Colors[scheme].tint : 'transparent',
                             }}
                         >
-                            <Image source={require('@/assets/images/payment/vnpay.png')} contentFit="contain" style={{ width: 120, height: 40 }} />
+                            <Image source={require('@/assets/images/payment/vnpay.png')} contentFit="contain" style={{ width: 100, height: 40 }} />
+                        </Pressable>
+                        <Pressable
+                            onPress={() => setPaymentMethod('cash')}
+                            style={{
+                                flex: 1,
+                                borderRadius: 12,
+                                padding: 16,
+                                backgroundColor: '#F9E0E0',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                minHeight: 72,
+                                borderWidth: 2,
+                                borderColor: paymentMethod === 'cash' ? Colors[scheme].tint : 'transparent',
+                            }}
+                        >
+                            <ThemedText type="title" style={{ fontSize: 16 }}>{t('checkoutPayment.cash') || 'Cash'}</ThemedText>
                         </Pressable>
                     </ThemedView>
                     {/* <ThemedView style={styles.fieldGroup}>
@@ -188,7 +207,27 @@ const CheckoutScreen: FC = () => {
                     </ThemedView> */}
 
                 </ThemedView>
-                <FullButton text={t('common.continue')} onPress={() => { router.push('/checkout/review') }} style={{ marginTop: 20, flex: 1 }} />
+                <FullButton
+                    text={t('common.continue')}
+                    onPress={() => {
+                        if (!paymentMethod) {
+                            toast.show({ message: t('checkoutPayment.selectPaymentMethod'), type: 'error' });
+                            return;
+                        }
+
+                        router.push({
+                            pathname: '/checkout/review',
+                            params: {
+                                items: params.items as string,
+                                promoId: params.promoId as string,
+                                promoCode: params.promoCode as string,
+                                address: params.address as string,
+                                paymentMethod: paymentMethod
+                            }
+                        });
+                    }}
+                    style={{ marginTop: 20, flex: 1 }}
+                />
             </ScrollView>
         </ThemedView>
     )

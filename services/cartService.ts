@@ -32,8 +32,7 @@ const deleteCart = async (id: number): Promise<string> => {
 };
 
 const checkoutCart = async (cart: Partial<any>): Promise<any> => {
-    const headers = await authHeaders();
-    return await http.post<any>('/carts/checkout', cart, headers);
+    return await http.post<any>('/carts/checkout', cart);
 };
 
 const createPayment = async (cart: Partial<any>): Promise<any> => {

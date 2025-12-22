@@ -5,42 +5,135 @@ import GoBackButton from '@/components/ui/gobackbutton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { router } from 'expo-router';
+import { checkoutCart, createPayment } from '@/services/cartService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router, useLocalSearchParams } from 'expo-router';
+import { jwtDecode } from 'jwt-decode';
 import React, { FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { useToast } from '../providers/ToastProvider';
+
 import Svg, { Path } from 'react-native-svg';
 
 
 const CheckoutScreen: FC = () => {
     const { t } = useTranslation();
+    const params = useLocalSearchParams();
+    const toast = useToast();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
-    const checkoutData = {
-        items: [{ id: '1', name: 'Badminton Racket', price: 99.99, quantity: 1, discount: 0 },
-        { id: '2', name: 'Shuttlecock Pack', price: 19.99, quantity: 2, discount: 5 },
-        { id: '3', name: 'Sports Shoes', price: 79.99, quantity: 1, discount: 15 }
-        ],
-        shippingAddress: {
-            fullName: 'John Doe',
-            phoneNumber: "123-456-7890",
-            detailAddress: '123 Main St',
-            district: 'District 1',
-            city: 'Hanoi',
-            country: 'Viet Nam',
-        },
-        paymentMethod: 'PayPal',
-        shippingCost: 20,
-        discount: 15,
-    }
+
+    const [items, setItems] = useState<any[]>([]);
+    const [address, setAddress] = useState<any>({});
+    const [paymentMethod, setPaymentMethod] = useState<string>('');
+    const [promoCode, setPromoCode] = useState<string>('');
     const [subtotal, setSubtotal] = useState(0);
+    const [discount, setDiscount] = useState(0);
     const [total, setTotal] = useState(0);
+    const [cartItemIds, setCartItemIds] = useState<number[]>([]);
+    const shippingCost = 0; // Fixed shipping cost
+
     useEffect(() => {
-        const newSubtotal = checkoutData.items.reduce((sum, item) => sum + item.price * (1 - item.discount / 100) * item.quantity, 0);
-        setSubtotal(newSubtotal);
-        const total = checkoutData.shippingCost + newSubtotal * (1 - checkoutData.discount / 100);
-        setTotal(total);
-    }, [checkoutData.items]);
+        if (params.items) {
+            const parsedItems = JSON.parse(params.items as string);
+            const itemIds = parsedItems.map((item: any) => Number(item.id));
+            setItems(parsedItems);
+            setCartItemIds(itemIds);
+        }
+        if (params.address) {
+            const parsedAddress = JSON.parse(params.address as string);
+            setAddress(parsedAddress);
+        }
+        if (params.paymentMethod) {
+            setPaymentMethod(params.paymentMethod as string);
+        }
+        if (params.promoCode) {
+            setPromoCode(params.promoCode as string);
+        }
+    }, [params.items, params.address, params.paymentMethod, params.promoCode, params.cartitemid]);
+
+    useEffect(() => {
+        if (items.length > 0) {
+            const newSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            setSubtotal(newSubtotal);
+
+            // Calculate discount from promo if exists
+            let discountAmount = 0;
+            if (params.promoId && items[0]?.discount !== undefined) {
+                // Discount already calculated in cart, use first item's discount as reference
+                // Or recalculate based on promo data
+                discountAmount = items.reduce((sum, item) => sum + (item.discount || 0), 0);
+            }
+            setDiscount(discountAmount);
+
+            const finalTotal = newSubtotal - discountAmount + shippingCost;
+            setTotal(finalTotal);
+        }
+    }, [items, params.promoId, shippingCost]);
+
+    const handlePlaceOrder = async () => {
+        try {
+            if (!items.length || !address || !address.phone || !paymentMethod) {
+                toast.show({ message: t('checkoutReview.errors.fillAllFields'), type: 'error' });
+                return;
+            }
+            const token = await AsyncStorage.getItem('loginToken');
+            const decode = jwtDecode<any>(token ?? '');
+            const userId = decode?.id ?? decode?.userid;
+            if (!userId) {
+                toast.show({ message: t('common.error'), type: 'error' });
+                return;
+            }
+
+            const addressString = [
+                address.detailedAddress,
+                address.district,
+                address.province,
+                address.country || 'Vietnam',
+            ]
+                .filter(Boolean)
+                .join(', ');
+
+            const cartPayload: any = {
+                userid: userId,
+                cartitemid: cartItemIds,
+                phonenumber: address.phone,
+                address: addressString,
+                promotioncode: promoCode || '',
+            };
+
+            const res = await checkoutCart(cartPayload);
+            if (res?.orderId) {
+                if (paymentMethod === 'vnpay' || paymentMethod === 'paypal') {
+                    const paymentData = {
+                        orderid: res.orderId,
+                        paymentmethod: paymentMethod,
+                    } as any;
+                    const resPayment = await createPayment(paymentData);
+                    if (resPayment) {
+                        try {
+                            await Linking.openURL(String(resPayment));
+                        } catch {
+                            toast.show({ message: t('common.error'), type: 'error' });
+                        }
+                    } else {
+                        toast.show({ message: t('common.error'), type: 'error' });
+                    }
+                } else if (paymentMethod === 'cash') {
+                    toast.show({ message: t('checkoutReview.placeOrderSuccess'), type: 'success' });
+                    router.push({ pathname: '/order/[id]', params: { id: String(res.orderId) } } as any);
+                } else {
+                    toast.show({ message: t('checkoutPayment.selectPaymentMethod'), type: 'error' });
+                }
+            } else {
+                toast.show({ message: t('common.error'), type: 'error' });
+            }
+        } catch (e) {
+            console.error('Place order failed', e);
+            toast.show({ message: t('common.error'), type: 'error' });
+        }
+    };
 
     return (
         <ThemedView style={styles.container}>
@@ -74,8 +167,13 @@ const CheckoutScreen: FC = () => {
                 </ThemedView>
                 <ThemedView style={styles.content}>
                     <ThemedView style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 20 }}>
-                        <ThemedText type='title' style={{ fontSize: 20 }}>{t('checkoutReview.item')} ({checkoutData.items.length})</ThemedText>
-                        <Pressable onPress={() => { router.push('/checkout/items') }}>
+                        <ThemedText type='title' style={{ fontSize: 20 }}>{t('checkoutReview.item')} ({items.length})</ThemedText>
+                        <Pressable onPress={() => {
+                            router.push({
+                                pathname: '/checkout/items',
+                                params: { items: params.items as string }
+                            });
+                        }}>
                             <IconSymbol name='chevron-right' size={36} color={Colors[scheme].text} />
                         </Pressable>
                     </ThemedView>
@@ -83,27 +181,27 @@ const CheckoutScreen: FC = () => {
                         <ThemedText type='title' style={{ fontSize: 20 }}>{t('checkoutReview.shippingAddressTitle')}</ThemedText>
                         <ThemedView style={styles.contentContainer}>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.fields.fullName')}</ThemedText>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.shippingAddress.fullName}</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{address.fullName || ''}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.fields.phoneNumber')}</ThemedText>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.shippingAddress.phoneNumber}</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{address.phone || ''}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.fields.country')}</ThemedText>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.shippingAddress.country}</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{address.country || 'Vietnam'}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.fields.city')}</ThemedText>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.shippingAddress.city}</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{address.province || ''}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.fields.district')}</ThemedText>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.shippingAddress.district}</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{address.district || ''}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.fields.streetAddress')}</ThemedText>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.shippingAddress.detailAddress}</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{address.detailedAddress || ''}</ThemedText>
                         </ThemedView>
                     </ThemedView>
                     <ThemedView >
@@ -114,11 +212,11 @@ const CheckoutScreen: FC = () => {
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.summary.shippingCost')}</ThemedText>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.shippingCost.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{shippingCost.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
                             <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('checkoutReview.summary.discount')}</ThemedText>
-                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{checkoutData.discount} %</ThemedText>
+                            <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{discount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                         </ThemedView>
                         <ThemedView style={styles.contentContainer}>
                             <ThemedText type='default' style={{ fontSize: 18, color: Colors[scheme].text }}>{t('checkoutReview.summary.total')}</ThemedText>
@@ -126,7 +224,8 @@ const CheckoutScreen: FC = () => {
                         </ThemedView>
                     </ThemedView>
                 </ThemedView>
-                <FullButton text={t('checkoutReview.placeOrder')} onPress={() => { router.push('/checkout/result') }} style={{ marginTop: 30, marginBottom: 50 }} />
+                {/* <FullButton text={t('checkoutReview.placeOrder')} onPress={() => { router.push('/checkout/result') }} style={{ marginTop: 30, marginBottom: 50 }} /> */}
+                <FullButton text={t('checkoutReview.placeOrder')} onPress={handlePlaceOrder} style={{ marginTop: 30, marginBottom: 50 }} />
             </ScrollView >
         </ThemedView >
     )

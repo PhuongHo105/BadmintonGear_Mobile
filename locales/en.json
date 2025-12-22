@@ -471,7 +471,8 @@
             "noDistricts": "No districts available"
         },
         "errors": {
-            "loadAddress": "Unable to load addresses. Check your connection and try again."
+            "loadAddress": "Unable to load addresses. Check your connection and try again.",
+            "fillAllFields": "Please fill in all required fields."
         }
     },
     "checkoutResult": {
@@ -480,13 +481,16 @@
         "continueShopping": "Continue Shopping"
     },
     "checkoutPayment": {
-        "title": "Checkout"
+        "title": "Checkout",
+        "selectPaymentMethod": "Please select a payment method",
+        "cash": "Cash"
     },
     "checkoutReview": {
         "title": "Checkout",
         "item": "Item",
         "shippingAddressTitle": "Shipping Address",
         "orderInformationTitle": "Order Information",
+        "placeOrderSuccess": "Your order has been placed successfully!",
         "fields": {
             "fullName": "Full Name",
             "phoneNumber": "Phone Number",

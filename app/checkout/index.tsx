@@ -4,11 +4,15 @@ import FullButton from '@/components/ui/fullbutton';
 import GoBackButton from '@/components/ui/gobackbutton';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { router } from 'expo-router';
-import React, { FC } from 'react';
+import { getUserById } from '@/services/userService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router, useLocalSearchParams } from 'expo-router';
+import { jwtDecode } from 'jwt-decode';
+import React, { FC, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { useToast } from '../providers/ToastProvider';
 
 type ID = string;
 
@@ -41,6 +45,8 @@ const GITHUB_FALLBACK_URL =
 
 const CheckoutScreen: FC = () => {
     const { t } = useTranslation();
+    const params = useLocalSearchParams();
+    const toast = useToast();
 
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
@@ -65,6 +71,31 @@ const CheckoutScreen: FC = () => {
     const [addressData, setAddressData] = React.useState<ProvinceOption[]>([]);
     const [isLoadingAddresses, setIsLoadingAddresses] = React.useState(false);
     const [addressError, setAddressError] = React.useState<string | null>(null);
+
+    const loadUserData = async () => {
+        const token = await AsyncStorage.getItem('loginToken');
+        const decode = jwtDecode<any>(token || '');
+        const user = await getUserById(decode.userid);
+        const address = user.address || {};
+        setFullName(user.name || '');
+        setPhone(user.phonenumber || '');
+        let detailedAddress = '';
+        let district = '';
+        let province = '';
+        if (user.address && typeof user.address === 'string') {
+            const parts = user.address.split(',').map((part: string) => part.trim());
+            detailedAddress = parts[0] || '';
+            district = parts[1] || '';
+            province = parts[2] || '';
+        }
+        setSelectedCountry(address.country || 'Vietnam');
+        setSelectedProvince(district || '');
+        setSelectedDistrict(province || '');
+        setDetailedAddress(detailedAddress || '');
+    }
+    useEffect(() => {
+        loadUserData();
+    }, []);
 
     const countries = React.useMemo(() => ['Vietnam'], []);
     const provinceOptions = React.useMemo(() => {
@@ -205,20 +236,10 @@ const CheckoutScreen: FC = () => {
                                         onSelect(option);
                                         onToggle();
                                     }}
-
-
-
-
-
                                 >
                                     <ThemedText style={{ color: option === value ? Colors[scheme].tint : Colors[scheme].text, fontSize: 16 }}>
                                         {option}
                                     </ThemedText>
-
-
-
-
-
                                 </Pressable>
                             ))
                         ) : (
@@ -410,7 +431,32 @@ const CheckoutScreen: FC = () => {
                     <FullButton
                         text={t('common.continue')}
                         onPress={() => {
-                            router.push('/checkout/payment' as any);
+                            // Validate address fields
+                            if (!fullName.trim() || !phone.trim() || !selectedProvince || !selectedDistrict || !detailedAddress.trim()) {
+                                toast.show({ type: 'error', message: t('checkout.errors.fillAllFields') });
+                                return;
+                            }
+
+                            // Package address info
+                            const address = {
+                                fullName,
+                                phone,
+                                country: selectedCountry,
+                                province: selectedProvince,
+                                district: selectedDistrict,
+                                detailedAddress,
+                            };
+
+                            // Pass cart items, promo, and address to payment page
+                            router.push({
+                                pathname: '/checkout/payment',
+                                params: {
+                                    items: params.items || '',
+                                    promoId: params.promoId || '',
+                                    promoCode: params.promoCode || '',
+                                    address: JSON.stringify(address),
+                                },
+                            } as any);
                         }}
                         style={{ marginTop: 20, flex: 1 }}
                     />
@@ -423,12 +469,12 @@ const CheckoutScreen: FC = () => {
 export default CheckoutScreen;
 
 const styles = StyleSheet.create({
-    container: { height: '100%', width: '100%', padding: 15, paddingTop: 20, position: 'relative' },
-    headerContainer: { width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+    container: { height: '100%', width: '100%', padding: 15, paddingTop: 50, position: 'relative' },
+    headerContainer: { width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 },
     leftHeader: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 12 },
-    statusBar: { width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
+    statusBar: { width: '100%', justifyContent: 'center', alignItems: 'center' },
     content: { flex: 1 },
-    fieldGroup: { marginTop: 16 },
+    fieldGroup: { marginBottom: 16 },
     errorText: { marginTop: 8, fontSize: 13 },
     input: { fontSize: 16, borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 15, marginTop: 8 },
     dropdownGroup: { marginTop: 8 },
