@@ -104,7 +104,9 @@
         "welcome": "Welcome",
         "category": "Category",
         "bestSelling": "Best Selling",
-        "latestProducts": "Latest Products"
+        "latestProducts": "Latest Products",
+        "flashsale": "Flash Sale",
+        "flashsaleEnded": "Ended"
     },
     "profile": {
         "title": "Profile",

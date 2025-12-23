@@ -58,7 +58,7 @@ export default function ProductCard({ product }: { product: any }) {
                     <Image source={imageUrl ? { uri: imageUrl } : undefined} style={styles.image} />
                     {product.flashsale && product.flashsale.value !== 0 ? (
                         <ThemedView style={[styles.badge, { backgroundColor: tint }]}>
-                            <ThemedText style={{ color: '#fff', fontSize: 12 }}>{`-${product.flashsale.value.toLocaleString('vi-VN')}${product.flashsale.type === 0 ? '%' : ''}`}</ThemedText>
+                            <ThemedText style={{ color: '#fff', fontSize: 12 }}>{`-${product?.flashsale?.value?.toLocaleString('vi-VN')}${product.flashsale.type === 0 ? '%' : ''}`}</ThemedText>
                         </ThemedView>
                     ) : null}
                 </ThemedView>
@@ -70,9 +70,9 @@ export default function ProductCard({ product }: { product: any }) {
                 >
                     {name}
                 </ThemedText>
-                <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: tint }}>{currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
+                <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: tint }}>{currentPrice?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                 {product.flashsale && product.flashsale.value !== 0 ? (
-                    <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: discountColor, textDecorationLine: 'line-through' }}>{product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
+                    <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: discountColor, textDecorationLine: 'line-through' }}>{product?.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                 ) : null}
                 <ThemedView style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 4 }}>
                     <ThemedText type="default" style={{ fontSize: 14, color: '#FFD700' }}>★</ThemedText>

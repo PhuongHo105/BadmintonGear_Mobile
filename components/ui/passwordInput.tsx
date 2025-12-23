@@ -4,7 +4,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Feather } from '@expo/vector-icons';
 import { FC, useState } from "react";
 import { Pressable, StyleProp, StyleSheet, TextInput, ViewStyle } from "react-native";
-import { ThemedView } from "./themed-view";
+import { ThemedView } from "../themed-view";
 
 type PasswordInputProps = {
     placeholder?: string;

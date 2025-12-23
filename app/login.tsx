@@ -1,3 +1,4 @@
+import { useAuth } from '@/app/providers/AuthProvider';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import BorderButton from '@/components/ui/borderbutton';
@@ -16,6 +17,7 @@ import Svg, { Path } from 'react-native-svg';
 const LoginScreen: React.FC = () => {
     const { t } = useTranslation();
     const router = useRouter();
+    const { signIn } = useAuth();
     const schemeRaw = useColorScheme() as ColorSchemeName | undefined | null;
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const logoSource: ImageSourcePropType =
@@ -40,9 +42,9 @@ const LoginScreen: React.FC = () => {
             const token = (response as any)?.token;
             const ok = token || (response as any)?.message === 'Login successfully';
             if (ok && token) {
-                await AsyncStorage.setItem('loginToken', token);
+                await signIn(token);
                 await AsyncStorage.setItem('password', password);
-                router.push('/');
+                // AuthProvider will handle navigation automatically
             } else {
                 setError(t('login.invalidCredentials'));
             }

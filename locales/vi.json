@@ -105,7 +105,9 @@
         "welcome": "Chào mừng",
         "category": "Danh mục",
         "bestSelling": "Bán chạy nhất",
-        "latestProducts": "Sản phẩm mới nhất"
+        "latestProducts": "Sản phẩm mới nhất",
+        "flashsale": "Giảm giá sốc",
+        "flashsaleEnded": "Đã kết thúc"
     },
     "profile": {
         "title": "Hồ sơ",

@@ -1,3 +1,4 @@
+import { useAuth } from '@/app/providers/AuthProvider';
 import { useThemePreference } from '@/app/providers/ThemePreferenceProvider';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -25,6 +26,7 @@ import {
 const ProfileScreen: React.FC = () => {
     const { t } = useTranslation();
     const router = useRouter();
+    const { signOut } = useAuth();
     const schemeRaw = useColorScheme() as ColorSchemeName | null | undefined;
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors
     const tint: string = Colors[scheme].tint;
@@ -52,9 +54,9 @@ const ProfileScreen: React.FC = () => {
                 { text: t('common.cancel'), onPress: () => { }, style: 'cancel' },
                 {
                     text: t('profile.logout'), onPress: async () => {
-                        await AsyncStorage.removeItem('loginToken');
                         await AsyncStorage.removeItem('password');
-                        router.replace('/login' as any);
+                        await signOut();
+                        // AuthProvider will handle navigation automatically
                     }, style: 'destructive'
                 },
             ]
