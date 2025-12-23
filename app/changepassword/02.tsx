@@ -1,8 +1,8 @@
-import PasswordInput from '@/components/passwordInput';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import FullButton from '@/components/ui/fullbutton';
 import GoBackButton from '@/components/ui/gobackbutton';
+import PasswordInput from '@/components/ui/passwordInput';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { changePassword } from '@/services/userService';
@@ -50,7 +50,6 @@ const ChangePassword02Screen: FC = () => {
         try {
             const currentPassword = await AsyncStorage.getItem('password');
             const response = await changePassword(currentPassword ?? '', newPassword);
-            console.log('Password changed successfully:', response);
             if (response === 'Password changed successfully') {
                 await AsyncStorage.setItem('password', newPassword);
                 Alert.alert(t('profile.ChangePassSuccessTitle'), t('profile.ChangePassSuccessMessage'), [

@@ -155,10 +155,8 @@ const CartScreen: FC = () => {
                 }
 
                 const serverCart = await getCartByUserID(userId);
-                console.log('Fetched cart items:', serverCart);
 
                 const normalized = await mapServerCartToUi(serverCart);
-                console.log('Normalized cart items:', normalized);
                 setCartItems(normalized);
                 recalcTotals(normalized as any);
             } catch (error) {

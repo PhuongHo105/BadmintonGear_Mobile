@@ -304,10 +304,8 @@ const OrderDetailScreen: FC = () => {
                                             orderId: order.id,
                                             quantity: d.quantity || d.numberOfItems || 1
                                         };
-                                        console.log('Product data:', productData);
                                         return productData;
                                     });
-                                    console.log('All products:', productsData);
                                     const productsJson = encodeURIComponent(JSON.stringify(productsData));
                                     router.push(`/feedback?products=${productsJson}`);
                                 }} style={{ flex: 1 }} />

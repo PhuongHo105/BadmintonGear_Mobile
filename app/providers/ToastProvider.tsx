@@ -65,7 +65,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     }, [opacity, translateY]);
 
     const getToastConfig = () => {
-        console.log(message)
         switch (type) {
             case 'success':
                 return {

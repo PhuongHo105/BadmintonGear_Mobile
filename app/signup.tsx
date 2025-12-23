@@ -1,8 +1,8 @@
-import PasswordInput from '@/components/passwordInput';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import BorderButton from '@/components/ui/borderbutton';
 import FullButton from '@/components/ui/fullbutton';
+import PasswordInput from '@/components/ui/passwordInput';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { register } from '@/services/authenticationService';

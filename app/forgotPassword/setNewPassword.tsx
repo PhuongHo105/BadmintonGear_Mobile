@@ -1,8 +1,8 @@
-import PasswordInput from '@/components/passwordInput';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import FullButton from '@/components/ui/fullbutton';
 import GoBackButton from '@/components/ui/gobackbutton';
+import PasswordInput from '@/components/ui/passwordInput';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useRouter } from 'expo-router';

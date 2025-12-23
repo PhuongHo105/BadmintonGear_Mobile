@@ -12,7 +12,6 @@ import { ThemedView } from '@/components/themed-view';
 export default function WelcomeScreen(): React.ReactElement {
     const router = useRouter();
     useEffect(() => {
-        console.log('WelcomeScreen mounted');
     }, []);
     const [progress, setProgress] = useState<number>(0);
     const [done, setDone] = useState<boolean>(false);

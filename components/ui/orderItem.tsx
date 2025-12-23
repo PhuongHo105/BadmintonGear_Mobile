@@ -110,11 +110,8 @@ export default function OrderItem({ order, onOrderUpdate }: { order: any, onOrde
                     quantity: product.quantity,
                     notes: ''
                 });
-                console.log('Add to cart response for product', product.Product.id, ':', res);
                 return res;
             });
-
-            console.log('Add to cart result:', result);
             if (result !== null && result.createdAt && result.updatedAt) {
                 toast.show({ type: 'success', message: t('product.addToCartSuccess') });
             }

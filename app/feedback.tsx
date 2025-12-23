@@ -58,7 +58,6 @@ const FeedbackScreen: FC = () => {
                     productid: product.id,
                     orderid: Number(product.orderId)
                 });
-                console.log('Submitted review for product', product.id, ':', res);
                 return res;
             });
         };
