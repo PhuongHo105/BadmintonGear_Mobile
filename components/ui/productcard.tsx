@@ -3,29 +3,14 @@ import { useColorScheme } from '@/hooks/use-color-scheme'
 import { getReviewByProductId } from '@/services/reviewService'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { ColorSchemeName, Dimensions, Pressable, StyleSheet } from 'react-native'
 import { ThemedText } from '../themed-text'
 import { ThemedView } from '../themed-view'
 
-type Product = {
-    id: string | number
-    name: string
-    Imagesproducts: { url: string }[]
-    translations?: {
-        name: string,
-        description: string
-    }[]
-    price: number
-    discount?: number
-}
 
-type Props = {
-    product: Product
-}
-
-export default function ProductCard({ product }: Props) {
-    const currentPrice: number = product.price * (1 - (product.discount ?? 0) / 100);
+export default function ProductCard({ product }: { product: any }) {
+    const currentPrice: number = product.price * (1 - (product.flashsale?.type === 0 ? product?.flashsale?.value : 0) / 100) - (product.flashsale?.type === 1 ? product?.flashsale?.value : 0);
     const schemeRaw: ColorSchemeName | undefined = useColorScheme()
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors
     const tint: string = Colors[scheme].tint
@@ -41,21 +26,14 @@ export default function ProductCard({ product }: Props) {
         : "@/assets/images/unimage.png";
     const name = product.translations?.[0]?.name || product.name;
     const [reviews, setReviews] = React.useState<any[]>([]);
+    const acceptedReviews = useMemo(() => reviews.filter(r => r.status === 'approved'), [reviews]);
     const [rate, setRate] = React.useState<number>(0);
 
     useEffect(() => {
         async function fetchReviews() {
             try {
-                const reponse = await getReviewByProductId(Number(product.id));
-                setReviews(reponse);
-                // Calculate average rating
-                if (reponse && reponse.length > 0) {
-                    const totalRate = reponse.reduce((sum: number, review: any) => sum + (review.rate || 0), 0);
-                    const avgRate = totalRate / reponse.length;
-                    setRate(avgRate);
-                } else {
-                    setRate(0);
-                }
+                const response = await getReviewByProductId(Number(product.id));
+                setReviews(response);
             }
             catch (error) {
                 console.error('Error fetching reviews for product', product.id, error);
@@ -64,14 +42,23 @@ export default function ProductCard({ product }: Props) {
         fetchReviews();
     }, [product])
 
+    useEffect(() => {
+        if (acceptedReviews.length === 0) {
+            setRate(0);
+            return;
+        }
+        const total = acceptedReviews.reduce((sum, r) => sum + (r.rating || 0), 0);
+        setRate(total / acceptedReviews.length);
+    }, [acceptedReviews]);
+
     return (
         <Pressable key={product.id} onPress={() => router.push(`/product/${product.id}` as any)} style={[styles.card, { width: cardWidth, borderColor: borderColor }]}>
             <ThemedView style={styles.inner}>
                 <ThemedView style={styles.imageWrapper}>
                     <Image source={imageUrl ? { uri: imageUrl } : undefined} style={styles.image} />
-                    {typeof product.discount === 'number' && product.discount > 0 ? (
+                    {product.flashsale && product.flashsale.value !== 0 ? (
                         <ThemedView style={[styles.badge, { backgroundColor: tint }]}>
-                            <ThemedText style={{ color: '#fff', fontSize: 12 }}>{`-${product.discount}%`}</ThemedText>
+                            <ThemedText style={{ color: '#fff', fontSize: 12 }}>{`-${product.flashsale.value.toLocaleString('vi-VN')}${product.flashsale.type === 0 ? '%' : ''}`}</ThemedText>
                         </ThemedView>
                     ) : null}
                 </ThemedView>
@@ -84,7 +71,7 @@ export default function ProductCard({ product }: Props) {
                     {name}
                 </ThemedText>
                 <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: tint }}>{currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
-                {typeof product.discount === 'number' && product.discount > 0 ? (
+                {product.flashsale && product.flashsale.value !== 0 ? (
                     <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: discountColor, textDecorationLine: 'line-through' }}>{product.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                 ) : null}
                 <ThemedView style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 4 }}>

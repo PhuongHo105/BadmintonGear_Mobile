@@ -10,17 +10,9 @@ import Svg, { Path } from "react-native-svg";
 import { ThemedText } from "../themed-text";
 import { ThemedView } from "../themed-view";
 
-type Cart = {
-    id: string;
-    productid: string;
-    name?: string;
-    price?: number;
-    image?: any;
-    discount?: number;
-}
 
 type CartItemProps = {
-    product: Cart;
+    product: any;
     checked?: boolean;
     numberOfItems?: number;
     onToggle?: (id: string) => void;
@@ -30,6 +22,7 @@ type CartItemProps = {
 };
 
 const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, onToggle, onChangeQuantity, onDeleteRequest, type }) => {
+    console.log('Rendering CartItem for product:', product);
 
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
@@ -46,7 +39,7 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
     const [mode, setMode] = useState<'editable' | 'review'>(type ?? 'editable');
     useEffect(() => setMode(type ?? 'editable'), [type]);
 
-    const currentPrice: number = (product.price ?? 0) * (1 - (product.discount ?? 0) / 100);
+    const currentPrice: number = (product?.price ?? 0) * (1 - (product?.flashsale?.type === 0 ? product?.flashsale?.value : 0) / 100) - (product?.flashsale?.type === 1 ? product?.flashsale?.value : 0);
 
     // Local quantity synced with prop
     const [quantity, setQuantity] = useState<number>(numberOfItems ?? 1);
@@ -54,15 +47,15 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
 
     const handleToggle = () => {
         setLocalChecked((v) => !v);
-        onToggle?.(product.id);
+        onToggle?.(product?.id);
     };
     const fupdateCart = async (newQuantity: number) => {
         const token = await AsyncStorage.getItem('loginToken');
         const decode = jwtDecode<any>(token ?? '');
-        await updateCart(product.id,
+        await updateCart(product?.id,
             {
                 userid: decode.userid ?? decode.id,
-                productid: product.productid,
+                productid: product?.productid,
                 quantity: newQuantity,
                 notes: ''
             }
@@ -72,7 +65,7 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
     const handleInc = () => {
         setQuantity((q) => {
             const nq = q + 1;
-            onChangeQuantity?.(product.id, nq);
+            onChangeQuantity?.(product?.id, nq);
             return nq;
         });
         fupdateCart(quantity + 1);
@@ -82,12 +75,12 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
 
     const handleDec = () => {
         if (quantity <= 1) {
-            onDeleteRequest?.(product.id);
+            onDeleteRequest?.(product?.id);
             return;
         }
         setQuantity((q) => {
             const nq = Math.max(1, q - 1);
-            onChangeQuantity?.(product.id, nq);
+            onChangeQuantity?.(product?.id, nq);
             return nq;
         });
         fupdateCart(quantity - 1);
@@ -96,17 +89,17 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
 
     return (
         <ThemedView style={styles.item}>
-            <Image source={product.image} style={styles.image} />
+            <Image source={product?.image} style={styles.image} />
             <ThemedView style={styles.contentContainer}>
                 <ThemedView style={styles.info}>
                     <ThemedView style={styles.content}>
-                        <ThemedText style={{ fontSize: 16, fontWeight: '600', color: textColor }}>{product.name}</ThemedText>
+                        <ThemedText style={{ fontSize: 16, fontWeight: '600', color: textColor }}>{product?.name}</ThemedText>
                         <ThemedText style={{ marginTop: 4, color: tint }}>
                             {currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                         </ThemedText>
-                        {typeof product.discount === 'number' && product.discount > 0 ? (
+                        {product?.flashsale && product?.flashsale?.value !== 0 ? (
                             <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: secondaryText, textDecorationLine: 'line-through' }}>
-                                {product.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                {product?.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                             </ThemedText>
                         ) : null}
                     </ThemedView>
@@ -144,7 +137,7 @@ const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, 
                     {mode !== 'review' && (
                         <Pressable style={styles.iconBtn}
                             onPress={() => {
-                                onDeleteRequest?.(product.id);
+                                onDeleteRequest?.(product?.id);
                             }}
                         >
                             <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">

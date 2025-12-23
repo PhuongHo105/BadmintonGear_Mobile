@@ -36,8 +36,6 @@ const CartScreen: FC = () => {
     const [selectedPromotionId, setSelectedPromotionId] = useState<string | null>(null);
     const [appliedPromotionId, setAppliedPromotionId] = useState<string | null>(null);
     const [currentTotal, setCurrentTotal] = useState(0);
-    type LocalProduct = { id: string; productid: string; name?: string; price?: number; discount?: number; image?: any };
-    type LocalCartItem = { product: LocalProduct; numberOfItems: number; checked: boolean };
     type Promotion = {
         code: string;
         id: string;
@@ -48,7 +46,7 @@ const CartScreen: FC = () => {
         minSubtotal?: number;
         maxDiscount?: number;
     };
-    const [cartItems, setCartItems] = useState<LocalCartItem[]>([]);
+    const [cartItems, setCartItems] = useState<any[]>([]);
     const [promotions, setPromotions] = useState<Promotion[]>([]);
 
     const loadPromotions = async () => {
@@ -80,13 +78,16 @@ const CartScreen: FC = () => {
         return Math.min(cappedDiscount, subtotal);
     }
 
-    function summarizeCart(items: LocalCartItem[]) {
+    function summarizeCart(items: any[]) {
         let subtotal = 0;
         let checkedCount = 0;
         items.forEach(cartItem => {
             if (cartItem.checked) {
-                const itemPrice = (cartItem.product.price ?? 0) * (1 - (cartItem.product.discount ?? 0) / 100);
-                subtotal += itemPrice * (cartItem.numberOfItems ?? 1);
+                const price = cartItem?.product?.price ?? 0;
+                const fs = cartItem?.product?.flashsale;
+                const priceAfterPercent = price * (1 - ((fs?.type === 0 ? (fs?.value ?? 0) : 0) / 100));
+                const itemPrice = priceAfterPercent - (fs?.type === 1 ? (fs?.value ?? 0) : 0);
+                subtotal += Math.max(itemPrice, 0) * (cartItem.numberOfItems ?? 1);
                 checkedCount += 1;
             }
         });
@@ -103,6 +104,42 @@ const CartScreen: FC = () => {
 
     const formatCurrency = (value: number) => value.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
 
+    // Helper to normalize/enrich server cart items to UI shape
+    const mapServerCartToUi = async (serverCart: any[]): Promise<any[]> => {
+        const lang = language;
+        const mapped = await Promise.all((serverCart ?? []).map(async (it: any) => {
+            const cartId = it?.id;
+            const productId = it?.productid ?? it?.productId;
+            let productData: any = it?.Product;
+            if (!productData && productId != null) {
+                try {
+                    productData = await getProductById(productId, lang);
+                } catch (e) {
+                    console.warn('Failed to fetch product for cart item', cartId, productId, e);
+                }
+            }
+            const imageUrl = productData?.Imagesproducts?.[0]?.url || productData?.image || '';
+            const name = productData?.translations?.[0]?.name || productData?.name || '';
+            const flashsale = productData?.flashsale;
+            const price = productData?.price ?? 0;
+
+            return {
+                id: String(cartId ?? `${productId}-${Math.random()}`),
+                product: {
+                    id: String(cartId ?? productId ?? ''), // cart row id for update/delete
+                    productid: productId,
+                    price,
+                    name,
+                    image: imageUrl || require('@/assets/images/unimage.png'),
+                    flashsale,
+                },
+                numberOfItems: it?.quantity ?? 1,
+                checked: true,
+            };
+        }));
+        return mapped;
+    };
+
     // Load cart from API based on stored user id (if available)
     useEffect(() => {
         const load = async () => {
@@ -118,41 +155,12 @@ const CartScreen: FC = () => {
                 }
 
                 const serverCart = await getCartByUserID(userId);
-                const rawItems: any[] = Array.isArray((serverCart as any)?.items)
-                    ? (serverCart as any).items
-                    : Array.isArray(serverCart)
-                        ? (serverCart as any)
-                        : [];
+                console.log('Fetched cart items:', serverCart);
 
-                const enriched: LocalCartItem[] = await Promise.all(
-                    rawItems.map(async (item: any) => {
-                        const pid = item.productId ?? item.productid ?? item.product?.id ?? item.product?.productId;
-                        let productData: any = item.product;
-                        if (!productData && pid != null) {
-                            try {
-                                productData = await getProductById(pid, language);
-                            } catch (e) {
-                                console.warn('Failed to fetch product', pid, e);
-                            }
-                        }
-                        const image = productData?.Imagesproducts?.[0]?.url
-                            ? { uri: productData.Imagesproducts[0].url }
-                            : require('@/assets/images/product1.png');
-                        const localProduct: LocalProduct = {
-                            id: String(item?.id),
-                            productid: String(productData?.id ?? pid ?? Math.random().toString(36).slice(2)),
-                            name: productData?.translations?.[0]?.name ?? item.name,
-                            price: productData?.price ?? item.price,
-                            discount: productData?.discount ?? item.discount,
-                            image,
-                        };
-                        const qty = Number(item.quantity ?? item.numberOfItems ?? 1) || 1;
-                        return { product: localProduct, numberOfItems: qty, checked: false };
-                    })
-                );
-
-                setCartItems(enriched);
-                recalcTotals(enriched as any);
+                const normalized = await mapServerCartToUi(serverCart);
+                console.log('Normalized cart items:', normalized);
+                setCartItems(normalized);
+                recalcTotals(normalized as any);
             } catch (error) {
                 console.error('Error fetching cart items:', error);
             }
@@ -160,7 +168,7 @@ const CartScreen: FC = () => {
         load();
     }, [language, t, toast]);
 
-    const recalcTotals = (items: LocalCartItem[], promoId: string | null = appliedPromotionId) => {
+    const recalcTotals = (items: any[], promoId: string | null = appliedPromotionId) => {
         const { subtotal, checkedCount } = summarizeCart(items);
         const promo = promotions.find(p => p.id === promoId);
         const computedDiscount = calculateDiscountAmount(subtotal, promo);
@@ -172,7 +180,7 @@ const CartScreen: FC = () => {
 
     const handleToggle = (id: string) => {
         const updatedItems = cartItems.map(cartItem => {
-            if (cartItem.product.id === id) {
+            if (String(cartItem.product.id) === String(id)) {
                 return { ...cartItem, checked: !cartItem.checked };
             }
             return cartItem;
@@ -183,7 +191,7 @@ const CartScreen: FC = () => {
 
     const handleChangeQuantity = (id: string, quantity: number) => {
         const updatedItems = cartItems.map(ci => {
-            if (ci.product.id === id) {
+            if (String(ci.product.id) === String(id)) {
                 return { ...ci, numberOfItems: quantity };
             }
             return ci;
@@ -201,7 +209,7 @@ const CartScreen: FC = () => {
             return;
         }
         toast.show({ type: 'success', message: t('cart.deleteSuccess') });
-        const updatedItems = cartItems.filter(ci => ci.product.id !== id);
+        const updatedItems = cartItems.filter(ci => String(ci.product?.id) !== String(id));
         setCartItems(updatedItems);
         recalcTotals(updatedItems);
     };
@@ -233,6 +241,7 @@ const CartScreen: FC = () => {
                 price: ci.product.price ?? 0,
                 name: ci.product.name ?? '',
                 image: ci.product?.image ?? '',
+                flashsale: ci.product.flashsale ?? null,
             }));
 
         if (selected.length === 0) {
@@ -293,7 +302,7 @@ const CartScreen: FC = () => {
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
                     {cartItems.map((item) => (
                         <CartItem
-                            key={item.product.id}
+                            key={item?.id}
                             product={item.product}
                             numberOfItems={item.numberOfItems}
                             checked={item.checked}

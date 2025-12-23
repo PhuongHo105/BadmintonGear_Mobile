@@ -32,7 +32,7 @@ export default function OrderItem({ order, onOrderUpdate }: { order: any, onOrde
     }
 
     const firstItem = order.details[0];
-    const currentPrice: number = (firstItem?.Product?.price ?? 0) * (1 - (firstItem?.discount ?? 0) / 100);
+    const currentPrice: number = firstItem.Product.price * (1 - (firstItem.Product.flashsale?.type === 0 ? firstItem.Product.flashsale?.value : 0) / 100) - (firstItem.Product.flashsale?.type === 1 ? firstItem.Product.flashsale?.value : 0);
     const updatedDate = new Date(order.updatedAt);
     const total = order.details.reduce((sum: number, item: any) => {
         const itemPrice = (item?.Product?.price ?? 0) * (1 - (item?.discount ?? 0) / 100);
@@ -165,7 +165,7 @@ export default function OrderItem({ order, onOrderUpdate }: { order: any, onOrde
                                     <ThemedText style={{ marginTop: 4, color: tint }}>
                                         {currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                                     </ThemedText>
-                                    {typeof firstItem?.discount === 'number' && firstItem.discount > 0 ? (
+                                    {firstItem?.Product.flashsale && firstItem.Product.flashsale.value !== 0 ? (
                                         <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: secondaryText, textDecorationLine: 'line-through' }}>
                                             {firstItem?.Product?.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                                         </ThemedText>

@@ -84,15 +84,18 @@ const ProductDetailScreen: React.FC = () => {
     const decreaseQuantity = () => setQuantity((prev) => (prev > 0 ? prev - 1 : 0));
     const increaseQuantity = () => setQuantity((prev) => prev + 1);
     const [reviews, setReviews] = useState<any[]>([]);
+    const acceptedReviews = useMemo(() => {
+        return reviews.filter(review => review.status === 'approved');
+    }, [reviews]);
     const relatedProducts = useMemo(() => {
         if (!product) return [];
         return products.filter((p) => p.id !== product.id && (p.brand === product.brand || p.categoriesid === product.categoriesid)).slice(0, 10);
     }, [products, product]);
     const rate = useMemo(() => {
-        if (reviews.length === 0) return 0;
-        const totalRate = reviews.reduce((sum: number, review: any) => sum + (review.rate || 0), 0);
-        return totalRate / reviews.length;
-    }, [reviews]);
+        if (acceptedReviews.length === 0) return 0;
+        const totalRate = acceptedReviews.reduce((sum: number, review: any) => sum + (review.rating || 0), 0);
+        return totalRate / acceptedReviews.length;
+    }, [acceptedReviews]);
 
     const handleImageMomentum = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const offsetX = event.nativeEvent.contentOffset.x;
@@ -306,20 +309,20 @@ const ProductDetailScreen: React.FC = () => {
                         <ThemedText type='title' style={styles.reviewsTitle}>
                             {reviews.length} {reviews.length === 1 ? t('product.review') : t('product.reviews')}
                         </ThemedText>
-                        <ThemedView style={styles.starsContainer}>{renderStars(product?.rating ?? 0)}</ThemedView>
+                        <ThemedView style={styles.starsContainer}>{renderStars(rate ?? 0)}</ThemedView>
 
                         {/* Display actual reviews from API */}
                         <ThemedView style={styles.reviewsList}>
-                            {reviews.slice(0, visibleReviews).map((review: any, index: number) => (
+                            {acceptedReviews.slice(0, visibleReviews).map((review: any, index: number) => (
                                 <ThemedView key={review.id || index} style={[styles.reviewItem, { borderBottomColor: palette.border }]}>
                                     <ThemedView style={styles.reviewHeader}>
                                         <ThemedText type='defaultSemiBold'>{review.customerName || review.name || 'Anonymous'}</ThemedText>
                                         <ThemedView style={styles.reviewStars}>
-                                            {renderStars(review.rate || 0)}
+                                            {renderStars(review.rating || 0)}
                                         </ThemedView>
                                     </ThemedView>
                                     <ThemedText style={[styles.reviewComment, { color: palette.secondaryText }]}>
-                                        {review.comment || review.text || 'No comment'}
+                                        {review.content || review.text || 'No comment'}
                                     </ThemedText>
                                 </ThemedView>
                             ))}
