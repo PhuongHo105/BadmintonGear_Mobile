@@ -11,7 +11,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { jwtDecode } from 'jwt-decode';
 import React, { FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Linking, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { WebView } from 'react-native-webview';
 import { useToast } from '../providers/ToastProvider';
 
 import Svg, { Path } from 'react-native-svg';
@@ -31,7 +32,10 @@ const CheckoutScreen: FC = () => {
     const [subtotal, setSubtotal] = useState(0);
     const [discount, setDiscount] = useState(0);
     const [total, setTotal] = useState(0);
+    const [orderId, setOrderId] = useState<number | null>(null);
     const [cartItemIds, setCartItemIds] = useState<number[]>([]);
+    const [paymentUrl, setPaymentUrl] = useState<string>('');
+    const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
     const shippingCost = 0; // Fixed shipping cost
 
     useEffect(() => {
@@ -110,19 +114,17 @@ const CheckoutScreen: FC = () => {
                         orderid: res.orderId,
                         paymentmethod: paymentMethod,
                     } as any;
+                    setOrderId(res.orderId);
                     const resPayment = await createPayment(paymentData);
                     if (resPayment) {
-                        try {
-                            await Linking.openURL(String(resPayment));
-                        } catch {
-                            toast.show({ message: t('common.error'), type: 'error' });
-                        }
+                        setPaymentUrl(String(resPayment));
+                        setShowPaymentModal(true);
                     } else {
                         toast.show({ message: t('common.error'), type: 'error' });
                     }
                 } else if (paymentMethod === 'cash') {
                     toast.show({ message: t('checkoutReview.placeOrderSuccess'), type: 'success' });
-                    router.push({ pathname: '/order/[id]', params: { id: String(res.orderId) } } as any);
+                    router.replace({ pathname: '/order/[id]', params: { id: String(res.orderId) } } as any);
                 } else {
                     toast.show({ message: t('checkoutPayment.selectPaymentMethod'), type: 'error' });
                 }
@@ -133,6 +135,34 @@ const CheckoutScreen: FC = () => {
             console.error('Place order failed', e);
             toast.show({ message: t('common.error'), type: 'error' });
         }
+    };
+
+    const handlePaymentNavigation = (navState: any) => {
+        const { url } = navState || {};
+        if (!url) return;
+
+        const successUrl = 'localhost:3030/paymentsuccess';
+        const isReturningToApp = url.includes('localhost:3030');
+
+        if (url.includes(successUrl)) {
+            setShowPaymentModal(false);
+            toast.show({ message: t('checkoutReview.placeOrderSuccess'), type: 'success' });
+            if (orderId !== null) {
+                router.replace({ pathname: '/order/[id]', params: { id: String(orderId) } } as any);
+            } else {
+                router.replace('/checkout/result');
+            }
+        } else if (isReturningToApp) {
+            setShowPaymentModal(false);
+            toast.show({ message: t('checkoutPayment.paymentError', { defaultValue: 'Payment failed' }), type: 'error' });
+            router.replace('/orderList');
+        }
+    };
+
+    const handleClosePaymentModal = (id: number) => {
+        setShowPaymentModal(false);
+        toast.show({ message: t('checkoutPayment.paymentError', { defaultValue: 'Payment failed' }), type: 'error' });
+        router.replace(`/order/${id}` as any);
     };
 
     return (
@@ -227,6 +257,25 @@ const CheckoutScreen: FC = () => {
                 {/* <FullButton text={t('checkoutReview.placeOrder')} onPress={() => { router.push('/checkout/result') }} style={{ marginTop: 30, marginBottom: 50 }} /> */}
                 <FullButton text={t('checkoutReview.placeOrder')} onPress={handlePlaceOrder} style={{ marginTop: 30, marginBottom: 50 }} />
             </ScrollView >
+            <Modal visible={showPaymentModal} animationType="slide" onRequestClose={() => { if (orderId !== null) handleClosePaymentModal(orderId) }}>
+                <ThemedView style={{ flex: 1, paddingTop: 50 }}>
+                    <ThemedView style={{ padding: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <ThemedText type='title' style={{ fontSize: 18 }}>{t('checkoutReview.payment')}</ThemedText>
+                        <Pressable onPress={() => { if (orderId !== null) handleClosePaymentModal(orderId) }}>
+                            <IconSymbol name='close' size={26} color={Colors[scheme].text} />
+                        </Pressable>
+                    </ThemedView>
+                    <View style={{ flex: 1, overflow: 'hidden', borderRadius: 12, margin: 12 }}>
+                        {paymentUrl ? (
+                            <WebView
+                                source={{ uri: paymentUrl }}
+                                onNavigationStateChange={handlePaymentNavigation}
+                                startInLoadingState
+                            />
+                        ) : null}
+                    </View>
+                </ThemedView>
+            </Modal>
         </ThemedView >
     )
 }

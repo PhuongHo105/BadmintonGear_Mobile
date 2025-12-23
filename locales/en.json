@@ -504,6 +504,7 @@
     "checkoutReview": {
         "title": "Checkout",
         "item": "Item",
+        "payment": "Payment",
         "shippingAddressTitle": "Shipping Address",
         "orderInformationTitle": "Order Information",
         "placeOrderSuccess": "Your order has been placed successfully!",

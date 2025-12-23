@@ -22,8 +22,6 @@ type CartItemProps = {
 };
 
 const CartItem: FC<CartItemProps> = ({ product, checked = false, numberOfItems, onToggle, onChangeQuantity, onDeleteRequest, type }) => {
-    console.log('Rendering CartItem for product:', product);
-
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const tint: string = Colors[scheme].tint;

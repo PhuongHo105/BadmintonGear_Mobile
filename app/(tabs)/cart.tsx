@@ -297,7 +297,7 @@ const CartScreen: FC = () => {
                         <ThemedText style={{ color: palette.tint }}>{t('cart.voucherCode')}</ThemedText>
                     </Pressable>
                 </ThemedView>
-                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24, marginTop: 8 }}>
                     {cartItems.map((item) => (
                         <CartItem
                             key={item?.id}

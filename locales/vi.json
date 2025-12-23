@@ -505,6 +505,7 @@
     "checkoutReview": {
         "title": "Thanh toán",
         "item": "Sản phẩm",
+        "payment": "Thanh toán",
         "shippingAddressTitle": "Địa chỉ giao hàng",
         "orderInformationTitle": "Thông tin đơn hàng",
         "placeOrderSuccess": "Đặt hàng thành công!",
