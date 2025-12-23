@@ -29,7 +29,8 @@
         "apply": "Áp dụng",
         "clear": "Xóa",
         "phoneNumber": "Số điện thoại",
-        "phoneNumberPlaceholder": "Nhập số điện thoại của bạn"
+        "phoneNumberPlaceholder": "Nhập số điện thoại của bạn",
+        "ok": "OK"
     },
     "layout": {
         "home": "Trang chủ",
@@ -211,7 +212,10 @@
         "submit": "Gửi",
         "thankYou": "Cảm ơn bạn đã phản hồi!",
         "alertTitleMissingRating": "Thiếu thông tin",
-        "pleaseSelectRating": "Vui lòng chọn số sao đánh giá."
+        "pleaseSelectRating": "Vui lòng chọn số sao đánh giá.",
+        "products": "Sản phẩm",
+        "errorSubmitting": "Lỗi khi gửi phản hồi. Vui lòng thử lại.",
+        "alertTitleError": "Lỗi gửi phản hồi"
     },
     "orders": {
         "title": "Lịch sử đơn hàng",
@@ -229,7 +233,14 @@
         "total": "Tổng cộng",
         "cancelOrderTitle": "Hủy đơn hàng",
         "cancelOrderMessage": "Bạn có chắc chắn muốn hủy đơn hàng này không?",
-        "confirmCancel": "Có, hủy đơn hàng"
+        "confirmCancel": "Có, hủy đơn hàng",
+        "status": {
+            "pending": "Chờ xử lý",
+            "processing": "Đang xử lý",
+            "shipped": "Đã gửi",
+            "delivered": "Đã giao",
+            "cancelled": "Đã hủy"
+        }
     },
     "product": {
         "reviews": "đánh giá",
@@ -266,7 +277,10 @@
         "buyAgain": "Mua lại",
         "rate": "Đánh giá",
         "cancel": "Hủy",
-        "orderId": "Mã đơn hàng"
+        "orderId": "Mã đơn hàng",
+        "warnCancel": "Bạn có chắc chắn muốn hủy đơn hàng này không?",
+        "successCancel": "Hủy đơn hàng thành công!",
+        "errorCancel": "Hủy đơn hàng thất bại. Vui lòng thử lại."
     },
     "changePassword": {
         "title": "Đổi mật khẩu",

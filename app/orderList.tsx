@@ -5,40 +5,58 @@ import GoBackButton from '@/components/ui/gobackbutton';
 import OrderItem from '@/components/ui/orderItem';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { getCurrentLanguage } from '@/i18n';
+import { getOrderByUserId, getOrderDetails } from '@/services/ordersService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import React, { FC, useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
+import React, { FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 
 const OrderListScreen: FC = () => {
     const { t } = useTranslation();
+    const language = getCurrentLanguage();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const textColor: string = Colors[scheme].text;
     const secondaryText: string = Colors[scheme].secondaryText;
     const [activeTab, setActiveTab] = useState('ongoing');
     const [ongoingOrders, setOngoingOrders] = useState<any[]>([]);
-    const [completedOrders, setCompletedOrders] = useState([
-        {
-            id: '1',
-            details: [
-                { productId: '101', name: 'Badminton Racket', image: require('@/assets/images/product1.png'), quantity: 1, price: 1200000, discount: 10 },
-                { productId: '102', name: 'Wireless Headphone', image: require('@/assets/images/product1.png'), quantity: 1, price: 800000, discount: 5 }
-            ],
-            updatedAt: '2025-10-26',
-            status: 'Delivered'
-        },
-        {
-            id: '2',
-            details: [
-                { productId: '102', name: 'Wireless Headphone', image: require('@/assets/images/product1.png'), quantity: 1, price: 800000, discount: 5 }
-            ],
-            updatedAt: '2025-10-20',
-            status: 'Delivered'
-        },
-    ]);
+    const [completedOrders, setCompletedOrders] = useState<any[]>([]);
+    const loadOrders = async () => {
+        try {
+            const token = await AsyncStorage.getItem('loginToken');
+            const decode = jwtDecode<any>(token || '');
+            const userId = decode.id ?? decode.userid;
+            const orders = await getOrderByUserId(userId);
+            const ordersWithDetails = await Promise.all(orders.map(async (order: any) => {
+                const details = await getOrderDetails(order.id, language);
+                return { ...order, details };
+            }));
+
+            // Ongoing: Not started (0), Processing (1), Shipped (2)
+            const ongoing = ordersWithDetails.filter(order =>
+                !order.delivered && Number(order.status) !== -1
+            );
+            // Completed: Delivered (3) or Cancelled (4)
+            const completed = ordersWithDetails.filter(order =>
+                order.delivered || Number(order.status) === -1
+            );
+            setOngoingOrders(ongoing);
+            setCompletedOrders(completed);
+        } catch (error) {
+            console.error('Error loading orders:', error);
+            setOngoingOrders([]);
+            setCompletedOrders([]);
+        }
+    };
+
+    useEffect(() => {
+        loadOrders();
+    }, []);
 
     const renderOrderList = () => {
         const ordersToShow = activeTab === 'ongoing' ? ongoingOrders : completedOrders;
@@ -69,7 +87,7 @@ const OrderListScreen: FC = () => {
         return (
             <View style={styles.orderListContainer}>
                 {ordersToShow.map((order: any) => (
-                    <OrderItem key={order.id} order={order} />
+                    <OrderItem key={order.id} order={order} onOrderUpdate={loadOrders} />
                 ))}
             </View>
         );

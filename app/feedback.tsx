@@ -4,34 +4,73 @@ import FullButton from '@/components/ui/fullbutton';
 import GoBackButton from '@/components/ui/gobackbutton';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { submitReview } from '@/services/reviewService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Image } from 'expo-image';
+import { router, useLocalSearchParams } from 'expo-router';
+import { jwtDecode } from 'jwt-decode';
 import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { useToast } from './providers/ToastProvider';
 
 
 const FeedbackScreen: FC = () => {
     const { t } = useTranslation();
+    const params = useLocalSearchParams();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const textColor: string = Colors[scheme].text;
     const secondaryText: string = Colors[scheme].secondaryText;
     const tint: string = Colors[scheme].tint;
-
-    const [rating, setRating] = React.useState<number>(0); // 0..5
+    const borderColor: string = Colors[scheme].border;
+    const toast = useToast();
+    const [rating, setRating] = React.useState<number>(0);
     const [comment, setComment] = React.useState<string>('');
     const [isFocused, setIsFocused] = React.useState<boolean>(false);
 
+    // Parse products from params
+    const products = React.useMemo(() => {
+        try {
+            if (typeof params.products === 'string') {
+                const decoded = decodeURIComponent(params.products);
+                const parsed = JSON.parse(decoded);
+                return Array.isArray(parsed) ? parsed : [];
+            }
+            return [];
+        } catch (error) {
+            console.error('Error parsing products:', error);
+            return [];
+        }
+    }, [params.products]);
+
     const onSubmit = () => {
-        if (rating <= 0) {
-            Alert.alert(t('feedback.alertTitleMissingRating'), t('feedback.pleaseSelectRating'));
+        const submitFeedback = async () => {
+            const token = await AsyncStorage.getItem('loginToken');
+            const decode = jwtDecode<any>(token || '');
+            const userid = decode.id ?? decode.userid;
+            products.map(async (product: any) => {
+                const res = await submitReview({
+                    userid,
+                    rating,
+                    content: comment,
+                    productid: product.id,
+                    orderid: Number(product.orderId)
+                });
+                console.log('Submitted review for product', product.id, ':', res);
+                return res;
+            });
+        };
+
+        if (rating === 0) {
+            toast.show({ type: 'error', title: t('feedback.alertTitleMissingRating'), message: t('feedback.pleaseSelectRating') });
             return;
         }
-        // Optionally validate comment length; we’ll accept empty comment
-        Alert.alert(t('feedback.thankYou'));
-        // Here you could call an API to submit rating/comment
-        setRating(0);
-        setComment('');
+        submitFeedback().then(() => {
+            toast.show({ message: t('feedback.thankYou'), type: 'success' });
+            router.back();
+        });
     };
 
     const Star = ({ filled }: { filled: boolean }) => (
@@ -55,6 +94,28 @@ const FeedbackScreen: FC = () => {
             </ThemedView>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
                 <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                    {products && products.length > 0 && (
+                        <ThemedView style={{ gap: 12, marginBottom: 24, paddingBottom: 20, borderBottomWidth: 1, borderBottomColor: borderColor }}>
+                            <ThemedText style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>{t('feedback.products')} ({products.length})</ThemedText>
+                            {products.map((product: any, index: number) => (
+                                <View key={`product-${index}`} style={{ flexDirection: 'row', gap: 12, paddingBottom: 12 }}>
+                                    {product.image ? (
+                                        <Image source={{ uri: product.image }} style={{ width: 70, height: 70, borderRadius: 8, backgroundColor: '#f0f0f0' }} contentFit="cover" />
+                                    ) : (
+                                        <View style={{ width: 70, height: 70, borderRadius: 8, backgroundColor: borderColor, justifyContent: 'center', alignItems: 'center' }}>
+                                            <ThemedText style={{ fontSize: 12, color: secondaryText }}>No Image</ThemedText>
+                                        </View>
+                                    )}
+                                    <View style={{ flex: 1, justifyContent: 'space-between' }}>
+                                        <ThemedText numberOfLines={2} style={{ fontSize: 14, fontWeight: '600', color: textColor }}>{product.name || 'Product'}</ThemedText>
+                                        {product.quantity && (
+                                            <ThemedText style={{ fontSize: 12, color: secondaryText }}>Qty: {product.quantity}</ThemedText>
+                                        )}
+                                    </View>
+                                </View>
+                            ))}
+                        </ThemedView>
+                    )}
                     <ThemedView style={{ gap: 16 }}>
                         <ThemedView style={{ gap: 8 }}>
                             <ThemedText style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>{t('feedback.yourRating')}</ThemedText>

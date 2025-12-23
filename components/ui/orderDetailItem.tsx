@@ -3,20 +3,12 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Image } from "expo-image";
 import { FC, useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import Svg, { Path } from "react-native-svg";
+import Svg, { Path } from 'react-native-svg';
 import { ThemedText } from "../themed-text";
 import { ThemedView } from "../themed-view";
 
-type Product = {
-    id: string;
-    name?: string;
-    price?: number;
-    image?: any;
-    discount?: number;
-}
-
 type CartItemProps = {
-    product: Product;
+    product: any;
     checked?: boolean;
     numberOfItems?: number;
     onToggle?: (id: string) => void;
@@ -41,7 +33,7 @@ const OrderDetailItem: FC<CartItemProps> = ({ product, checked = false, numberOf
     const [mode, setMode] = useState<'editable' | 'review'>(type ?? 'editable');
     useEffect(() => setMode(type ?? 'editable'), [type]);
 
-    const currentPrice: number = (product.price ?? 0) * (1 - (product.discount ?? 0) / 100);
+    const currentPrice: number = (product.Product.price ?? 0) * (1 - (product.discount ?? 0) / 100);
 
     // Local quantity synced with prop
     const [quantity, setQuantity] = useState<number>(numberOfItems ?? 1);
@@ -74,17 +66,17 @@ const OrderDetailItem: FC<CartItemProps> = ({ product, checked = false, numberOf
 
     return (
         <ThemedView style={styles.item}>
-            <Image source={product.image} style={styles.image} />
+            <Image source={product.Product?.Imagesproducts?.[0]?.url || require('@/assets/images/unimage.png')} style={styles.image} />
             <ThemedView style={styles.contentContainer}>
                 <ThemedView style={styles.info}>
                     <ThemedView style={styles.content}>
-                        <ThemedText style={{ fontSize: 16, fontWeight: '600', color: textColor }}>{product.name}</ThemedText>
+                        <ThemedText style={{ fontSize: 16, fontWeight: '600', color: textColor }}>{product.Product?.translations?.[0]?.name}</ThemedText>
                         <ThemedText style={{ marginTop: 4, color: tint }}>
                             {currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                         </ThemedText>
-                        {typeof product.discount === 'number' && product.discount > 0 ? (
+                        {typeof product.Product?.discount === 'number' && product.Product.discount > 0 ? (
                             <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: secondaryText, textDecorationLine: 'line-through' }}>
-                                {product.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                {product.Product.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                             </ThemedText>
                         ) : null}
                     </ThemedView>
@@ -104,19 +96,21 @@ const OrderDetailItem: FC<CartItemProps> = ({ product, checked = false, numberOf
                 </ThemedView>
 
                 <ThemedView style={styles.action}>
-                    <ThemedView style={[styles.numberOfItems, { borderColor: borderColor }]}>
-                        <Pressable style={styles.iconBtn} onPress={mode === 'review' ? undefined : handleDec}>
-                            <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <Path d="M18 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H18C18.41 11.25 18.75 11.59 18.75 12C18.75 12.41 18.41 12.75 18 12.75Z" fill={secondaryText} />
-                            </Svg>
-                        </Pressable>
+                    <ThemedView style={[styles.numberOfItems, { borderColor: borderColor, paddingHorizontal: mode === 'review' ? 8 : 4 }]}>
+                        {type === 'review' && (
+                            <Pressable style={styles.iconBtn} onPress={mode === 'review' ? undefined : handleDec}>
+                                <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <Path d="M18 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H18C18.41 11.25 18.75 11.59 18.75 12C18.75 12.41 18.41 12.75 18 12.75Z" fill={secondaryText} />
+                                </Svg>
+                            </Pressable>)}
                         <ThemedText style={{ textAlign: 'center', marginVertical: 4 }}>{quantity}</ThemedText>
-                        <Pressable style={styles.iconBtn} onPress={mode === 'review' ? undefined : handleInc}>
-                            <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <Path d="M18 12C18 12.41 17.66 12.75 17.25 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H17.25C17.66 11.25 18 11.59 18 12Z" fill={secondaryText} />
-                                <Path d="M12 18C11.59 18 11.25 17.66 11.25 17.25V6C11.25 5.59 11.59 5.25 12 5.25C12.41 5.25 12.75 5.59 12.75 6V17.25C12.75 17.66 12.41 18 12 18Z" fill={secondaryText} />
-                            </Svg>
-                        </Pressable>
+                        {type === 'review' && (
+                            <Pressable style={styles.iconBtn} onPress={mode === 'review' ? undefined : handleInc}>
+                                <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <Path d="M18 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H18C18.41 11.25 18.75 11.59 18.75 12C18.75 12.41 18.41 12.75 18 12.75Z" fill={secondaryText} />
+                                    <Path d="M12.75 18V6C12.75 5.59 13.09 5.25 13.5 5.25C13.91 5.25 14.25 5.59 14.25 6V18C14.25 18.41 13.91 18.75 13.5 18.75C13.09 18.75 12.75 18.41 12.75 18Z" fill={secondaryText} />
+                                </Svg>
+                            </Pressable>)}
                     </ThemedView>
 
                 </ThemedView>

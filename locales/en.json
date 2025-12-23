@@ -29,7 +29,8 @@
         "apply": "Apply",
         "clear": "Clear",
         "phoneNumber": "Phone Number",
-        "phoneNumberPlaceholder": "Enter your phone number"
+        "phoneNumberPlaceholder": "Enter your phone number",
+        "ok": "OK"
     },
     "layout": {
         "home": "Home",
@@ -210,7 +211,10 @@
         "submit": "Submit",
         "thankYou": "Thank you for your feedback!",
         "alertTitleMissingRating": "Missing Information",
-        "pleaseSelectRating": "Please select a rating."
+        "pleaseSelectRating": "Please select a rating.",
+        "products": "Products",
+        "errorSubmitting": "Error submitting feedback. Please try again.",
+        "alertTitleError": "Submission Error"
     },
     "orders": {
         "title": "Order History",
@@ -228,7 +232,14 @@
         "total": "Total",
         "cancelOrderTitle": "Cancel Order",
         "cancelOrderMessage": "Are you sure you want to cancel this order?",
-        "confirmCancel": "Yes, Cancel Order"
+        "confirmCancel": "Yes, Cancel Order",
+        "status": {
+            "pending": "Pending",
+            "processing": "Processing",
+            "shipped": "Shipped",
+            "delivered": "Delivered",
+            "cancelled": "Cancelled"
+        }
     },
     "product": {
         "reviews": "reviews",
@@ -265,7 +276,10 @@
         "buyAgain": "Buy Again",
         "rate": "Rate",
         "cancel": "Cancel",
-        "orderId": "Order ID"
+        "orderId": "Order ID",
+        "warnCancel": "Are you sure you want to cancel this order?",
+        "successCancel": "Order cancelled successfully!",
+        "errorCancel": "Failed to cancel order. Please try again."
     },
     "changePassword": {
         "title": "Change Password",

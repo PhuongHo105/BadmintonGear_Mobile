@@ -1,39 +1,24 @@
+import { useToast } from '@/app/providers/ToastProvider'
 import { Colors } from '@/constants/theme'
 import { useColorScheme } from '@/hooks/use-color-scheme'
+import { addCart } from '@/services/cartService'
+import { cancelOrder } from '@/services/ordersService'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Image } from 'expo-image'
 import { router } from 'expo-router'
+import { jwtDecode } from 'jwt-decode'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Pressable, StyleSheet } from 'react-native'
-import Svg, { Path } from 'react-native-svg'
 import { ThemedText } from '../themed-text'
 import { ThemedView } from '../themed-view'
 import BorderButton from './borderbutton'
 import FullButton from './fullbutton'
 
-type OrderDetail = {
-    productId: string | number
-    name: string
-    image: any
-    discount?: number
-    quantity: number
-    price: number
-}
 
-type Order = {
-    id: string | number
-    status: string
-    details: OrderDetail[]
-    updatedAt: string
-    discount?: number
-}
-
-type Props = {
-    order: Order
-}
-
-export default function OrderItem({ order }: Props) {
+export default function OrderItem({ order, onOrderUpdate }: { order: any, onOrderUpdate?: () => void }) {
     const { t } = useTranslation();
+    const toast = useToast();
     const schemeRaw = useColorScheme();
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors;
     const tint: string = Colors[scheme].tint;
@@ -41,32 +26,122 @@ export default function OrderItem({ order }: Props) {
     const secondaryText: string = Colors[scheme].secondaryText;
     const borderColor: string = Colors[scheme].border;
 
-    const currentPrice: number = (order.details[0].price ?? 0) * (1 - (order.details[0].discount ?? 0) / 100);
+    // Safety checks for order data
+    if (!order || !order.details || !Array.isArray(order.details) || order.details.length === 0) {
+        return null;
+    }
+
+    const firstItem = order.details[0];
+    const currentPrice: number = (firstItem?.Product?.price ?? 0) * (1 - (firstItem?.discount ?? 0) / 100);
     const updatedDate = new Date(order.updatedAt);
-    const total = order.details.reduce((sum, item) => {
-        const itemPrice = item.price * (1 - (item.discount ?? 0) / 100);
-        return sum + itemPrice * item.quantity;
-    }, 0) * (1 - (order.discount ?? 0) / 100);
+    const total = order.details.reduce((sum: number, item: any) => {
+        const itemPrice = (item?.Product?.price ?? 0) * (1 - (item?.discount ?? 0) / 100);
+        return sum + itemPrice * (item?.quantity ?? 0);
+    }, 0) * (order.Promotion?.type === 1 ? (1 - (order.Promotion?.value ?? 0) / 100) : 1) - (order.Promotion?.type === 2 ? (order.Promotion?.value ?? 0) : 0);
 
     const handleCancelOrder = () => {
         Alert.alert(
             t('orders.cancelOrderTitle'),
-            t('orders.cancelOrderMessage'),
+            t('order.warnCancel'),
             [
                 {
                     text: t('common.cancel'),
-                    style: 'cancel'
+                    style: 'cancel',
                 },
                 {
                     text: t('orders.confirmCancel'),
                     style: 'destructive',
-                    onPress: () => {
-                        // TODO: Call API to cancel order
-                        console.log('Order cancelled:', order.id);
+                    onPress: async () => {
+                        try {
+                            const response = await cancelOrder(order.id);
+                            if (response) {
+                                toast.show(
+                                    {
+                                        title: t('common.success'),
+                                        message: t('order.successCancel'),
+                                        type: 'success'
+                                    }
+                                );
+                                // Reload orders after successful cancellation
+                                if (onOrderUpdate) {
+                                    onOrderUpdate();
+                                }
+                            } else {
+                                toast.show(
+                                    {
+                                        title: t('common.error'),
+                                        message: t('order.errorCancel'),
+                                        type: 'error'
+                                    }
+                                );
+                            }
+                        } catch (error) {
+                            console.error("Error cancelling order:", error);
+                            toast.show(
+                                {
+                                    title: t('common.error'),
+                                    message: t('order.errorCancel'),
+                                    type: 'error'
+                                }
+                            );
+                        }
                     }
                 }
             ]
         );
+    };
+
+    const handleBuyAgain = async () => {
+        try {
+            let userId: string | number | undefined;
+            const userData = await AsyncStorage.getItem('loginToken');
+            const decode = jwtDecode<any>(userData || '');
+            userId = decode?.id || decode?.userid;
+
+            if (!userId) {
+                console.warn('No user id found for adding to cart');
+                return;
+            }
+
+            const result = await order.details.forEach(async (product: any) => {
+                const res = await addCart({
+                    userid: userId,
+                    productid: product.Product.id,
+                    quantity: product.quantity,
+                    notes: ''
+                });
+                console.log('Add to cart response for product', product.Product.id, ':', res);
+                return res;
+            });
+
+            console.log('Add to cart result:', result);
+            if (result !== null && result.createdAt && result.updatedAt) {
+                toast.show({ type: 'success', message: t('product.addToCartSuccess') });
+            }
+        } catch (e) {
+            console.error('Failed to add to cart', e);
+        }
+    };
+
+    const getOrderStatusText = (order: any): string => {
+        // Cancelled: status === -1
+        if (order.status === -1) {
+            return t('orders.status.cancelled');
+        }
+        // Delivered: delivered === true
+        if (order.delivered) {
+            return t('orders.status.delivered');
+        }
+        // Shipped: shipping === true && !delivered
+        if (order.shipping && !order.delivered) {
+            return t('orders.status.shipped');
+        }
+        // Processing: process === true && !shipping && !delivered
+        if (order.process && !order.shipping && !order.delivered) {
+            return t('orders.status.processing');
+        }
+        // Pending/Not Started: !process && !shipping && !delivered && status !== -1
+        return t('orders.status.pending');
     };
 
     return (
@@ -76,23 +151,23 @@ export default function OrderItem({ order }: Props) {
                     <ThemedText type="default"
                         style={{
                             fontSize: 14, color: "#fff", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12,
-                            backgroundColor: order.status === 'Delivered' ? 'green' : order.status === 'Pending' ? 'orange' : order.status === 'Cancelled' ? 'red' : 'blue'
-                        }}>{order.status}</ThemedText>
+                            backgroundColor: getOrderStatusText(order) === t('orders.status.delivered') ? 'green' : getOrderStatusText(order) === t('orders.status.pending') ? 'orange' : getOrderStatusText(order) === t('orders.status.cancelled') ? 'red' : getOrderStatusText(order) === t('orders.status.shipped') ? 'blue' : 'purple'
+                        }}>{getOrderStatusText(order)}</ThemedText>
                     <ThemedText type='default' style={{ fontSize: 16, color: secondaryText }}>{updatedDate.toLocaleDateString('vi-VN')}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.item}>
-                    <Image source={order.details[0].image} style={styles.image} />
+                    <Image source={firstItem?.Product?.Imagesproducts?.[0]?.url || require('@/assets/images/unimage.png')} style={styles.image} />
                     <ThemedView style={styles.contentContainer}>
                         <ThemedView style={styles.info}>
                             <ThemedView style={styles.content}>
-                                <ThemedText style={{ fontSize: 16, fontWeight: '600', color: textColor }}>{order.details[0].name}</ThemedText>
+                                <ThemedText style={{ fontSize: 16, fontWeight: '600', color: textColor }}>{firstItem?.Product.translations?.[0]?.name || 'Product'}</ThemedText>
                                 <ThemedView style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 4 }}>
                                     <ThemedText style={{ marginTop: 4, color: tint }}>
                                         {currentPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                                     </ThemedText>
-                                    {typeof order.details[0].discount === 'number' && order.details[0].discount > 0 ? (
+                                    {typeof firstItem?.discount === 'number' && firstItem.discount > 0 ? (
                                         <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: secondaryText, textDecorationLine: 'line-through' }}>
-                                            {order.details[0].price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                            {firstItem?.Product?.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                                         </ThemedText>
                                     ) : null}
                                 </ThemedView>
@@ -101,19 +176,8 @@ export default function OrderItem({ order }: Props) {
                         </ThemedView>
 
                         <ThemedView style={{ gap: 5 }}>
-                            <ThemedView style={[styles.numberOfItems, { borderColor: borderColor }]}>
-                                <Pressable style={styles.iconBtn} onPress={undefined}>
-                                    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                        <Path d="M18 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H18C18.41 11.25 18.75 11.59 18.75 12C18.75 12.41 18.41 12.75 18 12.75Z" fill={secondaryText} />
-                                    </Svg>
-                                </Pressable>
-                                <ThemedText style={{ textAlign: 'center', marginVertical: 4 }}>{order.details[0].quantity}</ThemedText>
-                                <Pressable style={styles.iconBtn} onPress={undefined}>
-                                    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                        <Path d="M18 12C18 12.41 17.66 12.75 17.25 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H17.25C17.66 11.25 18 11.59 18 12Z" fill={secondaryText} />
-                                        <Path d="M12 18C11.59 18 11.25 17.66 11.25 17.25V6C11.25 5.59 11.59 5.25 12 5.25C12.41 5.25 12.75 5.59 12.75 6V17.25C12.75 17.66 12.41 18 12 18Z" fill={secondaryText} />
-                                    </Svg>
-                                </Pressable>
+                            <ThemedView style={[styles.numberOfItems, { borderColor: borderColor, paddingHorizontal: 8 }]}>
+                                <ThemedText style={{ textAlign: 'center', marginVertical: 4 }}>{firstItem?.quantity || 0}</ThemedText>
                             </ThemedView>
                             {order.details.length > 1 ? (
                                 <ThemedText style={{ fontSize: 12, fontWeight: '600', color: secondaryText }}>+ {order.details.length - 1}  {t('orders.products')}</ThemedText>
@@ -126,13 +190,25 @@ export default function OrderItem({ order }: Props) {
                     </ThemedView>
 
                 </ThemedView >
-                {order.status === 'Delivered' ? (
+                {getOrderStatusText(order) === t('orders.status.delivered') || getOrderStatusText(order) === t('orders.status.cancelled') ? (
                     <ThemedView style={{ paddingHorizontal: 12, flexDirection: 'row', gap: 12 }}>
-                        <BorderButton text={t('orders.buyAgain')} onPress={() => { }} style={{ flex: 1 }} />
-                        <FullButton text={t('orders.rate')} onPress={() => { router.push('/feedback') }} style={{ flex: 1 }} />
+                        <BorderButton text={t('orders.buyAgain')} onPress={handleBuyAgain} style={{ flex: 1 }} />
+                        {getOrderStatusText(order) === t('orders.status.delivered') && (
+                            <FullButton text={t('orders.rate')} onPress={() => {
+                                const productsData = order.details.map((d: any) => ({
+                                    id: d.Product?.id,
+                                    name: d.Product?.translations?.[0]?.name || 'Product',
+                                    image: d.Product?.Imagesproducts?.[0]?.url || '',
+                                    orderId: order.id,
+                                    quantity: d.quantity || 1
+                                }));
+                                const productsJson = encodeURIComponent(JSON.stringify(productsData));
+                                router.push(`/feedback?products=${productsJson}`);
+                            }} style={{ flex: 1 }} />
+                        )}
                     </ThemedView>
                 ) : null}
-                {order.status === 'Pending' ? (
+                {getOrderStatusText(order) === t('orders.status.pending') ? (
                     <ThemedView style={{ paddingHorizontal: 12, justifyContent: 'flex-end', gap: 12 }}>
                         <FullButton text={t('orders.cancel')} onPress={handleCancelOrder} style={{ flex: 1 }} />
                     </ThemedView>
@@ -155,21 +231,24 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         borderRadius: 8,
         justifyContent: 'space-between',
-        width: 'auto',
+        width: '100%',
+        marginBottom: 12,
+        paddingHorizontal: 0,
     },
     item: {
         width: '100%',
-        height: 150,
+        minHeight: 150,
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         padding: 12,
         marginBottom: 20,
+        gap: 12,
     },
     image: {
-        width: 120,
-        height: 140,
-        marginRight: 12,
+        width: 100,
+        height: 130,
         borderRadius: 19,
+        flexShrink: 0,
     },
     numberOfItems: {
         flexDirection: 'row',
@@ -213,12 +292,14 @@ const styles = StyleSheet.create({
     content: {
         flexDirection: 'column',
         justifyContent: 'center',
-        gap: 1,
+        gap: 2,
+        flex: 1,
     },
     contentContainer: {
-        width: 'auto',
         flex: 1,
-        gap: 12,
+        gap: 8,
+        justifyContent: 'space-between',
+        minWidth: 0,
     },
     iconBtn: {
         width: 28,
