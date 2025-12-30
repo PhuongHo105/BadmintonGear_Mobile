@@ -107,9 +107,10 @@ const CheckoutScreen: FC = () => {
                                 borderColor: paymentMethod === 'cash' ? Colors[scheme].tint : 'transparent',
                             }}
                         >
-                            <ThemedText type="title" style={{ fontSize: 16 }}>{t('checkoutPayment.cash') || 'Cash'}</ThemedText>
+                            <ThemedText type="title" style={{ fontSize: 16, color: 'black' }}>{t('checkoutPayment.cash') || 'Cash'}</ThemedText>
                         </Pressable>
                     </ThemedView>
+                    <ThemedText style={{ fontSize: 16, color: Colors[scheme].text }}><ThemedText style={{ color: 'red' }}>*</ThemedText>{t('common.note')}: {t('checkoutPayment.note') || 'Note'}</ThemedText>
                     {/* <ThemedView style={styles.fieldGroup}>
                         <ThemedText>Card Holder Name *</ThemedText>
                         <TextInput

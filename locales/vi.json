@@ -30,7 +30,8 @@
         "clear": "Xóa",
         "phoneNumber": "Số điện thoại",
         "phoneNumberPlaceholder": "Nhập số điện thoại của bạn",
-        "ok": "OK"
+        "ok": "OK",
+        "note": "Lưu ý"
     },
     "layout": {
         "home": "Trang chủ",
@@ -504,7 +505,8 @@
     "checkoutPayment": {
         "title": "Thanh toán",
         "selectPaymentMethod": "Vui lòng chọn phương thức thanh toán",
-        "cash": "Tiền mặt"
+        "cash": "Tiền mặt",
+        "note": "Đối với các phương thức thanh toán online, nếu bạn thanh toán không thành công, đơn hàng của bạn sẽ chuyển sang phương thức thanh toán bằng tiền mặt."
     },
     "checkoutReview": {
         "title": "Thanh toán",

@@ -30,7 +30,8 @@
         "clear": "Clear",
         "phoneNumber": "Phone Number",
         "phoneNumberPlaceholder": "Enter your phone number",
-        "ok": "OK"
+        "ok": "OK",
+        "note": "Note"
     },
     "layout": {
         "home": "Home",
@@ -503,7 +504,8 @@
     "checkoutPayment": {
         "title": "Checkout",
         "selectPaymentMethod": "Please select a payment method",
-        "cash": "Cash"
+        "cash": "Cash",
+        "note": "For online payment methods, if you failed to pay, it will changed to cash payment method."
     },
     "checkoutReview": {
         "title": "Checkout",
