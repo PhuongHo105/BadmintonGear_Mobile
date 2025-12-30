@@ -87,12 +87,12 @@ export const CATEGORY_LABEL_MAP: Record<number, string> = {
 export const getCategoryOptions = (): { label: string; value?: number }[] => {
   return [
     { label: t('products.all'), value: undefined },
-    { label: CATEGORY_LABEL_MAP[1], value: 1 },
-    { label: CATEGORY_LABEL_MAP[2], value: 2 },
-    { label: CATEGORY_LABEL_MAP[3], value: 3 },
-    { label: CATEGORY_LABEL_MAP[4], value: 4 },
-    { label: CATEGORY_LABEL_MAP[5], value: 5 },
-    { label: CATEGORY_LABEL_MAP[6], value: 6 },
+    { label: t('categories.rackets'), value: 1 },
+    { label: t('categories.shoes'), value: 2 },
+    { label: t('categories.clothes'), value: 3 },
+    { label: t('categories.bags'), value: 4 },
+    { label: t('categories.shuttlecocks'), value: 5 },
+    { label: t('categories.other'), value: 6 },
   ];
 };
 

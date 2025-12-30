@@ -266,7 +266,7 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
     const handleApplyFilters = () => {
         setAppliedFilters(draftFilters);
         setIsModalVisible(false);
-    }
+    };
 
     const handleClearFilters = () => {
         setDraftFilters({});
@@ -369,12 +369,12 @@ const ProductsScreen: React.FC<ProductsScreenProps> = ({ filters }) => {
                         <ThemedText type="defaultSemiBold" style={styles.sectionLabel}>
                             {t('products.category')}
                         </ThemedText>
-                        <ThemedView style={styles.chipGroup}>{renderChip<number>(getCategoryOptions(), draftFilters.categoriesid, handleCategoriesIdPress)}</ThemedView>
+                        <ThemedView style={styles.chipGroup}>{renderChip(getCategoryOptions(), draftFilters.categoriesid, handleCategoriesIdPress)}</ThemedView>
 
                         <ThemedText type="defaultSemiBold" style={styles.sectionLabel}>
                             {t('products.brand')}
                         </ThemedText>
-                        <ThemedView style={styles.chipGroup}>{renderChip<string>(brandOptions, draftFilters.brand, handleBrandPress)}</ThemedView>
+                        <ThemedView style={styles.chipGroup}>{renderChip(brandOptions, draftFilters.brand, handleBrandPress)}</ThemedView>
 
                         <ThemedText type="defaultSemiBold" style={styles.sectionLabel}>
                             {t('products.priceRange')} (VND)
