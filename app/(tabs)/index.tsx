@@ -79,17 +79,19 @@ export default function HomeScreen() {
           }
 
           const flashsaleProducts = await getFlashsaleDetailById(activeFlashsale.id, language);
-          const enrichedFlashsaleProducts = flashsaleProducts.map((product: any) => ({
-            ...product,
-            translations: product.Product.translations,
-            price: product.Product.price,
-            Imagesproducts: product.Product.Imagesproducts,
-            flashsale: {
-              id: product.flashsaleid,
-              type: product.type,
-              value: product.value,
-            },
-          }));
+          const enrichedFlashsaleProducts = flashsaleProducts
+            .filter((item: any) => item && item.Product)
+            .map((product: any) => ({
+              ...product,
+              translations: product.Product.translations,
+              price: product.Product.price,
+              Imagesproducts: product.Product.Imagesproducts,
+              flashsale: {
+                id: product.flashsaleid,
+                type: product.type,
+                value: product.value,
+              },
+            }));
           setFlashsaleProducts(enrichedFlashsaleProducts);
         }
       } catch (error) {
@@ -99,6 +101,7 @@ export default function HomeScreen() {
 
     fetchData();
   }, [language]);
+
 
   useEffect(() => {
     if (!flashsaleEndTime) return;

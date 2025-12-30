@@ -175,6 +175,44 @@ const ProductDetailScreen: React.FC = () => {
         load();
     }, [id, language]);
 
+    const handleBuyNow = useCallback(async () => {
+        if (!product?.id) return;
+        try {
+            setAdding(true);
+            let userId: string | number | undefined;
+            const userData = await AsyncStorage.getItem('loginToken');
+            const decode = jwtDecode<any>(userData || '');
+            userId = decode?.id || decode?.userid;
+
+            if (!userId) {
+                toast.show({ type: 'error', message: t('cart.pleaseLogin') });
+                // Optional: navigate to login
+                return;
+            }
+
+            // reuse add cart logic or similar
+            const result = await addCart({
+                userid: userId,
+                productid: product.id,
+                quantity: quantity,
+                notes: ''
+            });
+
+            if (result) {
+                // Navigate to cart with selection param
+                router.push({
+                    pathname: '/(tabs)/cart',
+                    params: { selectProductId: String(product.id) }
+                });
+            }
+        } catch (e) {
+            console.error('Failed to buy now', e);
+            toast.show({ type: 'error', message: 'Failed to proceed' });
+        } finally {
+            setAdding(false);
+        }
+    }, [adding, product?.id, quantity]);
+
     const imagesArray = useMemo(() => {
         const apiImages = product?.Imagesproducts?.map((img) => ({ uri: img.url })) ?? [];
         const legacyImages = (product?.images ?? []).map((img: any) => img);
@@ -359,7 +397,7 @@ const ProductDetailScreen: React.FC = () => {
                             </ThemedView>)
                             )}
                         </ScrollView>
-                        <FullButton text={t('common.seeAll')} onPress={() => { router.push('/products' as any) }} />
+                        <FullButton text={t('common.seeAll')} onPress={() => { router.push('/productList' as any) }} />
                     </ThemedView>
 
                 </ThemedView>
@@ -375,13 +413,13 @@ const ProductDetailScreen: React.FC = () => {
                 ]}
             >
                 <BorderButton
-                    text='Buy Now'
-                    onPress={() => { }}
+                    text={t('product.buyNow')}
+                    onPress={handleBuyNow}
                     style={[styles.footerButton, styles.footerButtonLeft]}
                 />
                 <FullButton
                     onPress={handleAddToCart}
-                    text="Add to Cart"
+                    text={t('product.addToCart')}
                     style={styles.footerButton}
                 />
             </ThemedView>

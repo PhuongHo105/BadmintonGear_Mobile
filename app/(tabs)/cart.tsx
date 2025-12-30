@@ -12,7 +12,7 @@ import { getProductById } from '@/services/productService'
 import { getPromotions } from '@/services/promotionService'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Image } from 'expo-image'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { jwtDecode } from 'jwt-decode'
 import React, { FC, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -25,6 +25,7 @@ const CartScreen: FC = () => {
     const language = getCurrentLanguage();
     const toast = useToast();
     const router = useRouter();
+    const params = useLocalSearchParams<{ selectProductId?: string }>();
     const scheme = useColorScheme() ?? 'light';
     const palette = Colors[scheme];
     const [total, setTotal] = useState(0);
@@ -134,7 +135,7 @@ const CartScreen: FC = () => {
                     flashsale,
                 },
                 numberOfItems: it?.quantity ?? 1,
-                checked: true,
+                checked: false,
             };
         }));
         return mapped;
@@ -157,6 +158,16 @@ const CartScreen: FC = () => {
                 const serverCart = await getCartByUserID(userId);
 
                 const normalized = await mapServerCartToUi(serverCart);
+
+                if (params.selectProductId) {
+                    const targetId = String(params.selectProductId);
+                    normalized.forEach((item) => {
+                        if (String(item.product.productid) === targetId) {
+                            item.checked = true;
+                        }
+                    });
+                }
+
                 setCartItems(normalized);
                 recalcTotals(normalized as any);
             } catch (error) {
@@ -164,7 +175,7 @@ const CartScreen: FC = () => {
             }
         };
         load();
-    }, [language, t, toast]);
+    }, [language, t, toast, params.selectProductId]);
 
     const recalcTotals = (items: any[], promoId: string | null = appliedPromotionId) => {
         const { subtotal, checkedCount } = summarizeCart(items);
