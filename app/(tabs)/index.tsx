@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useCallback, useEffect } from 'react';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -51,6 +51,7 @@ export default function HomeScreen() {
   const [flashsaleProducts, setFlashsaleProducts] = React.useState<any[]>([]);
   const [flashsaleEndTime, setFlashsaleEndTime] = React.useState<Date | null>(null);
   const [countdown, setCountdown] = React.useState<string>('');
+  const [refreshing, setRefreshing] = React.useState(false);
 
   const handleSeeAllProductsPress = () => {
     pushProductList();
@@ -60,47 +61,52 @@ export default function HomeScreen() {
     pushProductList(category ? { category } : undefined);
   };
 
-  useEffect(() => {
-    // Fetch products here
-    const fetchData = async () => {
-      try {
-        const productsResponse = await getAllProducts(language);
-        const bestSellingResponse = await getTopSellingProducts(new Date().getMonth() + 1, new Date().getFullYear(), language);
-        const flashsalesResponse = await getNowFlashsales();
+  const fetchData = useCallback(async () => {
+    try {
+      const productsResponse = await getAllProducts(language);
+      const bestSellingResponse = await getTopSellingProducts(new Date().getMonth() + 1, new Date().getFullYear(), language);
+      const flashsalesResponse = await getNowFlashsales();
 
-        setProducts(productsResponse);
-        setBestSellingProducts(bestSellingResponse);
+      setProducts(productsResponse);
+      setBestSellingProducts(bestSellingResponse);
 
-        if (flashsalesResponse && flashsalesResponse.length > 0) {
-          const activeFlashsale = flashsalesResponse[0];
-          // Set countdown end time from the flashsale
-          if (activeFlashsale.end) {
-            setFlashsaleEndTime(new Date(activeFlashsale.end));
-          }
-
-          const flashsaleProducts = await getFlashsaleDetailById(activeFlashsale.id, language);
-          const enrichedFlashsaleProducts = flashsaleProducts
-            .filter((item: any) => item && item.Product)
-            .map((product: any) => ({
-              ...product,
-              translations: product.Product.translations,
-              price: product.Product.price,
-              Imagesproducts: product.Product.Imagesproducts,
-              flashsale: {
-                id: product.flashsaleid,
-                type: product.type,
-                value: product.value,
-              },
-            }));
-          setFlashsaleProducts(enrichedFlashsaleProducts);
+      if (flashsalesResponse && flashsalesResponse.length > 0) {
+        const activeFlashsale = flashsalesResponse[0];
+        // Set countdown end time from the flashsale
+        if (activeFlashsale.end) {
+          setFlashsaleEndTime(new Date(activeFlashsale.end));
         }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
 
-    fetchData();
+        const flashsaleProducts = await getFlashsaleDetailById(activeFlashsale.id, language);
+        const enrichedFlashsaleProducts = flashsaleProducts
+          .filter((item: any) => item && item.Product)
+          .map((product: any) => ({
+            ...product,
+            translations: product.Product.translations,
+            price: product.Product.price,
+            Imagesproducts: product.Product.Imagesproducts,
+            flashsale: {
+              id: product.flashsaleid,
+              type: product.type,
+              value: product.value,
+            },
+          }));
+        setFlashsaleProducts(enrichedFlashsaleProducts);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   }, [language]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData, language]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  }, [fetchData, language]);
 
 
   useEffect(() => {
@@ -137,7 +143,12 @@ export default function HomeScreen() {
     <View>
       <ThemedView style={styles.container}>
         <Header />
-        <ScrollView showsVerticalScrollIndicator={false} >
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[tint]} />
+          }
+        >
           <ThemedView style={styles.stepContainer}>
             <Image source={require('../../assets/images/banner/banner1.png')} style={styles.banner} />
           </ThemedView>

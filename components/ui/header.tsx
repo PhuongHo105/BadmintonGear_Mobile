@@ -1,9 +1,12 @@
 import { Colors } from '@/constants/theme'
 import { useColorScheme } from '@/hooks/use-color-scheme'
+import { getUserById } from '@/services/userService'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/native'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import React, { FC } from 'react'
+import { jwtDecode } from 'jwt-decode'
+import React, { FC, useEffect } from 'react'
 import { ColorSchemeName, ImageSourcePropType, Pressable, StyleSheet } from 'react-native'
 import { ThemedText } from '../themed-text'
 import { ThemedView } from '../themed-view'
@@ -17,12 +20,44 @@ type HeaderProps = {
 const Header: FC<HeaderProps> = ({ mode }) => {
     const router = useRouter();
     const navigation = useNavigation();
+    const [userInfo, setUserInfo] = React.useState<{ name: string; email: string; avatar?: string }>(
+        {
+            name: 'Nguyễn Văn A',
+            email: 'nguyenvana@gmail.com',
+            avatar: undefined,
+        }
+    );
     const schemeRaw = useColorScheme() as ColorSchemeName | null | undefined;
     const scheme: keyof typeof Colors = (schemeRaw ?? 'light') as keyof typeof Colors
     const iconColor: string = Colors[scheme].text
     const logoSource: ImageSourcePropType = scheme === 'dark'
         ? require('../../assets/images/logo/dark-logo.png')
         : require('../../assets/images/logo/light-logo.png')
+
+    const avatarSource: ImageSourcePropType = scheme === 'dark'
+        ? require('../../assets/images/avatar/dark-avatar.png')
+        : require('../../assets/images/avatar/light-avatar.png')
+
+    useEffect(() => {
+        const fetchUserInfo = async () => {
+            try {
+                const token = await AsyncStorage.getItem('loginToken');
+                const decode = jwtDecode(token ?? "") as any;
+                const user = await getUserById(decode.userid ?? "") as any;
+                console.log(user);
+                if (user) {
+                    setUserInfo({
+                        name: user.name,
+                        email: user.email,
+                        avatar: user.Imagesuser?.url,
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+            }
+        };
+        fetchUserInfo();
+    }, []);
 
     return (
         <ThemedView style={styles.headerContainer}>
@@ -36,8 +71,8 @@ const Header: FC<HeaderProps> = ({ mode }) => {
                     <Pressable onPress={() => { router.push('/search') }}>
                         <IconSymbol size={28} name="search.fill" color={iconColor} />
                     </Pressable>
-                    <Pressable onPress={() => { }} style={{ marginLeft: 12 }}>
-                        <Image source={require('../../assets/images/logo/light-logo.png')} style={styles.avatar} />
+                    <Pressable onPress={() => router.push('/profile')} style={{ marginLeft: 12 }}>
+                        <Image source={userInfo.avatar ? { uri: userInfo.avatar } : avatarSource} style={styles.avatar} />
                     </Pressable>
                 </ThemedView>
             )}

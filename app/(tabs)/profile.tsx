@@ -7,10 +7,12 @@ import LanguageSelector from '@/components/ui/language-selector';
 import ProfileMenuItem from '@/components/ui/profileMenuItem';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { getUserById } from '@/services/userService';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import { jwtDecode } from 'jwt-decode';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     Alert,
@@ -62,6 +64,27 @@ const ProfileScreen: React.FC = () => {
             ]
         );
     }
+
+    useEffect(() => {
+        const fetchUserInfo = async () => {
+            try {
+                const token = await AsyncStorage.getItem('loginToken');
+                const decode = jwtDecode(token ?? "") as any;
+                const user = await getUserById(decode.userid ?? "") as any;
+                console.log(user);
+                if (user) {
+                    setUserInfo({
+                        name: user.name,
+                        email: user.email,
+                        avatar: user.Imagesuser?.url,
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+            }
+        };
+        fetchUserInfo();
+    }, []);
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: tint }]}>
