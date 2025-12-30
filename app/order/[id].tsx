@@ -64,6 +64,7 @@ const OrderDetailScreen: FC = () => {
             setOrder(data);
         }
         const details = await getOrderDetails(orderId, language);
+        console.log(details);
         setDetails(details);
         setLoading(false);
     };
@@ -74,25 +75,25 @@ const OrderDetailScreen: FC = () => {
 
     useEffect(() => {
         if (!order) return;
-        const items = Array.isArray(order.items) ? order.items : [];
+        const items = Array.isArray(details) ? details : [];
         const newSubtotal = items.reduce((sum: number, item: any) => {
-            const price = item.product?.price ?? item.price ?? 0;
-            const discount = item.product?.discount ?? item.discount ?? 0;
-            const qty = item.numberOfItems ?? item.quantity ?? 1;
+            const price = item.Product?.price ?? item.price ?? 0;
+            const discount = item.Product?.discount ?? item.discount ?? 0;
+            const qty = item.quantity ?? 1;
             const netPrice = price * (1 - discount / 100);
             return sum + netPrice * qty;
         }, 0);
         setSubtotal(newSubtotal);
 
         const shippingCost = order.shipping ?? order.shippingCost ?? order.shipping_fee ?? 0;
-        const discountPercent = order.discount ?? order.discountValue ?? 0;
+        const discountPercent = order.Promotion?.value ?? 0;
         const computedTotal = shippingCost + newSubtotal * (1 - discountPercent / 100);
         if (order.totalprice !== undefined && order.totalprice !== null) {
             setTotal(order.totalprice);
         } else {
             setTotal(computedTotal);
         }
-    }, [order]);
+    }, [order, details]);
 
     const updatedDate = order?.updatedAt ? new Date(order.updatedAt) : null;
 
@@ -275,6 +276,14 @@ const OrderDetailScreen: FC = () => {
                             <ThemedView >
                                 <ThemedText type='title' style={{ fontSize: 20 }}>{t('order.orderInformation')}</ThemedText>
                                 <ThemedView style={styles.contentContainer}>
+                                    <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('order.paymentStatus')}</ThemedText>
+                                    <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{order.Payment ? t('order.paid') : t('order.unpaid')}</ThemedText>
+                                </ThemedView>
+                                <ThemedView style={styles.contentContainer}>
+                                    <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('order.paymentMethod')}</ThemedText>
+                                    <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{order.Payment.paymentmethod}</ThemedText>
+                                </ThemedView>
+                                <ThemedView style={styles.contentContainer}>
                                     <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('order.subtotal')}</ThemedText>
                                     <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{subtotal.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                                 </ThemedView>
@@ -284,7 +293,7 @@ const OrderDetailScreen: FC = () => {
                                 </ThemedView>
                                 <ThemedView style={styles.contentContainer}>
                                     <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('order.discount')}</ThemedText>
-                                    <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{order.discount ?? order.discountValue ?? 0} %</ThemedText>
+                                    <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{order.Promotion?.type === 'percentage' ? order.Promotion?.value + '%' : order.Promotion?.value.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) ?? '0 %'}</ThemedText>
                                 </ThemedView>
                                 <ThemedView style={styles.contentContainer}>
                                     <ThemedText type='default' style={{ fontSize: 18, color: Colors[scheme].text }}>{t('order.total')}</ThemedText>

@@ -282,7 +282,11 @@
         "orderId": "Mã đơn hàng",
         "warnCancel": "Bạn có chắc chắn muốn hủy đơn hàng này không?",
         "successCancel": "Hủy đơn hàng thành công!",
-        "errorCancel": "Hủy đơn hàng thất bại. Vui lòng thử lại."
+        "errorCancel": "Hủy đơn hàng thất bại. Vui lòng thử lại.",
+        "paid": "Đã thanh toán",
+        "unpaid": "Chưa thanh toán",
+        "paymentStatus": "Trạng thái thanh toán",
+        "paymentMethod": "Phương thức thanh toán"
     },
     "changePassword": {
         "title": "Đổi mật khẩu",
