@@ -8,7 +8,8 @@ export const initSocket = async () => {
   if (socket?.connected) return socket;
 
   const token = await AsyncStorage.getItem("loginToken");
-  socket = io("http://192.168.1.12:3000", {
+  const url = process.env.EXPO_PUBLIC_SOCKET_IO_URL;
+  socket = io(url, {
     transports: ["websocket"],
     auth: { token },
     reconnection: true,
