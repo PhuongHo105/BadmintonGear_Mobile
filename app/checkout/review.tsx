@@ -110,8 +110,7 @@ const CheckoutScreen: FC = () => {
             const res = await checkoutCart(cartPayload);
             if (res?.orderId) {
                 if (paymentMethod === 'vnpay' || paymentMethod === 'paypal') {
-                    const returnUrl = process.env.EXPO_PUBLIC_API_BASE_URL
-                    console.log('returnUrl', returnUrl);
+                    const returnUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
                     const paymentData = {
                         orderid: res.orderId,
                         paymentmethod: paymentMethod,

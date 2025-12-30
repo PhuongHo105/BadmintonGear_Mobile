@@ -44,7 +44,6 @@ const Header: FC<HeaderProps> = ({ mode }) => {
                 const token = await AsyncStorage.getItem('loginToken');
                 const decode = jwtDecode(token ?? "") as any;
                 const user = await getUserById(decode.userid ?? "") as any;
-                console.log(user);
                 if (user) {
                     setUserInfo({
                         name: user.name,
