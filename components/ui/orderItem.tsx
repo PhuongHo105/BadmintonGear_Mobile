@@ -17,6 +17,7 @@ import FullButton from './fullbutton'
 
 
 export default function OrderItem({ order, onOrderUpdate }: { order: any, onOrderUpdate?: () => void }) {
+    console.log(order);
     const { t } = useTranslation();
     const toast = useToast();
     const schemeRaw = useColorScheme();
@@ -181,7 +182,7 @@ export default function OrderItem({ order, onOrderUpdate }: { order: any, onOrde
                             ) : null}
                             <ThemedView style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <ThemedText style={{ fontSize: 16, fontWeight: '700', color: textColor }}>{t('orders.total')}:</ThemedText>
-                                <ThemedText style={{ fontSize: 16, fontWeight: '700', color: textColor }}>{total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
+                                <ThemedText style={{ fontSize: 16, fontWeight: '700', color: textColor }}>{order.totalprice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                             </ThemedView>
                         </ThemedView>
                     </ThemedView>
