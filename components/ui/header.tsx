@@ -66,8 +66,8 @@ const Header: FC<HeaderProps> = ({ mode }) => {
             const token = await AsyncStorage.getItem('loginToken');
             if (token) {
                 const decode = jwtDecode(token) as any;
-                const count = await countUnreadNotifications(decode.userid);
-                setUnreadCount(count);
+                const count = await countUnreadNotifications(decode.userid) as any;
+                setUnreadCount(count.unreadCount);
             }
         } catch (error) {
             console.error('Failed to fetch unread count', error);
