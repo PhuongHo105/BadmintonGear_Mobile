@@ -12,3 +12,11 @@ export function getMyVouchers(): Promise<any[]> {
     });
     return voucher;
 }
+
+export function getSuggestedVouchers(orderTotal: number, userid: number): Promise<any[]> {
+    const voucher: Promise<any[]> = http.get<any[]>(`/promotions/promotion/suggest?orderTotal=${orderTotal}&userid=${userid}`);
+    voucher.then((res) => {
+        console.log(res);
+    });
+    return voucher;
+}

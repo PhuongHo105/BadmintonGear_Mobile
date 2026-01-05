@@ -9,7 +9,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme'
 import { getCurrentLanguage } from '@/i18n'
 import { deleteCart, getCartByUserID } from '@/services/cartService'
 import { getProductById } from '@/services/productService'
-import { getPromotions } from '@/services/promotionService'
+import { getSuggestedVouchers } from '@/services/promotionService'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -51,16 +51,19 @@ const CartScreen: FC = () => {
     const [promotions, setPromotions] = useState<Promotion[]>([]);
 
     const loadPromotions = async () => {
-        const res = await getPromotions();
+        const userData = await AsyncStorage.getItem('loginToken');
+        const decode = jwtDecode<any>(userData ?? '');
+        const userId = decode?.id ?? decode?.userid;
+        const res = await getSuggestedVouchers(total, userId);
         return res.map((promo: any) => ({
             id: String(promo.id),
             code: promo.code,
             title: promo.description,
             description: promo.description,
             type: Number(promo.type) === 1 ? 'percent' : 'amount',
-            value: promo.value,
-            minSubtotal: promo.min_order_value,
-            maxDiscount: promo.max_value,
+            value: Number(promo.value),
+            minSubtotal: Number(promo.min_order_value),
+            maxDiscount: Number(promo.max_value),
         } as Promotion));
     }
 
@@ -72,11 +75,17 @@ const CartScreen: FC = () => {
         if (!promo || subtotal <= 0) return 0;
         if (promo.minSubtotal && subtotal < promo.minSubtotal) return 0;
 
-        const rawDiscount = promo.type === 'percent'
-            ? (subtotal * promo.value) / 100
-            : promo.value;
-        const cappedDiscount = promo.maxDiscount ? Math.min(rawDiscount, promo.maxDiscount) : rawDiscount;
-        return Math.min(cappedDiscount, subtotal);
+        let discount = 0;
+        if (promo.type === 'percent') {
+            discount = (subtotal * promo.value) / 100;
+            if (promo.maxDiscount && promo.maxDiscount > 0) {
+                discount = Math.min(discount, promo.maxDiscount);
+            }
+        } else {
+            discount = promo.value;
+        }
+
+        return Math.min(discount, subtotal);
     }
 
     function summarizeCart(items: any[]) {
@@ -332,12 +341,12 @@ const CartScreen: FC = () => {
                             <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>{t('cart.shippingCost')}: </ThemedText>
                             <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>{formatCurrency(0)}</ThemedText>
                         </ThemedView>
-                        {appliedPromotionId && (
+                        {/* {appliedPromotionId && (
                             <ThemedView style={styles.info}>
                                 <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>{t('cart.appliedPromotion')}: </ThemedText>
                                 <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>{appliedPromotionId}</ThemedText>
                             </ThemedView>
-                        )}
+                        )} */}
                         {discountAmount > 0 && (
                             <ThemedView style={styles.info}>
                                 <ThemedText type="default" style={{ fontSize: 16, color: palette.secondaryText }}>{t('cart.discount')}: </ThemedText>
