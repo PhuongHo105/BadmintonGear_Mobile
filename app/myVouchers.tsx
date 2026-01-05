@@ -5,6 +5,8 @@ import VoucherItem from '@/components/ui/voucherItem';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { getMyVouchers } from '@/services/promotionService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { jwtDecode } from 'jwt-decode';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
@@ -39,10 +41,14 @@ const MyVouchersScreen = () => {
 
     const filterVouchers = () => {
         const now = new Date();
-        return vouchers.filter(v => {
+        return vouchers.filter(async v => {
+            let userId: string | number | undefined;
+            const userData = await AsyncStorage.getItem('loginToken');
+            const decode = jwtDecode<any>(userData ?? '');
+            userId = decode?.id ?? decode?.userid;
             const endDate = new Date(v.end);
             const startDate = new Date(v.start);
-            return endDate >= now && startDate <= now && v.max_uses > v.used_count && v.status !== 1;
+            return endDate >= now && startDate <= now && v.max_uses > v.used_count && v.status !== 1 && (v.userid === null || v.userid === userId) && v.used_count < v.max_uses;
         });
     };
 
