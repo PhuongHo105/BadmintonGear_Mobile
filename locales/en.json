@@ -297,6 +297,7 @@
         "errorCancel": "Failed to cancel order. Please try again.",
         "paid": "Paid",
         "unpaid": "Unpaid",
+        "cash": "Cash",
         "paymentStatus": "Payment Status",
         "paymentMethod": "Payment Method"
     },

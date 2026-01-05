@@ -280,7 +280,7 @@ const OrderDetailScreen: FC = () => {
                                 </ThemedView>
                                 <ThemedView style={styles.contentContainer}>
                                     <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('order.paymentMethod')}</ThemedText>
-                                    <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{order.Payment.paymentmethod}</ThemedText>
+                                    <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{order.Payment?.paymentmethod ?? t('order.cash')}</ThemedText>
                                 </ThemedView>
                                 <ThemedView style={styles.contentContainer}>
                                     <ThemedText type='default' style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>{t('order.subtotal')}</ThemedText>

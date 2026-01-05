@@ -298,6 +298,7 @@
         "errorCancel": "Hủy đơn hàng thất bại. Vui lòng thử lại.",
         "paid": "Đã thanh toán",
         "unpaid": "Chưa thanh toán",
+        "cash": "Tiền mặt",
         "paymentStatus": "Trạng thái thanh toán",
         "paymentMethod": "Phương thức thanh toán"
     },
