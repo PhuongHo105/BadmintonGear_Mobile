@@ -12,7 +12,7 @@ import { http } from "@/services/http";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput } from "react-native";
+import { Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput } from "react-native";
 
 const SearchScreen: React.FC = () => {
     const { t } = useTranslation();
@@ -246,13 +246,13 @@ const SearchScreen: React.FC = () => {
                         <Pressable onPress={() => setIsModalVisible(true)} style={{ marginRight: 10 }}>
                             <IconSymbol name="filter" size={30} color={palette.text} />
                         </Pressable>
-                        <Pressable onPress={handleVoiceButtonPress}>
+                        {/* <Pressable onPress={handleVoiceButtonPress}>
                             {isListening ? (
                                 <ActivityIndicator size="small" color={palette.tint} />
                             ) : (
                                 <IconSymbol name="mic.fill" size={30} color={palette.text} />
                             )}
-                        </Pressable>
+                        </Pressable> */}
                     </ThemedView>
                 </ThemedView>
                 <ScrollView showsVerticalScrollIndicator={false}>

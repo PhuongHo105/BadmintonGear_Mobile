@@ -42,7 +42,7 @@ const MyVouchersScreen = () => {
         return vouchers.filter(v => {
             const endDate = new Date(v.end);
             const startDate = new Date(v.start);
-            return endDate >= now && startDate <= now && v.max_uses > v.used_count && v.status !== -1;
+            return endDate >= now && startDate <= now && v.max_uses > v.used_count && v.status !== 1;
         });
     };
 
