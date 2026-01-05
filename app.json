@@ -14,7 +14,9 @@
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
-        }
+        },
+        "NSMicrophoneUsageDescription": "Cho phép truy cập microphone để tìm kiếm bằng giọng nói.",
+        "NSSpeechRecognitionUsageDescription": "Cho phép nhận dạng giọng nói để chuyển đổi thành văn bản."
       }
     },
     "android": {
@@ -25,7 +27,10 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",

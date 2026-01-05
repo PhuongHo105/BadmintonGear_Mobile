@@ -101,6 +101,7 @@ export default function RootLayout() {
                   <Stack.Screen name="order/[id]" options={{ headerShown: false }} />
                   <Stack.Screen name="feedback" options={{ headerShown: false }} />
                   <Stack.Screen name="notifications" options={{ headerShown: false }} />
+                  <Stack.Screen name="myVouchers" options={{ headerShown: false }} />
                 </Stack>
               )}
               <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />

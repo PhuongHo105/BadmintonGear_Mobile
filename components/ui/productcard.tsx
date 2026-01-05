@@ -72,9 +72,9 @@ export default function ProductCard({ product }: { product: any }) {
                 </ThemedText>
                 <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: tint }}>{currentPrice?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                 {product.flashsale && product.flashsale.value !== 0 ? (
-                    <ThemedText type="default" style={{ fontSize: 13, marginTop: 4, color: discountColor, textDecorationLine: 'line-through' }}>{product?.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
+                    <ThemedText type="default" style={{ fontSize: 13, marginTop: 1, color: discountColor, textDecorationLine: 'line-through' }}>{product?.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</ThemedText>
                 ) : null}
-                <ThemedView style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 4 }}>
+                <ThemedView style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2, gap: 4 }}>
                     <ThemedText type="default" style={{ fontSize: 14, color: '#FFD700' }}>★</ThemedText>
                     <ThemedText type="default" style={{ fontSize: 12, color: tint }}>
                         {rate > 0 ? rate.toFixed(1) : '0.0'} ({reviews.length})
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         borderRadius: 12,
         borderWidth: 1,
-        height: 310,
+        height: 330,
         shadowColor: '#686868ff',
     },
     inner: {

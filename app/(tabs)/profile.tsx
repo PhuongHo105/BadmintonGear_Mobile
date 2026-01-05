@@ -117,6 +117,11 @@ const ProfileScreen: React.FC = () => {
                         name={t('profile.orderHistory')}
                         onPress={() => router.push('/orderList' as any)}
                     />
+                    <ProfileMenuItem
+                        icon="ticket"
+                        name={t('profile.myVouchers')}
+                        onPress={() => router.push('/myVouchers' as any)}
+                    />
                 </ThemedView>
 
                 <ThemedView style={styles.section}>

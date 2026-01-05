@@ -24,6 +24,8 @@ const MAPPING: IconMapping = {
   'heart.fill': 'favorite',
   'account-box': 'account-box',
   'search.fill': 'search',
+  'mic': 'mic',
+  'mic.fill': 'mic',
   'close': 'close',
   'filter': 'filter-list',
   'star': 'star',

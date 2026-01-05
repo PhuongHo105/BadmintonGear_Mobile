@@ -128,10 +128,21 @@
         "theme": "Giao diện",
         "logout": "Đăng xuất",
         "logoutConfirmation": "Bạn có chắc chắn muốn đăng xuất không?",
+        "myVouchers": "Kho Voucher",
         "ChangePassSuccessTitle": "Thành công",
         "ChangePassSuccessMessage": "Mật khẩu của bạn đã được thay đổi thành công.",
         "ChangePassErrorTitle": "Lỗi",
         "errorChangingPassword": "Đã xảy ra lỗi khi thay đổi mật khẩu của bạn. Vui lòng thử lại sau."
+    },
+    "myVouchers": {
+        "title": "Kho Voucher",
+        "valid": "Có hiệu lực",
+        "used": "Đã sử dụng",
+        "use": "Sử dụng",
+        "copySuccess": "Đã sao chép mã voucher",
+        "expiry": "HSD",
+        "noValid": "Bạn chưa có voucher nào.",
+        "noUsed": "Bạn chưa sử dụng voucher nào."
     },
     "cart": {
         "title": "Giỏ hàng của tôi",

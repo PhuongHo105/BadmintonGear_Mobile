@@ -127,10 +127,21 @@
         "theme": "Theme",
         "logout": "Logout",
         "logoutConfirmation": "Are you sure you want to log out?",
+        "myVouchers": "My Vouchers",
         "ChangePassSuccessTitle": "Success",
         "ChangePassSuccessMessage": "Your password has been changed successfully.",
         "ChangePassErrorTitle": "Error",
         "errorChangingPassword": "There was an error changing your password. Please try again later."
+    },
+    "myVouchers": {
+        "title": "My Vouchers",
+        "valid": "Valid",
+        "used": "Used",
+        "use": "Use",
+        "copySuccess": "Voucher code copied",
+        "expiry": "Exp",
+        "noValid": "You have no vouchers.",
+        "noUsed": "You have not used any vouchers."
     },
     "cart": {
         "title": "My Cart",
