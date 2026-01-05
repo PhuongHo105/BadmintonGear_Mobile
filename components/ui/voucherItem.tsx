@@ -18,6 +18,7 @@ const VoucherItem: React.FC<VoucherItemProps> = ({ voucher, isUsed = false }) =>
     const theme = useColorScheme() ?? 'light';
     const textColor = Colors[theme].text;
     const secondaryText = Colors[theme].secondaryText;
+    const borderColor = Colors[theme].border;
     const backgroundColor = theme === 'dark' ? '#1C1C1EFF' : '#FFFFFF';
 
     const copyToClipboard = async () => {
@@ -27,24 +28,24 @@ const VoucherItem: React.FC<VoucherItemProps> = ({ voucher, isUsed = false }) =>
     };
 
     return (
-        <ThemedView style={[styles.container, { backgroundColor }]}>
+        <ThemedView style={[styles.container, { backgroundColor, borderRadius: 12, borderColor: borderColor, borderWidth: 1 }]}>
             <View style={styles.leftSection}>
                 <View style={[styles.iconContainer, isUsed && styles.usedIconContainer]}>
                     <Ionicons name="ticket-outline" size={24} color={isUsed ? '#999' : '#FF6B00'} />
                 </View>
                 <View style={styles.content}>
                     <ThemedText style={[styles.title, isUsed && styles.usedText]} numberOfLines={1}>
-                        {voucher.name}
+                        {voucher.description}
                     </ThemedText>
                     <ThemedText style={[styles.code, isUsed && styles.usedText]}>
                         Code: {voucher.code}
                     </ThemedText>
                     <ThemedText style={styles.expiry}>
-                        {t('myVouchers.expiry')}: {new Date(voucher.endDate).toLocaleDateString()}
+                        {t('myVouchers.expiry')}: {new Date(voucher.end).toLocaleDateString()}
                     </ThemedText>
-                    {voucher.minimumOrderValue > 0 && (
+                    {voucher.min_order_value > 0 && (
                         <ThemedText style={styles.minOrder}>
-                            Min: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(voucher.minimumOrderValue)}
+                            Min: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(voucher.min_order_value)}
                         </ThemedText>
                     )}
                 </View>

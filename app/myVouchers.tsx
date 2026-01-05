@@ -40,8 +40,10 @@ const MyVouchersScreen = () => {
     const filterVouchers = () => {
         const now = new Date();
         return vouchers.filter(v => {
-            const endDate = new Date(v.endDate);
-            return endDate >= now && v.status !== -1;
+            const endDate = new Date(v.end);
+            console.log(endDate);
+            const startDate = new Date(v.start);
+            return endDate >= now && startDate <= now && v.max_uses > v.used_count && v.status !== -1;
         });
     };
 
