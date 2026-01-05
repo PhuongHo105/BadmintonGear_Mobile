@@ -64,7 +64,6 @@ const OrderDetailScreen: FC = () => {
             setOrder(data);
         }
         const details = await getOrderDetails(orderId, language);
-        console.log(details);
         setDetails(details);
         setLoading(false);
     };

@@ -16,6 +16,7 @@ interface VoucherItemProps {
 const VoucherItem: React.FC<VoucherItemProps> = ({ voucher, isUsed = false }) => {
     const { t } = useTranslation();
     const theme = useColorScheme() ?? 'light';
+    const tint = Colors[theme].tint;
     const textColor = Colors[theme].text;
     const secondaryText = Colors[theme].secondaryText;
     const borderColor = Colors[theme].border;
@@ -31,7 +32,7 @@ const VoucherItem: React.FC<VoucherItemProps> = ({ voucher, isUsed = false }) =>
         <ThemedView style={[styles.container, { backgroundColor, borderRadius: 12, borderColor: borderColor, borderWidth: 1 }]}>
             <View style={styles.leftSection}>
                 <View style={[styles.iconContainer, isUsed && styles.usedIconContainer]}>
-                    <Ionicons name="ticket-outline" size={24} color={isUsed ? '#999' : '#FF6B00'} />
+                    <Ionicons name="ticket-outline" size={24} color={isUsed ? '#999' : tint} />
                 </View>
                 <View style={styles.content}>
                     <ThemedText style={[styles.title, isUsed && styles.usedText]} numberOfLines={1}>
@@ -52,7 +53,7 @@ const VoucherItem: React.FC<VoucherItemProps> = ({ voucher, isUsed = false }) =>
             </View>
 
             <TouchableOpacity
-                style={[styles.copyButton, isUsed && styles.usedButton]}
+                style={[styles.copyButton, isUsed && styles.usedButton, { backgroundColor: tint }]}
                 onPress={copyToClipboard}
                 disabled={isUsed}
             >
@@ -126,7 +127,6 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         paddingHorizontal: 16,
         borderRadius: 20,
-        backgroundColor: '#FF6B00',
     },
     usedButton: {
         backgroundColor: '#E0E0E0',

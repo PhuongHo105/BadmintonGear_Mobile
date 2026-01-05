@@ -23,7 +23,24 @@ const ForgotPasswordScreen: React.FC = () => {
     const [email, setEmail] = React.useState('');
     const [isEmailFocused, setIsEmailFocused] = React.useState(false);
 
+    const [error, setError] = React.useState('');
+
+    const validateEmail = (email: string) => {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    };
+
     const handleSendPass = async () => {
+        if (!email) {
+            setError(t('forgotPassword.emailRequired'));
+            return;
+        }
+        if (!validateEmail(email)) {
+            setError(t('forgotPassword.emailInvalid'));
+            return;
+        }
+        setError('');
+
         try {
             const response = await forgotPassword(email);
             if (response === "Password reset link sent to your email") {
@@ -31,12 +48,14 @@ const ForgotPasswordScreen: React.FC = () => {
                 router.push('/login');
             }
             else {
+                setError(t('forgotPassword.errorSendingEmail'));
                 Alert.alert(t('forgotPassword.errorSendingEmail'));
             }
         }
         catch (error) {
+            setError(t('forgotPassword.errorSendingEmail'));
             Alert.alert(t('forgotPassword.errorSendingEmail'));
-            console.error('Error in forgot password:', error);
+            // console.error('Error in forgot password:', error);
         }
     }
 
@@ -48,8 +67,8 @@ const ForgotPasswordScreen: React.FC = () => {
                     <ThemedText type="title" style={{ fontSize: 20 }}>{t('forgotPassword.title')}</ThemedText>
                 </ThemedView>
                 <ThemedView style={styles.rightHeader}>
-                    <ThemedText type="default" style={{ fontSize: 16, color: Colors[scheme].text }}>01 / </ThemedText>
-                    <ThemedText type="default" style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>03</ThemedText>
+                    {/* <ThemedText type="default" style={{ fontSize: 16, color: Colors[scheme].text }}>01 / </ThemedText>
+                    <ThemedText type="default" style={{ fontSize: 16, color: Colors[scheme].secondaryText }}>03</ThemedText> */}
                 </ThemedView>
             </ThemedView>
 
@@ -68,11 +87,14 @@ const ForgotPasswordScreen: React.FC = () => {
                             styles.input,
                             {
                                 color: Colors[scheme].text,
-                                borderColor: isEmailFocused ? Colors[scheme].tint : Colors[scheme].border,
+                                borderColor: error ? 'red' : (isEmailFocused ? Colors[scheme].tint : Colors[scheme].border),
                             },
                         ]}
                         value={email}
-                        onChangeText={setEmail}
+                        onChangeText={(text) => {
+                            setEmail(text);
+                            setError('');
+                        }}
                         placeholder={t('forgotPassword.enterEmail')}
                         placeholderTextColor={Colors[scheme].secondaryText}
                         keyboardType="email-address"
@@ -80,6 +102,7 @@ const ForgotPasswordScreen: React.FC = () => {
                         onFocus={() => setIsEmailFocused(true)}
                         onBlur={() => setIsEmailFocused(false)}
                     />
+                    {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
                 </ThemedView>
 
                 <ThemedView style={styles.buttonsContainer}>
@@ -149,5 +172,11 @@ const styles = StyleSheet.create({
     },
     buttonsContainer: {
         marginTop: 32,
+    },
+    errorText: {
+        color: 'red',
+        fontSize: 12,
+        marginTop: 4,
+        marginLeft: 4,
     },
 });

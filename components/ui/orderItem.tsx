@@ -17,7 +17,6 @@ import FullButton from './fullbutton'
 
 
 export default function OrderItem({ order, onOrderUpdate }: { order: any, onOrderUpdate?: () => void }) {
-    console.log(order);
     const { t } = useTranslation();
     const toast = useToast();
     const schemeRaw = useColorScheme();

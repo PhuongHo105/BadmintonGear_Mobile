@@ -64,6 +64,7 @@
     "forgotPassword": {
         "title": "Quên mật khẩu",
         "confirmEmail": "Xác nhận Email",
+        "emailInvalid": "Email không hợp lệ. Vui lòng thử lại.",
         "confirmDescription": "Nhập địa chỉ email của bạn để xác minh.",
         "enterEmail": "Nhập email của bạn",
         "send": "Gửi",

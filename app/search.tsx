@@ -4,14 +4,15 @@ import FullButton from "@/components/ui/fullbutton";
 import Header from "@/components/ui/header";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import Slider from "@/components/ui/slider";
+import { VoiceRecognizerRef } from "@/components/ui/VoiceRecognizer";
 import { formatPrice, getCategoryOptions, PRICE_STEP, type ProductFilters } from "@/constants/product-data";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { http } from "@/services/http";
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput } from "react-native";
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput } from "react-native";
 
 const SearchScreen: React.FC = () => {
     const { t } = useTranslation();
@@ -22,6 +23,40 @@ const SearchScreen: React.FC = () => {
     const [value, setValue] = useState('');
     const [draftFilters, setDraftFilters] = useState<ProductFilters>({});
     const [productList, setProductList] = useState<any[]>([]);
+
+    // Voice Search
+    const voiceRef = useRef<VoiceRecognizerRef>(null);
+    const [isListening, setIsListening] = useState(false);
+
+    const handleVoiceButtonPress = () => {
+        if (isListening) {
+            voiceRef.current?.stop();
+        } else {
+            setValue(''); // Clear previous text? Or maybe append? Usually clear for new search.
+            voiceRef.current?.start();
+        }
+    };
+
+    const onSpeechStart = () => {
+        setIsListening(true);
+    };
+
+    const onSpeechEnd = () => {
+        setIsListening(false);
+    };
+
+    const onSpeechResults = (results: string[]) => {
+        if (results && results.length > 0) {
+            setValue(results[0]);
+            // Optional: Auto-search after a short delay or immediately
+            // For now, just set the text so user can see it.
+        }
+    };
+
+    const onSpeechError = (e: any) => {
+        console.log('Voice Error:', e);
+        setIsListening(false);
+    };
 
     useEffect(() => {
         // Fetch products to derive brand list and price range
@@ -207,13 +242,29 @@ const SearchScreen: React.FC = () => {
                             }
                         }}
                     />
-                    <Pressable onPress={() => setIsModalVisible(true)}>
-                        <IconSymbol name="filter" size={30} color={palette.text} />
-                    </Pressable>
+                    <ThemedView style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Pressable onPress={() => setIsModalVisible(true)} style={{ marginRight: 10 }}>
+                            <IconSymbol name="filter" size={30} color={palette.text} />
+                        </Pressable>
+                        <Pressable onPress={handleVoiceButtonPress}>
+                            {isListening ? (
+                                <ActivityIndicator size="small" color={palette.tint} />
+                            ) : (
+                                <IconSymbol name="mic.fill" size={30} color={palette.text} />
+                            )}
+                        </Pressable>
+                    </ThemedView>
                 </ThemedView>
                 <ScrollView showsVerticalScrollIndicator={false}>
                     {/* Search history */}
                 </ScrollView>
+                {/* <VoiceRecognizer
+                    ref={voiceRef}
+                    onSpeechStart={onSpeechStart}
+                    onSpeechEnd={onSpeechEnd}
+                    onSpeechResults={onSpeechResults}
+                    onSpeechError={onSpeechError}
+                /> */}
             </ThemedView>
 
             <Modal

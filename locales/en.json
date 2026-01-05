@@ -67,6 +67,7 @@
         "confirmDescription": "Enter your email address for verification.",
         "enterEmail": "Enter your email",
         "send": "Send",
+        "emailInvalid": "Email is invalid. Please try again.",
         "emailVerification": "Email Verification",
         "verificationDescription": "Enter the 6-digit code sent to your email address.",
         "resendCode": "Resend Code",
